@@ -40,9 +40,9 @@
 .demo-box { background: var(--gs-blue-light); border-radius: .75rem; padding: .85rem 1rem; font-size: .85rem; }
 
 /* ---------- app shell ---------- */
-.app-sidebar { width: var(--gs-sidebar-w); background: var(--gs-primary); color: #fff; }
-.app-sidebar .nav-link { color: rgba(255,255,255,.82); border-radius: .6rem; padding: .6rem .85rem; font-weight: 500; }
-.app-sidebar .nav-link:hover { background: rgba(255,255,255,.1); color: #fff; }
+.app-sidebar { width: var(--gs-sidebar-w); background-color: #3153aa !important; color: #fff; }
+.app-sidebar .nav-link { color: rgba(255,255,255,.92); border-radius: .6rem; padding: .6rem .85rem; font-weight: 500; }
+.app-sidebar .nav-link:hover { background: rgba(255,255,255,.12); color: #fff; }
 .app-sidebar .nav-link.active { background: #fff; color: var(--gs-primary); font-weight: 700; }
 .user-chip { background: rgba(255,255,255,.1); border-radius: .75rem; padding: .6rem .75rem; }
 .avatar { width: 38px; height: 38px; border-radius: 50%; background: #fff; color: var(--gs-primary); display: grid; place-items: center; font-weight: 700; flex: none; }
