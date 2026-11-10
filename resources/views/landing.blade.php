@@ -46,7 +46,7 @@
       </div>
       <p class="small text-secondary mt-3 mb-0">Appointments are subject to clinic availability.</p>
     </div>
-    <div class="col-lg-5"><div class="hero-logo-card"><img src="{{ asset('images/logo.png') }}" alt="Guda & Soriano Dental Clinic logo"></div></div>
+    <div class="col-lg-5"><div class="hero-logo-card"><img src="{{ asset('images/logo-removebg-preview.png') }}" alt="Guda &amp; Soriano Dental Clinic logo"></div></div>
   </div></div>
 </header>
 

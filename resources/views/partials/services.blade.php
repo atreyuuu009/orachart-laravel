@@ -1,12 +1,32 @@
 {{-- Price guide: one card per category, details open in a shared modal. Needs $categories. --}}
+@php
+  $categoryImages = [
+    'dentures' => 'denture.png',
+    'braces' => 'Upper and Lower Metal Braces.png',
+    'tooth extraction' => 'Tooth Extraction.png',
+    'crowns & bridges' => 'jacketcrownfixedbridge.png',
+    'fillings' => 'tooth resto.png',
+    'cleaning' => 'deep cleaning.png',
+    'veneers' => 'veneers.png',
+    'root canal' => 'root canal therapy.png',
+    'whitening' => 'laser teeth whitening.png',
+    'sealants' => 'pits and fissure sealant.png',
+    'gum treatment' => 'gum depigmentation.png',
+    'inlay / onlay' => 'tooth resto.png',
+  ];
+@endphp
 <div class="row g-3">
   @foreach ($categories as $c)
     @php
       $priced = $c->services->where('is_addon', false)->where('price_min_amount', '>', 0);
       $from = $priced->min('price_min_amount');
+      $categoryImage = $categoryImages[mb_strtolower($c->category_name)] ?? null;
     @endphp
     <div class="col-sm-6 col-lg-4">
       <div class="card service-card h-100">
+        @if ($categoryImage)
+          <img class="service-card-image" src="{{ asset('images/'.$categoryImage) }}" alt="{{ $c->category_name }} treatment" loading="lazy">
+        @endif
         <div class="card-body d-flex flex-column">
           <h5 class="card-title">{{ $c->category_name }}</h5>
           <p class="text-secondary small mb-2">{{ $c->services->where('is_addon', false)->count() }} option(s)</p>
