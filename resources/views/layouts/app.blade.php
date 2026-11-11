@@ -7,11 +7,13 @@
       ['dashboard', 'Home', 'dashboard'],
       ['booking.create', 'Book Appointment', 'booking.*'],
       ['appointments.mine', 'My Appointments', 'appointments.mine'],
+      ['patients.own', 'My Patient Record', 'patients.own'],
     ],
     'clinic_staff' => [
       ['dashboard', 'Dashboard', 'dashboard'],
       ['booking.staff', 'Create Appointment', 'booking.staff*'],
       ['appointments.index', 'Manage Appointments', 'appointments.index'],
+      ['patients.index', 'Patients', 'patients.*'],
       ['calendar', 'Appointment Calendar', 'calendar'],
     ],
     'dentist' => [
@@ -20,10 +22,12 @@
       ['calendar', 'My Schedule', 'calendar'],
       ['schedule', 'Hours & Time Off', 'schedule*'],
       ['odontogram', 'Digital Odontogram', 'odontogram*'],
+      ['patients.index', 'Patients', 'patients.*'],
     ],
     'admin' => [
       ['dashboard', 'Dashboard', 'dashboard'],
       ['appointments.index', 'View Appointments', 'appointments.index'],
+      ['patients.index', 'Patients', 'patients.*'],
       ['booking.staff', 'Create Appointment', 'booking.staff*'],
       ['calendar', 'Appointment Calendar', 'calendar'],
       ['odontogram', 'Digital Odontogram', 'odontogram*'],

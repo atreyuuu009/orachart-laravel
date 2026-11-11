@@ -98,11 +98,12 @@ class AuthController extends Controller
                 'last_name' => $data['last_name'],
                 'contact_number' => $data['contact_number'],
             ]);
-            Consent::create([
+            $consent = Consent::create([
                 'user_id' => $user->user_id, 'consent_type' => 'data_privacy',
                 'policy_version' => Settings::get('privacy_policy_version'), 'is_accepted' => 1, 'ip_address' => $request->ip(),
             ]);
-            $patients->create($data, $user);
+            $patient = $patients->create($data, $user);
+            $consent->update(['patient_id' => $patient->patient_id]);
             return $user;
         });
 
