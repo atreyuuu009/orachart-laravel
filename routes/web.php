@@ -53,6 +53,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/appointments/{appointment}/complete', [AppointmentController::class, 'complete'])->name('appointments.complete');
         Route::post('/appointments/{appointment}/no-show', [AppointmentController::class, 'noShow'])->name('appointments.noshow');
         Route::post('/appointments/{appointment}/follow-up', [AppointmentController::class, 'followUp'])->name('appointments.followup');
+        Route::get('/appointments/{appointment}/suggested-slots', [AppointmentController::class, 'suggestedSlots'])->name('appointments.suggested_slots');
         Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar');
     });
     Route::middleware('role:admin,clinic_staff')->group(function () {
@@ -86,6 +87,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/settings', [SettingsController::class, 'show'])->name('admin.settings');
         Route::post('/settings/hours', [SettingsController::class, 'saveHours'])->name('admin.settings.hours');
         Route::post('/settings/rules', [SettingsController::class, 'saveRules'])->name('admin.settings.rules');
+        Route::post('/settings/overrides/preview', [SettingsController::class, 'previewOverride'])->name('admin.settings.overrides.preview');
+        Route::get('/settings/overrides/{override}/call-list', [SettingsController::class, 'callList'])->name('admin.settings.overrides.calllist');
         Route::post('/settings/overrides', [SettingsController::class, 'storeOverride'])->name('admin.settings.overrides.store');
         Route::delete('/settings/overrides/{override}', [SettingsController::class, 'destroyOverride'])->name('admin.settings.overrides.destroy');
         Route::post('/settings/dentists', [SettingsController::class, 'saveDentists'])->name('admin.settings.dentists');

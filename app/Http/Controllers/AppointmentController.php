@@ -22,10 +22,30 @@ class AppointmentController extends Controller
             'from' => 'nullable|date', 'to' => 'nullable|date', 'q' => 'nullable|string|max:100',
         ]);
 
-        $q = Appointment::visibleTo($request->user())->with('patient', 'service', 'dentist.user');
-        if ($s = $request->query('status')) {
-            $s === 'needs_reschedule' ? $q->open()->where('needs_reschedule', 1) : $q->where('status', $s);
+        $isNeedsReschedule = $request->query('status') === 'needs_reschedule';
+        $q = Appointment::visibleTo($request->user())->with(['patient', 'service', 'dentist.user', 'emailLogs']);
+
+        if ($isNeedsReschedule) {
+            $todayStr = today()->toDateString();
+            $q->open()->where('apt_appointments.needs_reschedule', 1)
+                ->leftJoin('svc_services', 'apt_appointments.service_id', '=', 'svc_services.service_id')
+                ->select('apt_appointments.*')
+                ->orderByRaw("
+                    CASE 
+                        WHEN DATE(apt_appointments.start_at) = '{$todayStr}' THEN 1
+                        WHEN apt_appointments.is_emergency = 1 THEN 2
+                        WHEN apt_appointments.treatment_plan_id IS NOT NULL OR svc_services.is_multi_visit = 1 THEN 3
+                        ELSE 4
+                    END ASC
+                ")
+                ->orderBy('apt_appointments.start_at', 'ASC');
+        } else {
+            if ($s = $request->query('status')) {
+                $q->where('status', $s);
+            }
+            $q->orderByDesc('start_at');
         }
+
         if ($f = $request->query('from')) $q->where('start_at', '>=', Carbon::parse($f)->startOfDay());
         if ($t = $request->query('to')) $q->where('start_at', '<=', Carbon::parse($t)->endOfDay());
         if ($term = trim((string) $request->query('q'))) {
@@ -34,9 +54,26 @@ class AppointmentController extends Controller
                 ->orWhere('patient_code', 'like', "%$term%")->orWhere('contact_number', 'like', "%$term%")));
         }
 
+        // Call list for same-day and emergency appointments
+        $emergencyCallList = collect();
+        if ($isNeedsReschedule && $request->user()->hasRole('admin', 'clinic_staff', 'dentist')) {
+            $emergencyCallList = Appointment::visibleTo($request->user())
+                ->open()
+                ->where('needs_reschedule', 1)
+                ->where(fn ($w) => $w->whereDate('start_at', today())->orWhere('is_emergency', 1))
+                ->with(['patient', 'service', 'dentist.user'])
+                ->orderBy('start_at')
+                ->get();
+        }
+
+        $needsRescheduleCount = Appointment::visibleTo($request->user())->open()->where('needs_reschedule', 1)->count();
+
         return view('appointments.index', [
-            'appointments' => $q->orderByDesc('start_at')->paginate(15)->withQueryString(),
+            'appointments' => $q->paginate(15)->withQueryString(),
             'dentists' => Dentist::with('user')->get(),
+            'isNeedsReschedule' => $isNeedsReschedule,
+            'emergencyCallList' => $emergencyCallList,
+            'needsRescheduleCount' => $needsRescheduleCount,
         ]);
     }
 
@@ -47,8 +84,8 @@ class AppointmentController extends Controller
         $all = $patient->appointments()->with('service', 'dentist.user')->orderByDesc('start_at')->get();
 
         return view('appointments.mine', [
-            'upcoming' => $all->filter(fn ($a) => $a->isOpen() && $a->start_at->isFuture())->sortBy('start_at')->values(),
-            'history' => $all->reject(fn ($a) => $a->isOpen() && $a->start_at->isFuture())->values(),
+            'upcoming' => $all->filter(fn ($a) => $a->isOpen() && ($a->start_at->isFuture() || $a->needs_reschedule))->sortBy('start_at')->values(),
+            'history' => $all->reject(fn ($a) => $a->isOpen() && ($a->start_at->isFuture() || $a->needs_reschedule))->values(),
         ]);
     }
 
@@ -77,10 +114,11 @@ class AppointmentController extends Controller
         if (! $appointment->isOpen()) return back()->withErrors(['action' => 'This appointment can no longer be cancelled.']);
 
         $isPatient = $request->user()->hasRole('patient');
-        if ($isPatient && ! $appointment->start_at->isFuture()) {
+        if ($isPatient && ! $appointment->start_at->isFuture() && ! $appointment->needs_reschedule) {
             return back()->withErrors(['action' => 'Past appointments cannot be cancelled.']);
         }
-        $this->booking->cancel($appointment, $data['reason'] ?? ($isPatient ? 'Cancelled by patient' : 'Cancelled by clinic'));
+        $reason = $data['reason'] ?? ($isPatient ? ($appointment->needs_reschedule ? 'Cancelled by patient due to clinic closure' : 'Cancelled by patient') : 'Cancelled by clinic');
+        $this->booking->cancel($appointment, $reason);
         return back()->with('status', 'Appointment cancelled.');
     }
 
@@ -161,6 +199,19 @@ class AppointmentController extends Controller
         }
         return redirect()->route($request->user()->hasRole('patient') ? 'appointments.mine' : 'appointments.index')
             ->with('status', 'Appointment rescheduled.');
+    }
+
+    public function suggestedSlots(Request $request, Appointment $appointment, \App\Services\ScheduleService $schedule)
+    {
+        $this->authorizeManage($request, $appointment, false);
+        return response()->json([
+            'appointment_id' => $appointment->appointment_id,
+            'patient_name' => $appointment->patient->full_name,
+            'service_name' => $appointment->service->service_name,
+            'dentist_name' => $appointment->dentist->name,
+            'dentist_id' => $appointment->assigned_dentist_id,
+            'slots' => $schedule->suggestSlots($appointment, 3),
+        ]);
     }
 
     // ------------------------------------------------------------ guard
