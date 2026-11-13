@@ -47,6 +47,7 @@
   color: #fff;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 2px 0 20px rgba(18, 30, 74, 0.08);
+  overflow: hidden;
 }
 .sidebar-brand-box {
   background: #ffffff;
@@ -159,19 +160,24 @@
 @media (min-width: 992px) {
   .app-main { margin-left: var(--gs-sidebar-w); transition: margin-left .2s ease-in-out; }
   .app-sidebar.offcanvas-lg { position: fixed; top: 0; bottom: 0; left: 0; transition: width .2s ease-in-out; }
-  body.sidebar-collapsed .app-sidebar { width: 76px; }
-  body.sidebar-collapsed .app-main { margin-left: 76px; }
-  body.sidebar-collapsed .app-sidebar .brand-title,
-  body.sidebar-collapsed .app-sidebar .brand-sub,
-  body.sidebar-collapsed .app-sidebar .user-chip > :not(.avatar),
-  body.sidebar-collapsed .app-sidebar .nav-link span,
-  body.sidebar-collapsed .app-sidebar .sidebar-logout-btn span { display: none; }
-  body.sidebar-collapsed .app-sidebar .d-flex.align-items-center.gap-2.mb-3.px-1 { justify-content: center; }
-  body.sidebar-collapsed .app-sidebar .user-chip { justify-content: center; padding: .5rem; }
-  body.sidebar-collapsed .app-sidebar .nav-link { justify-content: center; padding: .6rem; }
-  body.sidebar-collapsed .app-sidebar .nav-link:hover { transform: none; }
-  body.sidebar-collapsed .app-sidebar .sidebar-logout-btn { justify-content: center; padding: .6rem; }
+  html.sidebar-collapsed .app-sidebar { width: 76px; }
+  html.sidebar-collapsed .app-main { margin-left: 76px; }
+  html.sidebar-collapsed .app-sidebar .brand-title,
+  html.sidebar-collapsed .app-sidebar .brand-sub,
+  html.sidebar-collapsed .app-sidebar .user-chip > :not(.avatar),
+  html.sidebar-collapsed .app-sidebar .nav-link span,
+  html.sidebar-collapsed .app-sidebar .sidebar-logout-btn span { max-width: 0; opacity: 0; }
+  html.sidebar-collapsed .app-sidebar .d-flex.align-items-center.gap-2.mb-3.px-1 { justify-content: center; gap: 0 !important; }
+  html.sidebar-collapsed .app-sidebar .user-chip { justify-content: center; gap: 0; padding: .5rem; }
+  html.sidebar-collapsed .app-sidebar .nav-link { justify-content: center; gap: 0; padding: .6rem; }
+  html.sidebar-collapsed .app-sidebar .nav-link:hover { transform: none; }
+  html.sidebar-collapsed .app-sidebar .sidebar-logout-btn { justify-content: center; gap: 0; padding: .6rem; }
 }
+.app-sidebar .brand-title,
+.app-sidebar .brand-sub,
+.app-sidebar .user-chip > :not(.avatar),
+.app-sidebar .nav-link span,
+.app-sidebar .sidebar-logout-btn span { max-width: 180px; overflow: hidden; white-space: nowrap; transition: max-width .2s ease-in-out, opacity .12s ease-in-out; }
 .sidebar-toggle { width: 38px; height: 38px; align-items: center; justify-content: center; padding: 0; color: var(--gs-primary); border: 1px solid var(--bs-border-color); }
 .sidebar-toggle:hover { color: #fff; background: var(--gs-primary); border-color: var(--gs-primary); }
 .topbar { background: #fff; border-bottom: 1px solid var(--bs-border-color); }

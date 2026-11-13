@@ -3,11 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const toggle = document.getElementById('sidebarToggle');
   if (!toggle) return;
 
-  const collapsed = localStorage.getItem('sidebar-collapsed') === 'true';
-  document.body.classList.toggle('sidebar-collapsed', collapsed);
-
   const updateToggle = () => {
-    const isCollapsed = document.body.classList.contains('sidebar-collapsed');
+    const isCollapsed = document.documentElement.classList.contains('sidebar-collapsed');
     toggle.setAttribute('aria-expanded', String(!isCollapsed));
     toggle.setAttribute('aria-label', isCollapsed ? 'Expand sidebar' : 'Collapse sidebar');
     toggle.title = isCollapsed ? 'Expand sidebar' : 'Collapse sidebar';
@@ -15,8 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
   updateToggle();
 
   toggle.addEventListener('click', () => {
-    document.body.classList.toggle('sidebar-collapsed');
-    localStorage.setItem('sidebar-collapsed', String(document.body.classList.contains('sidebar-collapsed')));
+    document.documentElement.classList.toggle('sidebar-collapsed');
+    localStorage.setItem('sidebar-collapsed', String(document.documentElement.classList.contains('sidebar-collapsed')));
     updateToggle();
   });
 });
