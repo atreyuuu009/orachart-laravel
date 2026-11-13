@@ -71,6 +71,9 @@
 <div class="app-main">
   <header class="topbar px-3 px-lg-4 py-3 d-flex align-items-center gap-3">
     <button class="btn btn-outline-primary d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-label="Menu">&#9776;</button>
+    <button class="btn sidebar-toggle d-none d-lg-inline-flex" type="button" id="sidebarToggle" aria-controls="sidebar" aria-expanded="true" aria-label="Collapse sidebar" title="Collapse sidebar">
+      <i class="bi bi-list"></i>
+    </button>
     <div>
       <h1 class="h4 mb-0">@yield('page_title')</h1>
       <small class="text-secondary">@yield('page_subtitle')</small>
