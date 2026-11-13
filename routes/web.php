@@ -11,6 +11,7 @@ use App\Http\Controllers\OdontogramController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\UserManagementController;
 use Illuminate\Support\Facades\Route;
 
 // ---------------------------------------------------------------- public
@@ -114,6 +115,16 @@ Route::middleware('auth')->group(function () {
 
     // ---- admin
     Route::middleware('role:admin')->prefix('admin')->group(function () {
+        Route::get('/users', [UserManagementController::class, 'index'])->name('admin.users');
+        Route::get('/users/create', [UserManagementController::class, 'create'])->name('admin.users.create');
+        Route::post('/users', [UserManagementController::class, 'store'])->name('admin.users.store');
+        Route::get('/users/{user}/edit', [UserManagementController::class, 'edit'])->name('admin.users.edit');
+        Route::put('/users/{user}', [UserManagementController::class, 'update'])->name('admin.users.update');
+        Route::post('/users/{user}/deactivate', [UserManagementController::class, 'deactivate'])->name('admin.users.deactivate');
+        Route::post('/users/{user}/reactivate', [UserManagementController::class, 'reactivate'])->name('admin.users.reactivate');
+        Route::post('/users/{user}/unlock', [UserManagementController::class, 'unlock'])->name('admin.users.unlock');
+        Route::post('/users/{user}/reset', [UserManagementController::class, 'sendReset'])->name('admin.users.reset');
+        Route::post('/users/{user}/verification', [UserManagementController::class, 'resendVerification'])->name('admin.users.verification');
         Route::get('/settings', [SettingsController::class, 'show'])->name('admin.settings');
         Route::post('/settings/hours', [SettingsController::class, 'saveHours'])->name('admin.settings.hours');
         Route::post('/settings/rules', [SettingsController::class, 'saveRules'])->name('admin.settings.rules');

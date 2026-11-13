@@ -33,6 +33,7 @@
       ['odontogram', 'Digital Odontogram', 'odontogram*'],
       ['schedule', 'Dentist Schedules', 'schedule*'],
       ['admin.settings', 'Clinic Settings', 'admin.settings*'],
+      ['admin.users', 'User Management', 'admin.users*'],
       ['admin.logs', 'Audit & E-mail Logs', 'admin.logs'],
     ],
     default => [['dashboard', 'Dashboard', 'dashboard']],

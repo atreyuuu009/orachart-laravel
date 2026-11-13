@@ -19,6 +19,7 @@ class User extends Authenticatable
         'is_email_verified' => 'boolean',
         'locked_until' => 'datetime',
         'last_login_at' => 'datetime',
+        'created_at' => 'datetime',
     ];
 
     // The schema stores the bcrypt hash in password_hash and has no remember_token column.
