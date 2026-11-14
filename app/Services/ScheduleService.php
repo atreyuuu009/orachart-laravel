@@ -16,6 +16,23 @@ use Illuminate\Database\Eloquent\Collection;
 
 class ScheduleService
 {
+    /** Same-day, or starting within this many hours, is short enough that e-mail alone is not enough. */
+    public const SHORT_NOTICE_HOURS = 6;
+
+    /**
+     * A phone list is required for an emergency closure, anything happening today,
+     * or any affected visit that starts within a few hours.
+     */
+    public function requiresCallList(string $closureType, Carbon $day, Collection $affected): bool
+    {
+        if ($closureType === 'emergency' || $day->isToday()) {
+            return true;
+        }
+        $earliest = $affected->sortBy('start_at')->first();
+
+        return $earliest && $earliest->start_at->lte(now()->addHours(self::SHORT_NOTICE_HOURS));
+    }
+
     /**
      * Get all open (pending or confirmed) appointments that conflict with a proposed closure/override.
      * Completed, cancelled, no-show, and rescheduled rows are never included.
@@ -87,15 +104,21 @@ class ScheduleService
                 Notifier::forAppointment('schedule_changed', $a, [
                     'reason' => $reason,
                     'action_url' => route('appointments.reschedule', $a),
-                    'cancel_url' => route('appointments.mine'),
+                    'cancel_url' => route('appointments.reschedule', $a).'#cancel',
                 ]);
             }
         }
 
-        // 5. Audit log
+        // 5. Audit log: who closed it, why, and how many appointments were affected
         $scope = $dentistId ? "Dentist #{$dentistId}" : 'Clinic';
-        $desc = "{$scope} closure on {$override->override_date->format('Y-m-d')} ({$closureType}): {$reason}. {$affected->count()} appointment(s) affected.";
-        Audit::log('create', 'sch_overrides', $override->override_id, $desc);
+        $who = trim($operator->full_name) ?: ('User #'.$operator->user_id);
+        $desc = "{$who} closed {$scope} on {$override->override_date->format('Y-m-d')} ({$closureType}): {$reason}. {$affected->count()} appointment(s) affected.";
+        Audit::log('create', 'sch_overrides', $override->override_id, $desc, null, [
+            'closed_by' => $who,
+            'reason' => $reason,
+            'closure_type' => $closureType,
+            'affected' => $affected->count(),
+        ], $operator->user_id);
 
         return $affected;
     }
@@ -146,7 +169,7 @@ class ScheduleService
                 Notifier::forAppointment('schedule_changed', $a, [
                     'reason' => 'Dentist schedule adjustment / time off',
                     'action_url' => route('appointments.reschedule', $a),
-                    'cancel_url' => route('appointments.mine'),
+                    'cancel_url' => route('appointments.reschedule', $a).'#cancel',
                 ]);
             }
             Audit::log('update', 'apt_appointments', null, $hit->count().' appointment(s) flagged for rescheduling');
@@ -178,7 +201,7 @@ class ScheduleService
                 Notifier::forAppointment('schedule_changed', $a, [
                     'reason' => 'Clinic operating hours update',
                     'action_url' => route('appointments.reschedule', $a),
-                    'cancel_url' => route('appointments.mine'),
+                    'cancel_url' => route('appointments.reschedule', $a).'#cancel',
                 ]);
             }
         }
@@ -314,7 +337,7 @@ class ScheduleService
             Notifier::forAppointment('schedule_changed_reminder', $a, [
                 'reason' => $reason,
                 'action_url' => route('appointments.reschedule', $a),
-                'cancel_url' => route('appointments.mine'),
+                'cancel_url' => route('appointments.reschedule', $a).'#cancel',
             ]);
 
             $sentCount++;
