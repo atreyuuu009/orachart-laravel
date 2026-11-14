@@ -34,7 +34,15 @@ class AuthController extends Controller
                 ->withErrors(['email' => "Too many failed attempts. Try again in about {$mins} minute(s)."]);
         }
 
-        if (! $user || ! $user->is_active || ! Hash::check($data['password'], $user->password_hash)) {
+        // A deactivated account is blocked by is_active, not the temporary login lock.
+        // Keep its feedback distinct so the user knows an administrator must reactivate it.
+        if ($user && ! $user->is_active) {
+            Audit::log('login_failed', 'usr_users', $user->user_id, 'Login blocked for inactive account '.$data['email']);
+            return back()->withInput($request->only('email'))
+                ->withErrors(['email' => 'Your account has been locked.']);
+        }
+
+        if (! $user || ! Hash::check($data['password'], $user->password_hash)) {
             if ($user) {
                 $fails = $user->failed_login_count + 1;
                 $user->update($fails >= self::MAX_ATTEMPTS
