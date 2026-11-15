@@ -1,4 +1,23 @@
 /* Shared UI helpers */
+document.addEventListener('DOMContentLoaded', () => {
+  const toggle = document.getElementById('sidebarToggle');
+  if (!toggle) return;
+
+  const updateToggle = () => {
+    const isCollapsed = document.documentElement.classList.contains('sidebar-collapsed');
+    toggle.setAttribute('aria-expanded', String(!isCollapsed));
+    toggle.setAttribute('aria-label', isCollapsed ? 'Expand sidebar' : 'Collapse sidebar');
+    toggle.title = isCollapsed ? 'Expand sidebar' : 'Collapse sidebar';
+  };
+  updateToggle();
+
+  toggle.addEventListener('click', () => {
+    document.documentElement.classList.toggle('sidebar-collapsed');
+    localStorage.setItem('sidebar-collapsed', String(document.documentElement.classList.contains('sidebar-collapsed')));
+    updateToggle();
+  });
+});
+
 document.addEventListener('click', (e) => {
   // Service price modal (landing + patient home)
   const cat = e.target.closest('[data-service-cat]');
