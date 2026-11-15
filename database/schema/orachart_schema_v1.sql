@@ -55,13 +55,15 @@ CREATE TABLE usr_users (
 -- Data Privacy Act consent (Backlog 001)
 CREATE TABLE usr_consents (
   consent_id      INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  user_id         INT UNSIGNED NOT NULL,
+  user_id         INT UNSIGNED NULL,
+  patient_id      INT UNSIGNED NULL,
   consent_type    VARCHAR(50)  NOT NULL DEFAULT 'data_privacy',
   policy_version  VARCHAR(20)  NOT NULL,
   is_accepted     TINYINT(1)   NOT NULL,
   accepted_at     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   ip_address      VARCHAR(45)  NULL,
-  CONSTRAINT fk_usr_consents_user_id FOREIGN KEY (user_id) REFERENCES usr_users(user_id)
+  CONSTRAINT fk_usr_consents_user_id FOREIGN KEY (user_id) REFERENCES usr_users(user_id),
+  CONSTRAINT chk_usr_consents_owner CHECK (user_id IS NOT NULL OR patient_id IS NOT NULL)
 ) ENGINE=InnoDB;
 
 -- Email verification + password reset (store only the HASH of the token)
@@ -263,6 +265,9 @@ CREATE TABLE pat_patients (
   address                    VARCHAR(500) NULL,
   emergency_contact_name     VARCHAR(150) NULL,
   emergency_contact_number   VARCHAR(20) NULL,
+  emergency_contact_relationship VARCHAR(100) NULL,
+  guardian_name              VARCHAR(150) NULL,
+  guardian_relationship      VARCHAR(100) NULL,
   created_by_user_id         INT UNSIGNED NULL,
   created_at                 DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at                 DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -275,6 +280,10 @@ CREATE TABLE pat_patients (
   INDEX idx_pat_patients_contact_number (contact_number)
 ) ENGINE=InnoDB;
 
+ALTER TABLE usr_consents
+  ADD INDEX idx_usr_consents_patient_id (patient_id),
+  ADD CONSTRAINT fk_usr_consents_patient_id FOREIGN KEY (patient_id) REFERENCES pat_patients(patient_id);
+
 CREATE TABLE pat_health_profiles (
   health_profile_id    INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   patient_id           INT UNSIGNED NOT NULL,
@@ -283,6 +292,7 @@ CREATE TABLE pat_health_profiles (
   medical_conditions   TEXT NULL,
   current_medications  TEXT NULL,
   oral_history         TEXT NULL,
+  structured_checklist JSON NULL,
   last_reviewed_at     DATETIME NULL,
   updated_by_user_id   INT UNSIGNED NULL,
   updated_at           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -370,6 +380,9 @@ CREATE TABLE pat_visit_records (
   chief_complaint  TEXT NULL,
   diagnosis        TEXT NULL,
   clinical_notes   TEXT NULL,
+  blood_pressure  VARCHAR(20) NULL,
+  pulse           SMALLINT UNSIGNED NULL,
+  last_xray_date  DATE NULL,
   created_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_pat_visit_records_patient_id     FOREIGN KEY (patient_id)     REFERENCES pat_patients(patient_id),

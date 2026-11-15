@@ -6,7 +6,7 @@
   --bs-font-sans-serif: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
   --gs-primary: #243b8f; --gs-primary-dark: #1b2f75;
   --gs-blue-light: #dff1ff; --gs-blue-medium: #b9def5;
-  --gs-sidebar-w: 260px;
+  --gs-sidebar-w: 230px;
 }
 .btn-primary { --bs-btn-bg: #243b8f; --bs-btn-border-color: #243b8f; --bs-btn-hover-bg: #1b2f75; --bs-btn-hover-border-color: #1b2f75;
   --bs-btn-active-bg: #1b2f75; --bs-btn-active-border-color: #1b2f75; --bs-btn-disabled-bg: #243b8f; --bs-btn-disabled-border-color: #243b8f; }
@@ -41,13 +41,145 @@
 .demo-box { background: var(--gs-blue-light); border-radius: .75rem; padding: .85rem 1rem; font-size: .85rem; }
 
 /* ---------- app shell ---------- */
-.app-sidebar { width: var(--gs-sidebar-w); background-color: #3153aa !important; color: #fff; }
-.app-sidebar .nav-link { color: rgba(255,255,255,.92); border-radius: .6rem; padding: .6rem .85rem; font-weight: 500; }
-.app-sidebar .nav-link:hover { background: rgba(255,255,255,.12); color: #fff; }
-.app-sidebar .nav-link.active { background: #fff; color: var(--gs-primary); font-weight: 700; }
-.user-chip { background: rgba(255,255,255,.1); border-radius: .75rem; padding: .6rem .75rem; }
-.avatar { width: 38px; height: 38px; border-radius: 50%; background: #fff; color: var(--gs-primary); display: grid; place-items: center; font-weight: 700; flex: none; }
-@media (min-width: 992px) { .app-main { margin-left: var(--gs-sidebar-w); } .app-sidebar.offcanvas-lg { position: fixed; top: 0; bottom: 0; left: 0; } }
+.app-sidebar {
+  width: var(--gs-sidebar-w);
+  background: linear-gradient(180deg, #243b8f 0%, #1a2c6d 100%) !important;
+  color: #fff;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 2px 0 20px rgba(18, 30, 74, 0.08);
+  overflow: hidden;
+}
+.sidebar-brand-box {
+  background: #ffffff;
+  border-radius: .65rem;
+  padding: .35rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.app-sidebar .brand-logo {
+  width: 32px;
+  height: 32px;
+}
+.app-sidebar .brand-title {
+  font-size: .88rem;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  color: #ffffff;
+  line-height: 1.2;
+}
+.app-sidebar .brand-sub {
+  font-size: .7rem;
+  opacity: .8;
+  color: #dbe4ff;
+  line-height: 1.2;
+}
+.user-chip {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: .75rem;
+  padding: .5rem .65rem;
+  backdrop-filter: blur(4px);
+}
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--gs-primary);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: .85rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
+  flex: none;
+}
+.user-role-badge {
+  font-size: .72rem;
+  color: #b9def5;
+  font-weight: 500;
+}
+.app-sidebar .nav-link {
+  color: rgba(255, 255, 255, 0.85);
+  border-radius: .6rem;
+  padding: .5rem .75rem;
+  font-size: .84rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  transition: all .15s ease-in-out;
+}
+.app-sidebar .nav-link i {
+  font-size: 1.05rem;
+  opacity: .8;
+  display: inline-flex;
+  align-items: center;
+  transition: transform .15s ease-in-out, opacity .15s ease-in-out;
+}
+.app-sidebar .nav-link:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  transform: translateX(2px);
+}
+.app-sidebar .nav-link:hover i {
+  opacity: 1;
+}
+.app-sidebar .nav-link.active {
+  background: #ffffff;
+  color: var(--gs-primary);
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+.app-sidebar .nav-link.active i {
+  color: var(--gs-primary);
+  opacity: 1;
+}
+.sidebar-logout-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: .65rem;
+  padding: .5rem .75rem;
+  font-size: .84rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  transition: all .2s ease-in-out;
+}
+.sidebar-logout-btn:hover {
+  background: #dc3545;
+  border-color: #dc3545;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+@media (min-width: 992px) {
+  .app-main { margin-left: var(--gs-sidebar-w); transition: margin-left .2s ease-in-out; }
+  .app-sidebar.offcanvas-lg { position: fixed; top: 0; bottom: 0; left: 0; transition: width .2s ease-in-out; }
+  html.sidebar-collapsed .app-sidebar { width: 76px; }
+  html.sidebar-collapsed .app-main { margin-left: 76px; }
+  html.sidebar-collapsed .app-sidebar .brand-title,
+  html.sidebar-collapsed .app-sidebar .brand-sub,
+  html.sidebar-collapsed .app-sidebar .user-chip > :not(.avatar),
+  html.sidebar-collapsed .app-sidebar .nav-link span,
+  html.sidebar-collapsed .app-sidebar .sidebar-logout-btn span { max-width: 0; opacity: 0; }
+  html.sidebar-collapsed .app-sidebar .d-flex.align-items-center.gap-2.mb-3.px-1 { justify-content: center; gap: 0 !important; }
+  html.sidebar-collapsed .app-sidebar .user-chip { justify-content: center; gap: 0; padding: .5rem; }
+  html.sidebar-collapsed .app-sidebar .nav-link { justify-content: center; gap: 0; padding: .6rem; }
+  html.sidebar-collapsed .app-sidebar .nav-link:hover { transform: none; }
+  html.sidebar-collapsed .app-sidebar .sidebar-logout-btn { justify-content: center; gap: 0; padding: .6rem; }
+}
+.app-sidebar .brand-title,
+.app-sidebar .brand-sub,
+.app-sidebar .user-chip > :not(.avatar),
+.app-sidebar .nav-link span,
+.app-sidebar .sidebar-logout-btn span { max-width: 180px; overflow: hidden; white-space: nowrap; transition: max-width .2s ease-in-out, opacity .12s ease-in-out; }
+.sidebar-toggle { width: 38px; height: 38px; align-items: center; justify-content: center; padding: 0; color: var(--gs-primary); border: 1px solid var(--bs-border-color); }
+.sidebar-toggle:hover { color: #fff; background: var(--gs-primary); border-color: var(--gs-primary); }
 .topbar { background: #fff; border-bottom: 1px solid var(--bs-border-color); }
 .stat-card .stat-value { font-size: 2rem; font-weight: 800; color: var(--gs-primary); line-height: 1; }
 .table > :not(caption) > * > * { padding: .75rem .85rem; vertical-align: middle; }

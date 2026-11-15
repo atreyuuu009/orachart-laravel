@@ -14,6 +14,14 @@ class SessionTimeout
     public function handle(Request $request, Closure $next)
     {
         if (Auth::check()) {
+            if (! Auth::user()->is_active || Auth::user()->trashed()) {
+                Audit::log('logout', 'usr_users', Auth::id(), 'Session ended because account is inactive');
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return $request->expectsJson() ? response()->json(['message' => 'Account inactive.'], 401)
+                    : redirect()->route('login')->withErrors(['email' => 'This account is inactive.']);
+            }
             $limit = max(1, Settings::int('session_timeout_minutes')) * 60;
             $last = (int) $request->session()->get('last_activity', time());
 

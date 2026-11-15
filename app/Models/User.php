@@ -19,6 +19,7 @@ class User extends Authenticatable
         'is_email_verified' => 'boolean',
         'locked_until' => 'datetime',
         'last_login_at' => 'datetime',
+        'created_at' => 'datetime',
     ];
 
     // The schema stores the bcrypt hash in password_hash and has no remember_token column.
@@ -29,6 +30,7 @@ class User extends Authenticatable
     public function role() { return $this->belongsTo(Role::class, 'role_id'); }
     public function dentist() { return $this->hasOne(Dentist::class, 'user_id'); }
     public function patient() { return $this->hasOne(Patient::class, 'user_id'); }
+    public function consents() { return $this->hasMany(Consent::class, 'user_id'); }
 
     public function roleName(): string { return $this->role->role_name ?? ''; }
     public function hasRole(string ...$roles): bool { return in_array($this->roleName(), $roles, true); }

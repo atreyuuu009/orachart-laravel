@@ -14,11 +14,14 @@ class Patient extends Model
     protected $primaryKey = 'patient_id';
     public $timestamps = false;
     protected $guarded = [];
-    protected $casts = ['birth_date' => 'date:Y-m-d'];
+    protected $casts = ['birth_date' => 'date:Y-m-d', 'deleted_at' => 'datetime'];
 
     public function user() { return $this->belongsTo(User::class, 'user_id'); }
     public function healthProfile() { return $this->hasOne(HealthProfile::class, 'patient_id'); }
+    public function consents() { return $this->hasMany(Consent::class, 'patient_id'); }
     public function appointments() { return $this->hasMany(Appointment::class, 'patient_id'); }
+    public function visitRecords() { return $this->hasMany(VisitRecord::class, 'patient_id')->orderByDesc('visit_date'); }
+    public function attachments() { return $this->hasMany(PatientAttachment::class, 'patient_id')->whereNull('deleted_at'); }
 
     public function getFullNameAttribute(): string
     {
