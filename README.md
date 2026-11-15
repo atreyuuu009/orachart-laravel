@@ -23,6 +23,9 @@ php artisan db:seed
 php artisan serve            # http://localhost:8000
 php artisan schedule:work    # sends queued reminders (in production use the cron line below)
 ```
+
+For an existing database created from an earlier v1 schema, apply the needed upgrade scripts once: `database/schema/upgrade_patient_management.sql`, followed by `database/schema/upgrade_patient_consents.sql`. Skip any script whose changes are already present.
+
 Production cron: `* * * * * cd /path/to/orachart && php artisan schedule:run >> /dev/null 2>&1`
 
 Demo logins (password `123456`): `atreyu@gmail.com` (admin) · `pericano@gmail.com` (staff) ·

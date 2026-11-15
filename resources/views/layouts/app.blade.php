@@ -7,6 +7,7 @@
       ['dashboard', 'Home', 'dashboard', 'bi-house-door'],
       ['booking.create', 'Book Appointment', 'booking.*', 'bi-calendar-plus'],
       ['appointments.mine', 'My Appointments', 'appointments.mine', 'bi-calendar-check'],
+      ['patients.own', 'My Patient Record', 'patients.own', 'bi-file-earmark-medical'],
     ],
     'clinic_staff' => [
       ['dashboard', 'Dashboard', 'dashboard', 'bi-speedometer2'],
@@ -20,15 +21,18 @@
       ['calendar', 'My Schedule', 'calendar', 'bi-calendar3'],
       ['schedule', 'Hours & Time Off', 'schedule*', 'bi-clock-history'],
       ['odontogram', 'Digital Odontogram', 'odontogram*', 'bi-clipboard2-pulse'],
+      ['patients.index', 'Patients', 'patients.*', 'bi-people'],
     ],
     'admin' => [
       ['dashboard', 'Dashboard', 'dashboard', 'bi-speedometer2'],
       ['appointments.index', 'View Appointments', 'appointments.index', 'bi-calendar-check'],
+      ['patients.index', 'Patients', 'patients.*', 'bi-people'],
       ['booking.staff', 'Create Appointment', 'booking.staff*', 'bi-calendar-plus'],
       ['calendar', 'Appointment Calendar', 'calendar', 'bi-calendar3'],
       ['odontogram', 'Digital Odontogram', 'odontogram*', 'bi-clipboard2-pulse'],
       ['schedule', 'Dentist Schedules', 'schedule*', 'bi-clock-history'],
       ['admin.settings', 'Clinic Settings', 'admin.settings*', 'bi-gear'],
+      ['admin.users', 'User Management', 'admin.users*', 'bi-person-gear'],
       ['admin.logs', 'Audit & E-mail Logs', 'admin.logs', 'bi-journal-text'],
     ],
     default => [['dashboard', 'Dashboard', 'dashboard', 'bi-speedometer2']],
@@ -71,6 +75,9 @@
 <div class="app-main">
   <header class="topbar px-3 px-lg-4 py-3 d-flex align-items-center gap-3">
     <button class="btn btn-outline-primary d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-label="Menu">&#9776;</button>
+    <button class="btn sidebar-toggle d-none d-lg-inline-flex" type="button" id="sidebarToggle" aria-controls="sidebar" aria-expanded="true" aria-label="Collapse sidebar" title="Collapse sidebar">
+      <i class="bi bi-list"></i>
+    </button>
     <div>
       <h1 class="h4 mb-0">@yield('page_title')</h1>
       <small class="text-secondary">@yield('page_subtitle')</small>

@@ -8,8 +8,10 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\OdontogramController;
+use App\Http\Controllers\PatientController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\UserManagementController;
 use Illuminate\Support\Facades\Route;
 
 // ---------------------------------------------------------------- public
@@ -40,12 +42,42 @@ Route::middleware('auth')->group(function () {
 
     // ---- patient
     Route::middleware('role:patient')->group(function () {
+        Route::get('/my-profile', [PatientController::class, 'own'])->name('patients.own');
+        Route::get('/my-profile/edit', [PatientController::class, 'editOwn'])->name('patients.own.edit');
+        Route::put('/my-profile', [PatientController::class, 'updateOwn'])->name('patients.own.update');
+        Route::get('/my-profile/attachments/{attachment}', [PatientController::class, 'download'])->name('patients.attachments.download');
         Route::get('/book', [BookingController::class, 'create'])->name('booking.create');
         Route::post('/book', [BookingController::class, 'store'])->name('booking.store');
         Route::get('/my-appointments', [AppointmentController::class, 'mine'])->name('appointments.mine');
     });
 
     // ---- clinic side
+    Route::middleware('role:admin,clinic_staff')->group(function () {
+        Route::get('/patients/create', [PatientController::class, 'create'])->name('patients.create');
+        Route::post('/patients', [PatientController::class, 'store'])->name('patients.store');
+        Route::get('/patients/{patient}/edit', [PatientController::class, 'edit'])->name('patients.edit');
+        Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('patients.update');
+    });
+    Route::middleware('role:admin,clinic_staff,dentist')->group(function () {
+        Route::get('/patients', [PatientController::class, 'index'])->name('patients.index');
+        Route::get('/patients/{patient}', [PatientController::class, 'show'])->name('patients.show');
+        Route::get('/patients/{patient}/attachments/{attachment}', [PatientController::class, 'downloadClinic'])->name('patients.attachments.download.clinic');
+        Route::get('/patients/{patient}/attachments/{attachment}/view', [PatientController::class, 'viewAttachment'])->name('patients.attachments.view');
+    });
+    Route::middleware('role:clinic_staff,dentist')->group(function () {
+        Route::post('/patients/{patient}/attachments', [PatientController::class, 'upload'])->name('patients.attachments.store');
+    });
+    Route::middleware('role:clinic_staff,dentist')->group(function () {
+        Route::put('/patients/{patient}/health', [PatientController::class, 'health'])->name('patients.health');
+    });
+    Route::middleware('role:clinic_staff')->group(function () {
+        Route::post('/patients/{patient}/consents', [PatientController::class, 'storeConsent'])->name('patients.consents.store');
+    });
+    Route::middleware('role:dentist')->group(function () {
+        Route::post('/patients/{patient}/visits', [PatientController::class, 'visit'])->name('patients.visits.store');
+        Route::put('/patients/{patient}/visits/{visitRecord}', [PatientController::class, 'updateVisit'])->name('patients.visits.update');
+    });
+
     Route::middleware('role:admin,clinic_staff,dentist')->group(function () {
         Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
         Route::post('/appointments/{appointment}/confirm', [AppointmentController::class, 'confirm'])->name('appointments.confirm');
@@ -84,6 +116,16 @@ Route::middleware('auth')->group(function () {
 
     // ---- admin
     Route::middleware('role:admin')->prefix('admin')->group(function () {
+        Route::get('/users', [UserManagementController::class, 'index'])->name('admin.users');
+        Route::get('/users/create', [UserManagementController::class, 'create'])->name('admin.users.create');
+        Route::post('/users', [UserManagementController::class, 'store'])->name('admin.users.store');
+        Route::get('/users/{user}/edit', [UserManagementController::class, 'edit'])->name('admin.users.edit');
+        Route::put('/users/{user}', [UserManagementController::class, 'update'])->name('admin.users.update');
+        Route::post('/users/{user}/deactivate', [UserManagementController::class, 'deactivate'])->name('admin.users.deactivate');
+        Route::post('/users/{user}/reactivate', [UserManagementController::class, 'reactivate'])->name('admin.users.reactivate');
+        Route::post('/users/{user}/unlock', [UserManagementController::class, 'unlock'])->name('admin.users.unlock');
+        Route::post('/users/{user}/reset', [UserManagementController::class, 'sendReset'])->name('admin.users.reset');
+        Route::post('/users/{user}/verification', [UserManagementController::class, 'resendVerification'])->name('admin.users.verification');
         Route::get('/settings', [SettingsController::class, 'show'])->name('admin.settings');
         Route::post('/settings/hours', [SettingsController::class, 'saveHours'])->name('admin.settings.hours');
         Route::post('/settings/rules', [SettingsController::class, 'saveRules'])->name('admin.settings.rules');
