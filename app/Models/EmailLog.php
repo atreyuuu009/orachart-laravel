@@ -10,5 +10,5 @@ class EmailLog extends Model
     protected $primaryKey = 'email_log_id';
     public $timestamps = false;   // created_at / updated_at are handled by MySQL defaults
     protected $guarded = [];
-    protected $casts = ['scheduled_for' => 'datetime', 'sent_at' => 'datetime'];
+    protected $casts = ['scheduled_for' => 'datetime', 'sent_at' => 'datetime', 'created_at' => 'datetime'];
 }

@@ -41,8 +41,38 @@ HTML],
             'recall_reminder' => ['Time for your routine check-up', <<<'HTML'
 <p>Hi {patient_name},</p><p>It has been a while since your last visit. It may be time for your routine dental cleaning and check-up.</p><p style="margin:24px 0;"><a href="{action_url}" style="background:#243b8f;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;display:inline-block;">Book my next visit</a></p>
 HTML],
-            'schedule_changed' => ['Your appointment needs rescheduling', <<<'HTML'
-<p>Hi {patient_name},</p><p>Because of a change in the clinic schedule, we need to move your appointment:</p><table style="margin:12px 0;border-collapse:collapse;"><tr><td style="padding:4px 14px 4px 0;color:#6b7280;">Procedure</td><td><strong>{service}</strong></td></tr><tr><td style="padding:4px 14px 4px 0;color:#6b7280;">Dentist</td><td>{dentist}</td></tr><tr><td style="padding:4px 14px 4px 0;color:#6b7280;">Date</td><td>{date}</td></tr><tr><td style="padding:4px 14px 4px 0;color:#6b7280;">Time</td><td>{time}</td></tr></table><p>We are sorry for the inconvenience. Please choose a new time.</p><p style="margin:24px 0;"><a href="{action_url}" style="background:#243b8f;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;display:inline-block;">Reschedule now</a></p>
+            'schedule_changed' => ['Clinic Schedule Update: Your appointment needs rescheduling', <<<'HTML'
+<p>Dear {patient_name},</p>
+<p>We sincerely apologize for the inconvenience, but due to a clinic schedule change, we are unable to accommodate your scheduled appointment:</p>
+<table style="margin:12px 0;border-collapse:collapse;">
+  <tr><td style="padding:4px 14px 4px 0;color:#6b7280;">Procedure:</td><td><strong>{service}</strong></td></tr>
+  <tr><td style="padding:4px 14px 4px 0;color:#6b7280;">Dentist:</td><td>{dentist}</td></tr>
+  <tr><td style="padding:4px 14px 4px 0;color:#6b7280;">Date:</td><td>{date}</td></tr>
+  <tr><td style="padding:4px 14px 4px 0;color:#6b7280;">Time:</td><td>{time}</td></tr>
+  <tr><td style="padding:4px 14px 4px 0;color:#6b7280;">Reason for closure:</td><td><strong>{reason}</strong></td></tr>
+</table>
+<p style="background:#fef3c7;border-left:4px solid #f59e0b;padding:12px;margin:16px 0;color:#92400e;">
+  <strong>No Penalty:</strong> Because this schedule change was initiated by the clinic, you may reschedule to any open slot or cancel at your convenience with <strong>zero penalty or fees</strong>. Booking notice restrictions have also been waived for your rescheduled visit.
+</p>
+<p style="margin:24px 0;">
+  <a href="{action_url}" style="background:#243b8f;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;display:inline-block;margin-right:10px;">Reschedule appointment</a>
+  <a href="{cancel_url}" style="background:#dc2626;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;display:inline-block;">Cancel appointment</a>
+</p>
+<p style="color:#6b7280;font-size:13px;">If you have any questions or require urgent assistance, please contact the clinic directly.</p>
+HTML],
+            'schedule_changed_reminder' => ['Second Reminder: Please reschedule your appointment with {clinic_name}', <<<'HTML'
+<p>Dear {patient_name},</p>
+<p>This is a second reminder regarding your appointment for <strong>{service}</strong> originally scheduled on <strong>{date} at {time}</strong> with {dentist}.</p>
+<p>We previously notified you that the clinic schedule changed due to: <strong>{reason}</strong>.</p>
+<p>We have not received your new schedule yet. Please choose a new date and time or cancel at your convenience:</p>
+<p style="background:#fef3c7;border-left:4px solid #f59e0b;padding:12px;margin:16px 0;color:#92400e;">
+  <strong>Zero Penalty:</strong> Because this schedule change was initiated by the clinic, you may reschedule to any open slot or cancel with <strong>zero penalty or fees</strong>. Booking notice and daily capacity restrictions have been waived for your rescheduled appointment.
+</p>
+<p style="margin:24px 0;">
+  <a href="{action_url}" style="background:#243b8f;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;display:inline-block;margin-right:10px;">Reschedule appointment</a>
+  <a href="{cancel_url}" style="background:#dc2626;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;display:inline-block;">Cancel appointment</a>
+</p>
+<p style="color:#6b7280;font-size:13px;">Our clinic staff will also be reaching out to you directly by phone to assist you if needed.</p>
 HTML],
         ];
 

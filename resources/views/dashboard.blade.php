@@ -15,11 +15,24 @@
   @if ($patientCount !== null)
     <div class="col-6 col-md"><div class="card stat-card h-100"><div class="card-body"><div class="text-secondary small mb-1">Patients</div><div class="stat-value">{{ $patientCount }}</div></div></div></div>
   @endif
+  @if (! $isPatient && $needsReschedule > 0)
+    <div class="col-6 col-md"><div class="card stat-card border-danger bg-danger bg-opacity-10 h-100"><div class="card-body"><div class="text-danger fw-bold small mb-1">Needs Reschedule</div><div class="stat-value text-danger">{{ $needsReschedule }}</div></div></div></div>
+  @endif
 </div>
 
-@if ($needsReschedule)
-  <div class="alert alert-warning">{{ $needsReschedule }} appointment(s) need rescheduling because of a schedule change.
-    <a href="{{ route('appointments.index', ['status' => 'needs_reschedule']) }}" class="alert-link">Review</a></div>
+@if ($needsReschedule > 0)
+  <div class="alert alert-danger shadow-sm border-danger d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div class="d-flex align-items-center gap-2">
+      <span class="fs-4">🚨</span>
+      <div>
+        <strong class="fs-6 text-danger">{{ $needsReschedule }} appointment(s) need rescheduling</strong>
+        <div class="small text-secondary">Appointments affected by clinic closures or schedule adjustments awaiting resolution.</div>
+      </div>
+    </div>
+    <a href="{{ route('appointments.index', ['status' => 'needs_reschedule']) }}" class="btn btn-danger btn-sm fw-bold">
+      Open Reschedule Queue ({{ $needsReschedule }})
+    </a>
+  </div>
 @endif
 
 @unless ($isPatient)

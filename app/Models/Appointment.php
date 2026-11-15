@@ -24,6 +24,44 @@ class Appointment extends Model
     public function dentist() { return $this->belongsTo(Dentist::class, 'assigned_dentist_id'); }
     public function requestedDentist() { return $this->belongsTo(Dentist::class, 'requested_dentist_id'); }
     public function treatmentPlan() { return $this->belongsTo(TreatmentPlan::class, 'treatment_plan_id'); }
+    public function emailLogs() { return $this->hasMany(EmailLog::class, 'related_appointment_id'); }
+
+    public function latestRescheduleEmail(): ?EmailLog
+    {
+        return $this->emailLogs->sortByDesc('email_log_id')->first(function ($l) {
+            $sub = strtolower($l->subject);
+            return str_contains($sub, 'reschedul') || str_contains($sub, 'schedule update');
+        });
+    }
+
+    public function hasSecondReminder(): bool
+    {
+        return $this->emailLogs->contains(function ($l) {
+            return str_contains(strtolower($l->subject), 'second reminder');
+        });
+    }
+
+    public function getPriorityOrderLabelAttribute(): string
+    {
+        if ($this->start_at && $this->start_at->isToday()) {
+            return '🚨 Same Day (On the way)';
+        }
+        if ($this->is_emergency) {
+            return '🔴 Emergency';
+        }
+        if ($this->treatment_plan_id || optional($this->service)->is_multi_visit) {
+            return '🦷 Multi-Visit (Sequence)';
+        }
+        return '📅 Standard';
+    }
+
+    public function getPriorityBadgeColorAttribute(): string
+    {
+        if ($this->start_at && $this->start_at->isToday()) return 'danger';
+        if ($this->is_emergency) return 'danger';
+        if ($this->treatment_plan_id || optional($this->service)->is_multi_visit) return 'info';
+        return 'secondary';
+    }
 
     /** Patients see their own, dentists their own chair, staff/admin everything. */
     public function scopeVisibleTo($q, User $u)

@@ -55,11 +55,19 @@ class AvailabilityService
     /**
      * @return array{closed:bool,message:?string,slots:array<int,array{time:string,label:string,state:string,dentist_id:?int}>}
      */
-    public function slots(Service $svc, Carbon $date, ?int $dentistId = null, bool $emergency = false, ?int $excludeAppointmentId = null, ?string $sessionId = null): array
+    public function slots(Service $svc, Carbon $date, ?int $dentistId = null, bool $emergency = false, ?int $excludeAppointmentId = null, ?string $sessionId = null, bool $isClosureReschedule = false): array
     {
         $day = $date->copy()->startOfDay();
         $dayEnd = $day->copy()->endOfDay();
         $dow = $day->dayOfWeek;
+
+        if (! $isClosureReschedule && $excludeAppointmentId) {
+            $ex = Appointment::find($excludeAppointmentId);
+            if ($ex && $ex->needs_reschedule) {
+                $isClosureReschedule = true;
+            }
+        }
+        $bypassNoticeAndCap = $emergency || $isClosureReschedule;
 
         $clinic = $this->clinicWindows($day);
         if (! $clinic) return ['closed' => true, 'message' => 'The clinic is closed on this date.', 'slots' => []];
@@ -128,13 +136,13 @@ class AvailabilityService
             $avail = array_values(array_filter($ids, fn ($id) => isset($free[$id][$t])));
 
             if ($avail) {
-                if (! $emergency && $startAt->lt($noticeAt)) {
+                if (! $bypassNoticeAndCap && $startAt->lt($noticeAt)) {
                     $row['state'] = 'notice';
-                } elseif (! $emergency && $maxPerDay > 0 && $dayTotal >= $maxPerDay) {
+                } elseif (! $bypassNoticeAndCap && $maxPerDay > 0 && $dayTotal >= $maxPerDay) {
                     $row['state'] = 'full';
                 } else {
                     $cands = $avail;
-                    if (! $emergency) {
+                    if (! $emergency && ! $isClosureReschedule) {
                         $cands = array_values(array_filter($avail, fn ($id) => ! $this->reserved($blocks, $id, $t, $startAt, $release)));
                     }
                     if (! $cands) {

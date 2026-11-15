@@ -28,23 +28,228 @@
   </div><div class="card-footer bg-white text-end"><button class="btn btn-primary">Save hours</button></div></form>
 </div>
 
-<div class="tab-pane fade {{ $tab === 'overrides' ? 'show active' : '' }}" id="t-overrides"><div class="row g-4">
-  <div class="col-lg-5"><form method="POST" action="{{ route('admin.settings.overrides.store') }}" class="card">@csrf<div class="card-body row g-2">
-    <div class="col-12"><label class="form-label">Date</label><input type="date" name="override_date" min="{{ today()->toDateString() }}" class="form-control" required></div>
-    <div class="col-12"><div class="form-check"><input class="form-check-input" type="checkbox" name="is_closed" value="1" id="ovClosed"><label class="form-check-label" for="ovClosed">Clinic closed all day</label></div></div>
-    <div class="col-6"><label class="form-label">Opens</label><input type="time" name="start_time" class="form-control"></div>
-    <div class="col-6"><label class="form-label">Closes</label><input type="time" name="end_time" class="form-control"></div>
-    <div class="col-12"><label class="form-label">Reason</label><input name="reason" class="form-control" maxlength="255" placeholder="e.g. Holiday"></div>
-    <div class="col-12 form-text">Booked patients affected by the change are flagged and e-mailed.</div>
-  </div><div class="card-footer bg-white text-end"><button class="btn btn-primary">Save override</button></div></form></div>
-  <div class="col-lg-7"><div class="card"><div class="card-header bg-white fw-bold">Upcoming overrides</div><ul class="list-group list-group-flush">
-    @forelse ($overrides as $o)
-      <li class="list-group-item d-flex justify-content-between align-items-center"><div><strong>{{ $o->override_date->format('D, M j, Y') }}</strong>
-        <div class="small text-secondary">{{ $o->is_closed ? 'Closed' : substr($o->start_time, 0, 5).' – '.substr($o->end_time, 0, 5) }} {{ $o->reason ? '· '.$o->reason : '' }}</div></div>
-        <form method="POST" action="{{ route('admin.settings.overrides.destroy', $o) }}">@csrf @method('DELETE')<button class="btn btn-sm btn-outline-danger">Remove</button></form></li>
-    @empty<li class="list-group-item text-secondary text-center">No upcoming overrides.</li>@endforelse
-  </ul></div></div>
-</div></div>
+<div class="tab-pane fade {{ $tab === 'overrides' ? 'show active' : '' }}" id="t-overrides">
+  @if (session('call_list'))
+    <div class="alert alert-danger shadow-sm border-danger mb-4">
+      <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+        <h5 class="alert-heading mb-0 text-danger fw-bold">
+          📞 Urgent Patient Call List — Same-Day / Emergency Closure ({{ session('call_list_date') }})
+        </h5>
+        <span class="badge bg-danger">Action Required</span>
+      </div>
+      <p class="mb-2 small">
+        Reason: <strong>{{ session('call_list_reason') }}</strong>.<br>
+        <strong>Important:</strong> Because SMS is not supported, patients with same-day or short-notice closures must be called by phone immediately to notify them of the closure and coordinate rescheduling.
+      </p>
+      <div class="table-responsive bg-white rounded border">
+        <table class="table table-sm table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Patient</th>
+              <th>Contact Number</th>
+              <th>Scheduled Time</th>
+              <th>Procedure</th>
+              <th>Dentist</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach (session('call_list') as $call)
+              <tr>
+                <td class="fw-semibold">{{ $call['patient_name'] }}</td>
+                <td>
+                  <a href="tel:{{ $call['contact_number'] }}" class="btn btn-sm btn-outline-success fw-bold py-0">
+                    📞 {{ $call['contact_number'] }}
+                  </a>
+                </td>
+                <td>{{ $call['time'] }}</td>
+                <td>{{ $call['service_name'] }}</td>
+                <td>{{ $call['dentist_name'] }}</td>
+                <td><span class="badge text-bg-warning">{{ $call['status'] }}</span></td>
+                <td>
+                  <label class="form-check-label small"><input type="checkbox" class="form-check-input me-1"> Called</label>
+                </td>
+              </tr>
+            @endforeach
+          </tbody>
+        </table>
+      </div>
+    </div>
+  @endif
+
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <form method="POST" action="{{ route('admin.settings.overrides.store') }}" id="overrideForm" class="card">
+        @csrf
+        <input type="hidden" name="confirmed" id="overrideConfirmed" value="0">
+        <div class="card-body row g-3">
+          <div class="col-12">
+            <label class="form-label fw-semibold">Closure Date</label>
+            <input type="date" name="override_date" id="ovDate" min="{{ today()->toDateString() }}" class="form-control" value="{{ old('override_date', today()->toDateString()) }}" required>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">Closure Type</label>
+            <div class="d-flex gap-3">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="closure_type" id="typePlanned" value="planned" @checked(old('closure_type', 'planned') === 'planned')>
+                <label class="form-check-label" for="typePlanned">
+                  <strong>Planned closure</strong>
+                  <div class="small text-secondary">Advance notice, regular holiday, renovations.</div>
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="closure_type" id="typeEmergency" value="emergency" @checked(old('closure_type') === 'emergency')>
+                <label class="form-check-label" for="typeEmergency">
+                  <strong class="text-danger">Emergency closure</strong>
+                  <div class="small text-secondary">Same-day or within hours. Generates patient call list.</div>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="is_closed" value="1" id="ovClosed" @checked(old('is_closed', 1))>
+              <label class="form-check-label fw-semibold" for="ovClosed">Clinic closed all day</label>
+            </div>
+          </div>
+          <div class="col-6 ov-hours-wrap {{ old('is_closed', 1) ? 'd-none' : '' }}">
+            <label class="form-label">Opens</label>
+            <input type="time" name="start_time" id="ovStartTime" class="form-control" value="{{ old('start_time') }}">
+          </div>
+          <div class="col-6 ov-hours-wrap {{ old('is_closed', 1) ? 'd-none' : '' }}">
+            <label class="form-label">Closes</label>
+            <input type="time" name="end_time" id="ovEndTime" class="form-control" value="{{ old('end_time') }}">
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">Reason for closure <span class="text-danger">*</span></label>
+            <input name="reason" id="ovReason" class="form-control" maxlength="255" placeholder="e.g. Typhoon / Power Outage / Dental Staff Emergency / Holiday" value="{{ old('reason') }}" required>
+            <div class="form-text">Reason is required. It is included in patient notification e-mails and audit logs.</div>
+          </div>
+        </div>
+        <div class="card-footer bg-white text-end">
+          <button type="submit" id="saveOverrideBtn" class="btn btn-primary">Save closure</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="col-lg-7">
+      <div class="card">
+        <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+          <span>Upcoming date overrides</span>
+        </div>
+        <ul class="list-group list-group-flush">
+          @forelse ($overrides as $o)
+            <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <div>
+                <strong>{{ $o->override_date->format('D, M j, Y') }}</strong>
+                @if (($o->closure_type ?? 'planned') === 'emergency')
+                  <span class="badge text-bg-danger ms-1">Emergency</span>
+                @else
+                  <span class="badge text-bg-secondary ms-1">Planned</span>
+                @endif
+                <div class="small text-secondary">
+                  {{ $o->is_closed ? 'Closed all day' : substr($o->start_time, 0, 5).' – '.substr($o->end_time, 0, 5) }}
+                  {{ $o->reason ? '· '.$o->reason : '' }}
+                </div>
+              </div>
+              <div class="d-flex gap-2 align-items-center">
+                <button type="button" class="btn btn-sm btn-outline-secondary view-call-list-btn" data-url="{{ route('admin.settings.overrides.calllist', $o) }}">
+                  📞 Call List
+                </button>
+                <form method="POST" action="{{ route('admin.settings.overrides.destroy', $o) }}" onsubmit="return confirm('Remove this date override?');">
+                  @csrf
+                  @method('DELETE')
+                  <button class="btn btn-sm btn-outline-danger">Remove</button>
+                </form>
+              </div>
+            </li>
+          @empty
+            <li class="list-group-item text-secondary text-center py-4">No upcoming overrides.</li>
+          @endforelse
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{-- Confirmation Modal before saving closure --}}
+<div class="modal fade" id="closureConfirmModal" tabindex="-1" aria-labelledby="closureConfirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-warning bg-opacity-25 border-warning">
+        <h5 class="modal-title fw-bold text-dark" id="closureConfirmModalLabel">Confirm Clinic Closure</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-warning mb-3">
+          <div class="fw-bold fs-6" id="closureConfirmMessage"></div>
+          <div class="small mt-1 text-secondary">
+            Date slots will disappear from online booking immediately, mid-booking holds will be deleted, queued reminders cancelled, and apology e-mails sent to all affected patients with free reschedule links.
+          </div>
+        </div>
+
+        <div id="closureEmergencyNotice" class="alert alert-danger py-2 d-none">
+          <strong>🚨 Emergency Closure Notice:</strong> Because SMS is not supported, an e-mail alone is not enough for same-day emergencies. A <strong>Patient Call List</strong> with telephone numbers will be generated upon saving so staff can call patients right away.
+        </div>
+
+        <div class="fw-semibold mb-2">Affected Patients &amp; Scheduled Appointments:</div>
+        <div class="table-responsive border rounded" style="max-height: 280px; overflow-y: auto;">
+          <table class="table table-sm table-striped align-middle mb-0">
+            <thead class="table-light sticky-top">
+              <tr>
+                <th>Time</th>
+                <th>Patient</th>
+                <th>Contact</th>
+                <th>Procedure</th>
+                <th>Dentist</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="closureConfirmTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" id="confirmSaveClosureBtn" class="btn btn-danger fw-bold">Continue &amp; Save Closure</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{-- Existing Override Call List Modal --}}
+<div class="modal fade" id="existingCallListModal" tabindex="-1" aria-labelledby="existingCallListModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="existingCallListModalLabel">Patient Call List</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-info py-2 small mb-3" id="existingCallListInfo"></div>
+        <div class="table-responsive border rounded" style="max-height: 320px; overflow-y: auto;">
+          <table class="table table-sm table-hover align-middle mb-0">
+            <thead class="table-light sticky-top">
+              <tr>
+                <th>Patient</th>
+                <th>Contact Number</th>
+                <th>Time</th>
+                <th>Procedure</th>
+                <th>Dentist</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="existingCallListBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="tab-pane fade {{ $tab === 'rules' ? 'show active' : '' }}" id="t-rules">
   <form method="POST" action="{{ route('admin.settings.rules') }}" class="card">@csrf<div class="card-body"><div class="row g-3">
@@ -102,3 +307,174 @@
 
 </div>
 @endsection
+
+@push('scripts')
+<script>
+(() => {
+  const ovClosed = document.getElementById('ovClosed');
+  const ovHoursWraps = document.querySelectorAll('.ov-hours-wrap');
+  const ovStartTime = document.getElementById('ovStartTime');
+  const ovEndTime = document.getElementById('ovEndTime');
+  const ovDate = document.getElementById('ovDate');
+  const typeEmergency = document.getElementById('typeEmergency');
+  const typePlanned = document.getElementById('typePlanned');
+  const overrideForm = document.getElementById('overrideForm');
+  const overrideConfirmed = document.getElementById('overrideConfirmed');
+  const saveOverrideBtn = document.getElementById('saveOverrideBtn');
+
+  // Toggle hours input
+  const toggleHours = () => {
+    const isClosed = ovClosed.checked;
+    ovHoursWraps.forEach(el => el.classList.toggle('d-none', isClosed));
+    if (ovStartTime) ovStartTime.required = !isClosed;
+    if (ovEndTime) ovEndTime.required = !isClosed;
+  };
+  if (ovClosed) {
+    ovClosed.addEventListener('change', toggleHours);
+    toggleHours();
+  }
+
+  // Suggest emergency if date is today
+  const checkDateEmergency = () => {
+    if (!ovDate) return;
+    const today = new Date().toISOString().split('T')[0];
+    if (ovDate.value === today && typeEmergency) {
+      typeEmergency.checked = true;
+    }
+  };
+  if (ovDate) {
+    ovDate.addEventListener('change', checkDateEmergency);
+  }
+
+  // Confirmation preview
+  if (overrideForm) {
+    overrideForm.addEventListener('submit', async (e) => {
+      if (overrideConfirmed.value === '1') return true;
+
+      e.preventDefault();
+      if (!overrideForm.checkValidity()) {
+        overrideForm.reportValidity();
+        return;
+      }
+
+      saveOverrideBtn.disabled = true;
+      const originalText = saveOverrideBtn.textContent;
+      saveOverrideBtn.textContent = 'Checking affected bookings…';
+
+      try {
+        const formData = new FormData(overrideForm);
+        const res = await fetch("{{ route('admin.settings.overrides.preview') }}", {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+          },
+          body: formData
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          alert(err.message || 'Error checking for conflicting appointments.');
+          saveOverrideBtn.disabled = false;
+          saveOverrideBtn.textContent = originalText;
+          return;
+        }
+
+        const data = await res.json();
+        saveOverrideBtn.disabled = false;
+        saveOverrideBtn.textContent = originalText;
+
+        if (data.count === 0) {
+          // No appointments affected, proceed directly
+          overrideConfirmed.value = '1';
+          overrideForm.submit();
+          return;
+        }
+
+        // Show confirmation modal with appointment list
+        document.getElementById('closureConfirmMessage').textContent = data.message;
+        const emNotice = document.getElementById('closureEmergencyNotice');
+        if (emNotice) {
+          emNotice.classList.toggle('d-none', !data.is_emergency);
+        }
+
+        const tbody = document.getElementById('closureConfirmTableBody');
+        tbody.replaceChildren();
+
+        data.appointments.forEach(a => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="text-nowrap fw-semibold">${a.time}</td>
+            <td><strong>${a.patient_name}</strong></td>
+            <td><a href="tel:${a.contact_number}" class="text-decoration-none">📞 ${a.contact_number}</a></td>
+            <td>${a.service_name}</td>
+            <td>${a.dentist_name}</td>
+            <td><span class="badge text-bg-${a.status === 'confirmed' ? 'primary' : 'warning'}">${a.status_label}</span></td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        const modalEl = document.getElementById('closureConfirmModal');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+
+        const confirmBtn = document.getElementById('confirmSaveClosureBtn');
+        confirmBtn.onclick = () => {
+          confirmBtn.disabled = true;
+          confirmBtn.textContent = 'Applying closure…';
+          overrideConfirmed.value = '1';
+          overrideForm.submit();
+        };
+
+      } catch (err) {
+        saveOverrideBtn.disabled = false;
+        saveOverrideBtn.textContent = originalText;
+        alert('Could not verify conflicts. Please try again.');
+      }
+    });
+  }
+
+  // Existing Override Call List Modal
+  document.querySelectorAll('.view-call-list-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const url = btn.dataset.url;
+      try {
+        const res = await fetch(url, { headers: { Accept: 'application/json' } });
+        if (!res.ok) return alert('Could not load call list.');
+        const data = await res.json();
+
+        document.getElementById('existingCallListInfo').innerHTML =
+          `<strong>${data.date}</strong> · Closure Type: <span class="badge text-bg-${data.closure_type === 'emergency' ? 'danger' : 'secondary'}">${data.closure_type}</span> · Reason: <em>${data.reason || 'None specified'}</em>`;
+
+        const tbody = document.getElementById('existingCallListBody');
+        tbody.replaceChildren();
+
+        if (data.appointments.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-3 text-secondary">No appointments were scheduled on this date.</td></tr>';
+        } else {
+          data.appointments.forEach(a => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td class="fw-semibold">${a.patient_name}</td>
+              <td><a href="tel:${a.contact_number}" class="btn btn-sm btn-outline-success py-0 fw-bold">📞 ${a.contact_number}</a></td>
+              <td class="text-nowrap">${a.time}</td>
+              <td>${a.service_name}</td>
+              <td>${a.dentist_name}</td>
+              <td>
+                <span class="badge text-bg-${a.status === 'Confirmed' ? 'primary' : 'warning'}">${a.status}</span>
+                ${a.needs_reschedule ? '<span class="badge text-bg-danger ms-1">Needs reschedule</span>' : ''}
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+
+        new bootstrap.Modal(document.getElementById('existingCallListModal')).show();
+      } catch (e) {
+        alert('Network error loading call list.');
+      }
+    });
+  });
+})();
+</script>
+@endpush

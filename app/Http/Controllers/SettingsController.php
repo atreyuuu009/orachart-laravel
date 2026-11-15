@@ -56,6 +56,48 @@ class SettingsController extends Controller
         return back()->with('status', 'Clinic hours saved. They apply to new bookings; existing appointments are not changed.')->with('tab', 'hours');
     }
 
+    public function previewOverride(Request $request, ScheduleService $schedule)
+    {
+        $v = $request->validate([
+            'override_date' => 'required|date_format:Y-m-d|after_or_equal:today',
+            'is_closed' => 'nullable|boolean',
+            'start_time' => 'nullable|required_unless:is_closed,1|date_format:H:i',
+            'end_time' => 'nullable|required_unless:is_closed,1|date_format:H:i|after:start_time',
+            'dentist_id' => 'nullable|exists:usr_dentists,dentist_id',
+            'closure_type' => 'nullable|in:planned,emergency',
+        ]);
+
+        $closed = $request->boolean('is_closed');
+        $dentistId = $v['dentist_id'] ?? null;
+        $day = Carbon::parse($v['override_date']);
+        $openTime = $closed ? null : ($v['start_time'] ?? null);
+        $closeTime = $closed ? null : ($v['end_time'] ?? null);
+
+        $affected = $schedule->getConflicts($dentistId, $day, $closed, $openTime, $closeTime);
+        $confirmedCount = $affected->where('status', 'confirmed')->count();
+        $pendingCount = $affected->where('status', 'pending')->count();
+        $isEmergency = ($v['closure_type'] ?? '') === 'emergency' || $day->isToday() || $day->diffInHours(now()) <= 24;
+
+        return response()->json([
+            'count' => $affected->count(),
+            'confirmed_count' => $confirmedCount,
+            'pending_count' => $pendingCount,
+            'is_emergency' => $isEmergency,
+            'message' => "This will affect {$affected->count()} appointments ({$confirmedCount} confirmed, {$pendingCount} pending). Continue?",
+            'appointments' => $affected->map(fn ($a) => [
+                'id' => $a->appointment_id,
+                'patient_name' => $a->patient->full_name,
+                'contact_number' => $a->patient->contact_number,
+                'email' => $a->patient->email ?: ($a->patient->user->email ?? 'N/A'),
+                'service_name' => $a->service->service_name,
+                'dentist_name' => $a->dentist->name,
+                'time' => $a->start_at->format('g:i A').' – '.$a->end_at->format('g:i A'),
+                'status' => $a->status,
+                'status_label' => ucfirst($a->status),
+            ])->values(),
+        ]);
+    }
+
     public function storeOverride(Request $request, ScheduleService $schedule)
     {
         $v = $request->validate([
@@ -63,19 +105,87 @@ class SettingsController extends Controller
             'is_closed' => 'nullable|boolean',
             'start_time' => 'nullable|required_unless:is_closed,1|date_format:H:i',
             'end_time' => 'nullable|required_unless:is_closed,1|date_format:H:i|after:start_time',
-            'reason' => 'nullable|string|max:255',
+            'reason' => 'required|string|max:255',
+            'closure_type' => 'required|in:planned,emergency',
+        ], [
+            'reason.required' => 'A reason for the closure is required (it is included in patient notification e-mails and audit logs).',
+            'closure_type.required' => 'Please select whether this is a planned or emergency closure.',
         ]);
+
         $closed = $request->boolean('is_closed');
+        $overrideDate = Carbon::parse($v['override_date']);
+        $isEmergency = $v['closure_type'] === 'emergency' || $overrideDate->isToday();
 
-        ScheduleOverride::updateOrCreate(['dentist_id' => null, 'override_date' => $v['override_date']], [
+        $override = ScheduleOverride::updateOrCreate(['dentist_id' => null, 'override_date' => $v['override_date']], [
             'is_closed' => $closed ? 1 : 0,
-            'start_time' => $closed ? null : $v['start_time'], 'end_time' => $closed ? null : $v['end_time'],
-            'reason' => $v['reason'] ?? null, 'created_by_user_id' => $request->user()->user_id,
+            'start_time' => $closed ? null : $v['start_time'],
+            'end_time' => $closed ? null : $v['end_time'],
+            'reason' => $v['reason'],
+            'closure_type' => $v['closure_type'],
+            'created_by_user_id' => $request->user()->user_id,
         ]);
-        $flagged = $schedule->flagOutsideHours(Carbon::parse($v['override_date']), $closed ? null : $v['start_time'], $closed ? null : $v['end_time']);
-        Audit::log('create', 'sch_overrides', null, 'Date override for '.$v['override_date']);
 
-        return back()->with('tab', 'overrides')->with('status', 'Date override saved.'.($flagged ? " {$flagged} appointment(s) were flagged for rescheduling and the patients were e-mailed." : ''));
+        $affected = $schedule->applyOverride($override, $request->user());
+        $count = $affected->count();
+
+        // If it's an emergency closure or same-day, flash the call list for immediate action
+        if ($isEmergency && $count > 0) {
+            $callList = $affected->map(fn ($a) => [
+                'id' => $a->appointment_id,
+                'patient_name' => $a->patient->full_name,
+                'contact_number' => $a->patient->contact_number,
+                'email' => $a->patient->email ?: ($a->patient->user->email ?? 'N/A'),
+                'service_name' => $a->service->service_name,
+                'dentist_name' => $a->dentist->name,
+                'time' => $a->start_at->format('g:i A').' – '.$a->end_at->format('g:i A'),
+                'status' => ucfirst($a->status),
+            ])->values()->all();
+
+            session()->flash('call_list', $callList);
+            session()->flash('call_list_date', $overrideDate->format('M j, Y'));
+            session()->flash('call_list_reason', $v['reason']);
+        }
+
+        $msg = "Date override saved for {$overrideDate->format('M j, Y')}.";
+        if ($count > 0) {
+            $msg .= " {$count} appointment(s) were flagged for rescheduling, queued reminders were cancelled, and patients were e-mailed.";
+            if ($isEmergency) {
+                $msg .= ' Because this is an emergency closure, a Call List has been generated below so staff can call patients immediately.';
+            }
+        }
+
+        return back()->with('tab', 'overrides')->with('status', $msg);
+    }
+
+    public function callList(ScheduleOverride $override, ScheduleService $schedule)
+    {
+        $day = Carbon::parse($override->override_date);
+        $closed = (bool) $override->is_closed;
+        $openTime = $override->start_time ? substr($override->start_time, 0, 5) : null;
+        $closeTime = $override->end_time ? substr($override->end_time, 0, 5) : null;
+
+        // Fetch affected or flagged appointments on this date
+        $affected = Appointment::whereBetween('start_at', [$day->copy()->startOfDay(), $day->copy()->endOfDay()])
+            ->where(fn ($q) => $q->open()->orWhere('needs_reschedule', 1))
+            ->with(['patient.user', 'service', 'dentist.user'])
+            ->orderBy('start_at')
+            ->get();
+
+        return response()->json([
+            'date' => $override->override_date->format('M j, Y'),
+            'reason' => $override->reason,
+            'closure_type' => $override->closure_type ?? 'planned',
+            'appointments' => $affected->map(fn ($a) => [
+                'id' => $a->appointment_id,
+                'patient_name' => $a->patient->full_name,
+                'contact_number' => $a->patient->contact_number,
+                'service_name' => $a->service->service_name,
+                'dentist_name' => $a->dentist->name,
+                'time' => $a->start_at->format('g:i A').' – '.$a->end_at->format('g:i A'),
+                'status' => ucfirst($a->status),
+                'needs_reschedule' => $a->needs_reschedule,
+            ]),
+        ]);
     }
 
     public function destroyOverride(ScheduleOverride $override)
