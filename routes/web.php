@@ -9,6 +9,7 @@ use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\OdontogramController;
 use App\Http\Controllers\PatientController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\UserManagementController;
@@ -66,6 +67,16 @@ Route::middleware('auth')->group(function () {
     });
     Route::middleware('role:clinic_staff,dentist')->group(function () {
         Route::post('/patients/{patient}/attachments', [PatientController::class, 'upload'])->name('patients.attachments.store');
+    });
+    Route::middleware('role:clinic_staff,dentist')->prefix('payments')->name('payments.')->group(function () {
+        Route::get('/', [PaymentController::class, 'index'])->name('index');
+        Route::get('/create', [PaymentController::class, 'create'])->name('create');
+        Route::post('/', [PaymentController::class, 'store'])->name('store');
+        Route::get('/{payment}', [PaymentController::class, 'show'])->name('show');
+        Route::post('/{payment}/settle', [PaymentController::class, 'settle'])->name('settle');
+        Route::post('/{payment}/verify', [PaymentController::class, 'verify'])->name('verify');
+        Route::post('/{payment}/reject', [PaymentController::class, 'reject'])->name('reject');
+        Route::get('/{payment}/receipt', [PaymentController::class, 'receipt'])->name('receipt');
     });
     Route::middleware('role:clinic_staff,dentist')->group(function () {
         Route::put('/patients/{patient}/health', [PatientController::class, 'health'])->name('patients.health');

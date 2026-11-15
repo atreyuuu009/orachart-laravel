@@ -13,6 +13,6 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call([NtfTemplateSeeder::class, DemoDataSeeder::class]);
+        $this->call([NtfTemplateSeeder::class, PaymentDiscountSeeder::class, DemoDataSeeder::class]);
     }
 }

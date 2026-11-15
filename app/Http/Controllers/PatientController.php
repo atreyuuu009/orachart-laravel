@@ -7,6 +7,7 @@ use App\Models\Dentist;
 use App\Models\HealthProfile;
 use App\Models\LabRequest;
 use App\Models\Patient;
+use App\Models\Payment;
 use App\Models\PatientAttachment;
 use App\Models\Prescription;
 use App\Models\VisitRecord;
@@ -107,6 +108,7 @@ class PatientController extends Controller
         }
         return view('patients.show', [
             'patient' => $patient, 'records' => $records, 'consents' => $consents,
+            'outstandingPayments' => $user->hasRole('clinic_staff', 'dentist') ? Payment::where('patient_id', $patient->patient_id)->where('balance_amount', '>', 0)->orderByDesc('payment_date')->get() : collect(),
             'appointments' => $user->hasRole('admin', 'clinic_staff') ? $patient->appointments()->with('dentist.user', 'service')->orderByDesc('start_at')->limit(20)->get() : collect(),
             'canEditIdentity' => $user->hasRole('admin', 'clinic_staff', 'patient'),
             'canEditHealth' => $user->hasRole('clinic_staff', 'dentist'),

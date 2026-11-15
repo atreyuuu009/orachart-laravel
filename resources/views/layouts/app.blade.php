@@ -14,6 +14,7 @@
       ['booking.staff', 'Create Appointment', 'booking.staff*', 'bi-calendar-plus'],
       ['appointments.index', 'Manage Appointments', 'appointments.index', 'bi-calendar-check'],
       ['calendar', 'Appointment Calendar', 'calendar', 'bi-calendar3'],
+      ['payments.index', 'Payments', 'payments.*', 'bi-receipt'],
     ],
     'dentist' => [
       ['dashboard', 'Dashboard', 'dashboard', 'bi-speedometer2'],
@@ -22,6 +23,7 @@
       ['schedule', 'Hours & Time Off', 'schedule*', 'bi-clock-history'],
       ['odontogram', 'Digital Odontogram', 'odontogram*', 'bi-clipboard2-pulse'],
       ['patients.index', 'Patients', 'patients.*', 'bi-people'],
+      ['payments.index', 'Payments', 'payments.*', 'bi-receipt'],
     ],
     'admin' => [
       ['dashboard', 'Dashboard', 'dashboard', 'bi-speedometer2'],

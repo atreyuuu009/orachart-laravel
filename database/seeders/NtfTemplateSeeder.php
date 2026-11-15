@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\EmailTemplate;
+use App\Models\Discount;
 use Illuminate\Database\Seeder;
 
 /** Replaces the TODO bodies from the SQL seed with real templates. Placeholders use {name}. */
@@ -10,6 +11,7 @@ class NtfTemplateSeeder extends Seeder
 {
     public function run(): void
     {
+        Discount::updateOrCreate(['discount_name' => 'Student'], ['discount_percent' => 20.00, 'is_active' => 1]);
         $templates = [
             'verify_email' => ['Verify your OraChart account', <<<'HTML'
 <p>Hi {first_name},</p><p>Thanks for registering with {clinic_name}. Please confirm your e-mail address to activate your account. This link is valid for 24 hours.</p><p style="margin:24px 0;"><a href="{action_url}" style="background:#243b8f;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;display:inline-block;">Verify my e-mail</a></p><p style="color:#6b7280;font-size:13px;">If you did not create this account, you can ignore this message.</p>
@@ -73,6 +75,12 @@ HTML],
   <a href="{cancel_url}" style="background:#dc2626;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;display:inline-block;">Cancel appointment</a>
 </p>
 <p style="color:#6b7280;font-size:13px;">Our clinic staff will also be reaching out to you directly by phone to assist you if needed.</p>
+HTML],
+            'payment_verified' => ['Your payment has been verified', <<<'HTML'
+<p>Hi {first_name},</p><p>Your payment of ₱{amount_paid} has been verified by {clinic_name}.</p><p>Bill total: ₱{total_amount}<br>Outstanding balance: ₱{balance_amount}<br>Receipt: {receipt_number}</p>
+HTML],
+            'payment_rejected' => ['We could not verify your payment', <<<'HTML'
+<p>Hi {first_name},</p><p>We could not verify the payment submitted for your bill at {clinic_name}.</p><p>Reason: {reason}</p><p>Outstanding balance: ₱{balance_amount}. Please contact the clinic to arrange settlement.</p>
 HTML],
         ];
 
