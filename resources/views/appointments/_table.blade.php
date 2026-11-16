@@ -25,7 +25,7 @@
                 </div>
               </div>
             @else
-              <div class="mt-2 p-2 bg-warning bg-opacity-10 border border-warning rounded small">
+              <div class="closure-action-panel mt-2 p-2 p-md-3 small">
                 <div class="d-flex flex-wrap gap-1 align-items-center mb-1">
                   <span class="badge text-bg-{{ $a->priority_badge_color }}">{{ $a->priority_order_label }}</span>
                   @php $latestEmail = $a->latestRescheduleEmail(); @endphp
@@ -46,9 +46,9 @@
                   @endif
                 </div>
 
-                <div class="d-flex flex-wrap gap-1 align-items-center mt-2">
-                  <a href="tel:{{ $a->patient->contact_number }}" class="btn btn-outline-success btn-sm py-0 px-2">📞 Call</a>
-                  <button type="button" class="btn btn-primary btn-sm py-0 px-2 quick-reschedule-btn"
+                <div class="d-flex flex-wrap gap-2 align-items-center mt-2 closure-actions">
+                  <a href="tel:{{ $a->patient->contact_number }}" class="btn btn-outline-success btn-sm px-3">📞 Call</a>
+                  <button type="button" class="btn btn-primary btn-sm px-3 quick-reschedule-btn"
                     data-id="{{ $a->appointment_id }}"
                     data-slots-url="{{ route('appointments.suggested_slots', $a) }}"
                     data-reschedule-url="{{ route('appointments.reschedule.store', $a) }}"
@@ -57,13 +57,20 @@
                     data-patient="{{ $a->patient->full_name }}"
                     data-service="{{ $a->service->service_name }}"
                     data-dentist="{{ $a->dentist->name }}">
-                    Quick Reschedule…
+                    Quick reschedule
                   </button>
-                  <form method="POST" action="{{ route('appointments.cancel', $a) }}" class="d-inline" onsubmit="return confirm('Cancel this appointment due to clinic closure?');">
+                  <div class="dropdown">
+                    <button class="btn btn-light btn-sm border dropdown-toggle px-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">More actions</button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                      <li>
+                        <form method="POST" action="{{ route('appointments.cancel', $a) }}" onsubmit="return confirm('Cancel this appointment due to clinic closure?');">
                     @csrf
                     <input type="hidden" name="reason" value="Cancelled due to clinic closure">
-                    <button class="btn btn-outline-danger btn-sm py-0 px-2">Cancel (Closure)</button>
-                  </form>
+                    <button class="dropdown-item text-danger" type="submit">Cancel due to closure</button>
+                        </form>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             @endif

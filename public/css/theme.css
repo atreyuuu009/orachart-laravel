@@ -185,6 +185,19 @@
 .table > :not(caption) > * > * { padding: .75rem .85rem; vertical-align: middle; }
 .table thead th { font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: #6b7280; background: #f8fafc; }
 
+/* Closure rescheduling actions */
+.closure-action-panel {
+  background: linear-gradient(135deg, #fff9e8, #fffdf7);
+  border: 1px solid #f1d98a;
+  border-left: 3px solid #e6b422;
+  border-radius: .75rem;
+  box-shadow: 0 3px 10px rgba(116, 85, 10, .06);
+}
+.closure-action-panel .badge { font-weight: 600; }
+.closure-actions .btn { border-radius: .55rem; font-weight: 600; }
+.closure-actions .btn-primary { box-shadow: 0 2px 5px rgba(36, 59, 143, .18); }
+.closure-actions .dropdown-menu { min-width: 12rem; border-color: #e5e7eb; border-radius: .65rem; }
+
 /* ---------- booking slots ---------- */
 .slot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: .6rem; }
 .slot { border: 1px solid var(--bs-border-color); background: #fff; border-radius: .6rem; padding: .55rem .4rem; text-align: center; font-weight: 600; font-size: .92rem; }
