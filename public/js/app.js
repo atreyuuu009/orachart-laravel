@@ -18,6 +18,26 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// Gentle, one-time reveals on the public landing page as each section enters view.
+document.addEventListener('DOMContentLoaded', () => {
+  const revealItems = document.querySelectorAll('.scroll-reveal');
+  if (!revealItems.length || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  revealItems.forEach(item => item.classList.add('reveal-pending'));
+  if (!('IntersectionObserver' in window)) {
+    revealItems.forEach(item => item.classList.add('reveal-visible'));
+    return;
+  }
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      entry.target.classList.toggle('reveal-visible', entry.isIntersecting);
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -35px 0px' });
+
+  revealItems.forEach(item => observer.observe(item));
+});
+
 document.addEventListener('click', (e) => {
   // Service price modal (landing + patient home)
   const cat = e.target.closest('[data-service-cat]');

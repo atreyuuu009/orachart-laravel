@@ -10,14 +10,16 @@
   <div class="container">
     <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('landing') }}">
       <img class="brand-logo" src="{{ asset('images/logo-removebg-preview.png') }}" alt="Logo">
-      <span class="lh-sm"><strong class="text-primary">Guda &amp; Soriano</strong><br><small class="text-secondary">Dental Clinic</small></span>
+      <span class="lh-sm"><strong>Guda &amp; Soriano</strong><br><small>Dental Clinic</small></span>
     </a>
     <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#lnav"><span class="navbar-toggler-icon"></span></button>
     <div class="collapse navbar-collapse" id="lnav">
-      <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+      <ul class="navbar-nav mx-auto align-items-lg-center gap-lg-3">
         <li class="nav-item"><a class="nav-link" href="#services">Services</a></li>
         <li class="nav-item"><a class="nav-link" href="#why">Why Us</a></li>
         <li class="nav-item"><a class="nav-link" href="#dentists">Dentists</a></li>
+      </ul>
+      <ul class="navbar-nav align-items-lg-center gap-lg-2">
         @auth
           <li class="nav-item"><a class="btn btn-primary" href="{{ route('dashboard') }}">Go to my account</a></li>
         @else
@@ -30,27 +32,25 @@
 </nav>
 
 <header class="landing-hero">
-  <div class="container"><div class="row align-items-center g-5">
-    <div class="col-lg-7">
-      <div class="eyebrow mb-2">GUDA &amp; SORIANO DENTAL CLINIC</div>
-      <h1 class="display-5 mb-3">Healthy smiles start with <span>trusted dental care.</span></h1>
-      <p class="lead text-secondary">From cleanings and fillings to braces, extractions, and crowns — clear prices, careful treatment, and a calm clinic experience for every patient.</p>
-      <div class="d-flex flex-wrap gap-2 my-4">
-        <a class="btn btn-primary btn-lg" href="{{ auth()->check() ? route('booking.create') : route('register') }}">Book Appointment</a>
-        <a class="btn btn-outline-primary btn-lg" href="#services">See Services &amp; Prices</a>
-      </div>
-      <div class="row text-center text-sm-start g-3 trust-item">
-        <div class="col-4"><strong>{{ $dentists->count() }}</strong><span class="text-secondary small">Licensed Dentists</span></div>
-        <div class="col-4"><strong>{{ $serviceCount }}+</strong><span class="text-secondary small">Dental Services</span></div>
-        <div class="col-4"><strong>{{ $hoursText }}</strong><span class="text-secondary small">Clinic Hours</span></div>
-      </div>
-      <p class="small text-secondary mt-3 mb-0">Appointments are subject to clinic availability.</p>
+  <div class="container hero-copy">
+    <div class="availability-pill"><span>OPEN</span> {{ $hoursText }} · Appointments subject to availability</div>
+    <h1>Healthy smiles start with<br>trusted dental care.</h1>
+    <p>From cleanings and fillings to braces, extractions, and crowns — clear prices, careful treatment, and a calm clinic experience for every patient.</p>
+    <div class="d-flex flex-wrap justify-content-center gap-2 hero-actions">
+      <a class="btn btn-light btn-lg" href="{{ auth()->check() ? route('booking.create') : route('register') }}">Book Appointment <span class="hero-arrow">→</span></a>
+      <a class="btn btn-hero-outline btn-lg" href="#services">See Services &amp; Prices</a>
     </div>
-    <div class="col-lg-5"><div class="hero-logo-card"><img src="{{ asset('images/logo-removebg-preview.png') }}" alt="Guda &amp; Soriano Dental Clinic logo"></div></div>
-  </div></div>
+  </div>
+  <div class="hero-art" aria-hidden="true">
+    <span class="float-label label-cleaning">Cleaning</span><span class="float-label label-fillings">Fillings</span>
+    <span class="float-label label-braces">Braces</span><span class="float-label label-crowns">Crowns &amp; Bridges</span>
+    <span class="hero-spark spark-blue"></span><span class="hero-spark spark-yellow"></span>
+    <div class="hero-tooth"><svg viewBox="0 0 120 140"><path d="M60 20C43 8 20 13 15 34c-5 19 4 38 8 54 4 18 8 41 18 39 10-2 12-36 19-36s10 34 20 36c10 2 14-21 18-39 4-16 13-35 8-54C101 13 78 8 60 20Z"/></svg></div>
+    <div class="hero-platform"></div>
+  </div>
 </header>
 
-<section id="services" class="section-pad"><div class="container">
+<section id="services" class="section-pad scroll-reveal"><div class="container">
   <div class="text-center mb-4">
     <div class="eyebrow">OUR TREATMENTS</div>
     <h2>Dental Services &amp; Price Guide</h2>
@@ -59,19 +59,26 @@
   @include('partials.services', ['categories' => $categories])
 </div></section>
 
-<section id="why" class="section-pad bg-white"><div class="container">
-  <div class="text-center mb-4"><div class="eyebrow">WHY PATIENTS CHOOSE US</div><h2>Dental care that feels clear and comfortable</h2></div>
-  <div class="row g-4">
-    @foreach ([['🦷','Experienced dentists','Thorough exams, restorative care, and treatment plans you can understand.'],
-               ['₱','Transparent pricing','See indicative service prices up front so you can plan with fewer surprises.'],
-               ['📅','Easy online booking','Register, choose your procedure and preferred time, then manage appointments in one place.'],
-               ['💙','Gentle clinic experience','A calm, respectful environment for first-time and anxious patients.']] as [$i, $t, $d])
-      <div class="col-md-6 col-lg-3"><div class="why-icon">{{ $i }}</div><h5>{{ $t }}</h5><p class="text-secondary">{{ $d }}</p></div>
-    @endforeach
+<section id="why" class="section-pad why-section scroll-reveal"><div class="container"><div class="row align-items-center g-5">
+  <div class="col-lg-5">
+    <div class="why-kicker"><span>＋</span> WHY PATIENTS CHOOSE US</div>
+    <h2>Dental care that feels<br class="d-none d-lg-block"> clear and comfortable</h2>
+    <div class="why-list">
+      @foreach ([['person-check','Experienced dentists','Thorough exams, careful treatment, and plans you can understand.'],
+                 ['cash-coin','Transparent pricing','See indicative prices up front so you can plan with fewer surprises.'],
+                 ['calendar-check','Easy online booking','Choose your treatment and preferred time, and manage visits in one place.'],
+                 ['heart','Gentle clinic experience','A calm, respectful environment for first-time and anxious patients.']] as [$icon, $t, $d])
+        <div class="why-item"><div class="why-item-title"><i class="bi bi-{{ $icon }}"></i><strong>{{ $t }}</strong></div><p>{{ $d }}</p></div>
+      @endforeach
+    </div>
   </div>
-</div></section>
+  <div class="col-lg-7"><div class="why-visual">
+    <div class="why-photo-panel"><img src="{{ asset('images/deep cleaning.png') }}" alt="Dental cleaning treatment"><span class="why-stamp"><i class="bi bi-patch-check"></i> LICENSED CARE</span></div>
+    <div class="why-photo-panel"><img src="{{ asset('images/Upper and Lower Metal Braces.png') }}" alt="Orthodontic braces treatment"><span class="why-stamp"><i class="bi bi-tag"></i> CLEAR PRICES</span></div>
+  </div></div>
+</div></div></section>
 
-<section id="dentists" class="section-pad"><div class="container">
+<section id="dentists" class="section-pad scroll-reveal"><div class="container">
   <div class="text-center mb-4"><div class="eyebrow">MEET YOUR DENTISTS</div><h2>The doctors behind your smile</h2></div>
   <div class="row g-4 justify-content-center">
     @foreach ($dentists as $d)
@@ -84,7 +91,7 @@
   </div>
 </div></section>
 
-<section class="pb-5"><div class="container"><div class="cta-band p-4 p-md-5 d-flex flex-wrap align-items-center justify-content-between gap-3">
+<section class="pb-5 scroll-reveal"><div class="container"><div class="cta-band p-4 p-md-5 d-flex flex-wrap align-items-center justify-content-between gap-3">
   <div><h2 class="h3 mb-1">Start your smile journey today</h2><p class="mb-0 opacity-75">Register as a new patient or log in to book with Guda &amp; Soriano Dental Clinic.</p></div>
   <div class="d-flex gap-2"><a class="btn btn-light" href="{{ route('login') }}">Login</a><a class="btn btn-outline-light" href="{{ route('register') }}">Register</a></div>
 </div></div></section>
