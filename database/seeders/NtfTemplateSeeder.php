@@ -56,7 +56,7 @@ HTML],
 </p>
 <p style="margin:24px 0;">
   <a href="{action_url}" style="background:#243b8f;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;display:inline-block;margin-right:10px;">Reschedule appointment</a>
-  <a href="{cancel_url}" style="background:#dc2626;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;display:inline-block;">Cancel appointment</a>
+  <a href="{cancel_url}" style="background:#dc2626;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;display:inline-block;">View cancellation options</a>
 </p>
 <p style="color:#6b7280;font-size:13px;">If you have any questions or require urgent assistance, please contact the clinic directly.</p>
 HTML],
@@ -70,7 +70,7 @@ HTML],
 </p>
 <p style="margin:24px 0;">
   <a href="{action_url}" style="background:#243b8f;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;display:inline-block;margin-right:10px;">Reschedule appointment</a>
-  <a href="{cancel_url}" style="background:#dc2626;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;display:inline-block;">Cancel appointment</a>
+  <a href="{cancel_url}" style="background:#dc2626;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;display:inline-block;">View cancellation options</a>
 </p>
 <p style="color:#6b7280;font-size:13px;">Our clinic staff will also be reaching out to you directly by phone to assist you if needed.</p>
 HTML],

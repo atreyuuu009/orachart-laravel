@@ -21,25 +21,56 @@ class Notifier
     public static function queue(string $templateKey, ?string $email, array $vars = [], ?int $userId = null, ?int $appointmentId = null, ?Carbon $when = null): ?EmailLog
     {
         if (! $email) return null;
-        $tpl = EmailTemplate::where('template_key', $templateKey)->where('is_active', 1)->first();
+
+        try {
+            $tpl = EmailTemplate::where('template_key', $templateKey)->where('is_active', 1)->first();
+        } catch (\Throwable $e) {
+            Log::warning('Email template lookup failed: '.$e->getMessage());
+            return null;
+        }
+
         if (! $tpl) return null;
 
-        $vars += ['clinic_name' => Settings::get('clinic_name'), 'app_url' => url('/')];
-        $subject = self::merge($tpl->subject, $vars, false);
-        $html = view('emails.layout', ['subject' => $subject, 'body' => self::merge($tpl->body_html, $vars, true)])->render();
+        try {
+            // Create the log first so a rendering failure can still be recorded as failed.
+            $log = EmailLog::create([
+                'template_id' => $tpl->template_id,
+                'recipient_user_id' => $userId,
+                'recipient_email' => $email,
+                'subject' => mb_substr($tpl->subject, 0, 255),
+                'body_html' => null,
+                'related_appointment_id' => $appointmentId,
+                'status' => 'queued',
+                'scheduled_for' => $when,
+            ]);
+        } catch (\Throwable $e) {
+            // If the log table itself is unavailable, no failed row can be persisted.
+            Log::warning('Email log creation failed: '.$e->getMessage());
+            return null;
+        }
 
-        $log = EmailLog::create([
-            'template_id' => $tpl->template_id,
-            'recipient_user_id' => $userId,
-            'recipient_email' => $email,
-            'subject' => mb_substr($subject, 0, 255),
-            'body_html' => $html,
-            'related_appointment_id' => $appointmentId,
-            'status' => 'queued',
-            'scheduled_for' => $when,
-        ]);
+        try {
+            $vars += ['clinic_name' => Settings::get('clinic_name'), 'app_url' => url('/')];
+            $subject = self::merge($tpl->subject, $vars, false);
+            $html = view('emails.layout', ['subject' => $subject, 'body' => self::merge($tpl->body_html, $vars, true)])->render();
+            $log->update([
+                'subject' => mb_substr($subject, 0, 255),
+                'body_html' => $html,
+            ]);
 
-        if (! $when || $when->lte(now())) self::deliver($log);
+            if (! $when || $when->lte(now())) self::deliver($log);
+        } catch (\Throwable $e) {
+            Log::warning('Email preparation failed: '.$e->getMessage());
+            try {
+                $log->update([
+                    'status' => 'failed',
+                    'error_message' => mb_substr($e->getMessage(), 0, 500),
+                ]);
+            } catch (\Throwable $logError) {
+                Log::error('Could not update failed email log: '.$logError->getMessage());
+            }
+        }
+
         return $log;
     }
 
@@ -70,7 +101,11 @@ class Notifier
             $log->update(['status' => 'sent', 'sent_at' => now(), 'error_message' => null]);
         } catch (\Throwable $e) {
             Log::warning('Email send failed: '.$e->getMessage());
-            $log->update(['status' => 'failed', 'error_message' => mb_substr($e->getMessage(), 0, 500)]);
+            try {
+                $log->update(['status' => 'failed', 'error_message' => mb_substr($e->getMessage(), 0, 500)]);
+            } catch (\Throwable $logError) {
+                Log::error('Could not update failed email log: '.$logError->getMessage());
+            }
         }
     }
 

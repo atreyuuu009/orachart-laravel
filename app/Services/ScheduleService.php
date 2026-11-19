@@ -104,7 +104,7 @@ class ScheduleService
                 Notifier::forAppointment('schedule_changed', $a, [
                     'reason' => $reason,
                     'action_url' => route('appointments.reschedule', $a),
-                    'cancel_url' => route('appointments.reschedule', $a).'#cancel',
+                    'cancel_url' => route('appointments.mine'),
                 ]);
             }
         }
@@ -169,7 +169,7 @@ class ScheduleService
                 Notifier::forAppointment('schedule_changed', $a, [
                     'reason' => 'Dentist schedule adjustment / time off',
                     'action_url' => route('appointments.reschedule', $a),
-                    'cancel_url' => route('appointments.reschedule', $a).'#cancel',
+                    'cancel_url' => route('appointments.mine'),
                 ]);
             }
             Audit::log('update', 'apt_appointments', null, $hit->count().' appointment(s) flagged for rescheduling');
@@ -201,7 +201,7 @@ class ScheduleService
                 Notifier::forAppointment('schedule_changed', $a, [
                     'reason' => 'Clinic operating hours update',
                     'action_url' => route('appointments.reschedule', $a),
-                    'cancel_url' => route('appointments.reschedule', $a).'#cancel',
+                    'cancel_url' => route('appointments.mine'),
                 ]);
             }
         }
@@ -337,7 +337,7 @@ class ScheduleService
             Notifier::forAppointment('schedule_changed_reminder', $a, [
                 'reason' => $reason,
                 'action_url' => route('appointments.reschedule', $a),
-                'cancel_url' => route('appointments.reschedule', $a).'#cancel',
+                'cancel_url' => route('appointments.mine'),
             ]);
 
             $sentCount++;
