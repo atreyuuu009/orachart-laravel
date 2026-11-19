@@ -8,6 +8,9 @@
   @elseif ($user->hasRole('admin', 'clinic_staff'))<a class="btn btn-primary" href="{{ route('booking.staff') }}">Create Appointment</a>@endif
 @endsection
 @section('content')
+@if($installmentDue)
+  <div class="alert {{ $installmentDue->status === 'overdue' ? 'alert-danger' : 'alert-warning' }} d-flex justify-content-between align-items-center flex-wrap gap-2"><span><strong>Installment payment {{ $installmentDue->status === 'overdue' ? 'overdue' : 'due soon' }}:</strong> ₱{{ number_format($installmentDue->amount_due,2) }} due {{ $installmentDue->due_date->format('M j, Y') }}.</span><a class="btn btn-sm btn-primary" href="{{ route('installments.mine') }}">View My Installments</a></div>
+@endif
 <div class="row g-3 mb-4">
   @foreach ([['Total', $stats['total']], ['Pending', $stats['pending']], ['Confirmed', $stats['confirmed']], ['Completed', $stats['completed']], ['Cancelled', $stats['cancelled']]] as [$label, $n])
     <div class="col-6 col-md"><div class="card stat-card h-100"><div class="card-body"><div class="text-secondary small mb-1">{{ $label }}</div><div class="stat-value">{{ $n }}</div></div></div></div>

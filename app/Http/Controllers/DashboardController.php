@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\ServiceCategory;
+use App\Models\InstallmentPayment;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -29,11 +30,15 @@ class DashboardController extends Controller
             : $base()->with($with)->open()->whereDate('start_at', today())->orderBy('start_at')->get();
         $needsReschedule = $user->hasRole('patient') ? 0 : $base()->open()->where('needs_reschedule', 1)->count();
         $patientCount = $user->hasRole('admin', 'clinic_staff') ? Patient::count() : null;
+        $installmentDue = $user->hasRole('patient') && $user->patient
+            ? InstallmentPayment::whereHas('plan', fn ($q) => $q->where('patient_id', $user->patient->patient_id)->where('status', 'active'))
+                ->whereIn('status', ['unpaid', 'overdue'])->whereDate('due_date', '<=', today()->addDays(7))->oldest('due_date')->first()
+            : null;
 
         $categories = $user->hasRole('patient')
             ? ServiceCategory::with(['services' => fn ($q) => $q->listed()->with('packageTerm')])->orderBy('category_id')->get()->filter(fn ($c) => $c->services->isNotEmpty())
             : collect();
 
-        return view('dashboard', compact('user', 'stats', 'recent', 'upcoming', 'today', 'needsReschedule', 'patientCount', 'categories'));
+        return view('dashboard', compact('user', 'stats', 'recent', 'upcoming', 'today', 'needsReschedule', 'patientCount', 'categories', 'installmentDue'));
     }
 }

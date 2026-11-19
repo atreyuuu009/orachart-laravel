@@ -77,10 +77,19 @@ HTML],
 <p style="color:#6b7280;font-size:13px;">Our clinic staff will also be reaching out to you directly by phone to assist you if needed.</p>
 HTML],
             'payment_verified' => ['Your payment has been verified', <<<'HTML'
-<p>Hi {first_name},</p><p>Your payment of ₱{amount_paid} has been verified by {clinic_name}.</p><p>Bill total: ₱{total_amount}<br>Outstanding balance: ₱{balance_amount}<br>Receipt: {receipt_number}</p>
+<p>Hi {first_name},</p><p>Your payment of ₱{amount_paid} {payment_context} has been verified by {clinic_name}.</p><p>Bill total: ₱{total_amount}<br>Outstanding balance: ₱{balance_amount}<br>Receipt: {receipt_number}</p>
 HTML],
             'payment_rejected' => ['We could not verify your payment', <<<'HTML'
-<p>Hi {first_name},</p><p>We could not verify the payment submitted for your bill at {clinic_name}.</p><p>Reason: {reason}</p><p>Outstanding balance: ₱{balance_amount}. Please contact the clinic to arrange settlement.</p>
+<p>Hi {first_name},</p><p>We could not verify your payment of ₱{amount_paid} {payment_context} for your bill at {clinic_name}.</p><p>Reason: {reason}</p><p>Outstanding balance: ₱{balance_amount}. Please contact the clinic for next steps. If this was an installment payment, sign in and <a href="{app_url}/my-installments">upload a corrected proof</a>.</p>
+HTML],
+            'installment_due' => ['Installment payment reminder', <<<'HTML'
+<p>Hi {first_name},</p><p>Installment {installment_number} of {months} for {service} is due {due_date}. Amount due: ₱{amount}.</p><p><a href="{action_url}">View your installment plan and payment instructions</a></p>
+HTML],
+            'installment_approved' => ['Your installment terms are ready', <<<'HTML'
+<p>Hi {first_name},</p><p>Your installment request for {service} has been approved. The total cost, including the disclosed finance charge, is ₱{net_amount} over {months} months.</p><p>Please sign in to review every due date and amount, then accept or decline the terms.</p><p><a href="{action_url}">Review installment terms</a></p>
+HTML],
+            'installment_rejected' => ['Your installment request was declined', <<<'HTML'
+<p>Hi {first_name},</p><p>Your installment request for {service} was declined.</p><p>Reason: {reason}</p>
 HTML],
         ];
 

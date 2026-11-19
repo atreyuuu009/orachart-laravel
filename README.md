@@ -3,7 +3,7 @@
 Laravel 12 · PHP 8.2+ · MySQL 8 · Bootstrap 5 · Mailtrap SMTP
 
 Rebuild of the HTML/CSS/JS prototype as a database-backed Laravel app, using the team's
-`orachart_schema_v1.sql` **as the single source of truth** (no Laravel migrations for those tables).
+`orachart_schema_v1.sql` as the base schema. Laravel migrations apply approved extensions to those tables.
 
 ## Setup
 
@@ -14,8 +14,14 @@ cp .env.example .env && php artisan key:generate
 # 1. create the database (the script creates orachart_db and seeds reference data)
 mysql -u root -p < database/schema/orachart_schema_v1.sql
 
-# 2. edit .env  ->  DB_USERNAME / DB_PASSWORD and the Mailtrap SMTP credentials
-# 3. demo accounts + real e-mail templates (replaces the 'TODO' bodies; safe to re-run)
+# 2. edit .env -> DB_USERNAME / DB_PASSWORD and Mailtrap SMTP credentials
+# 3. apply additive Laravel schema changes (safe on the current SQL schema)
+php artisan migrate
+
+# 4. public storage for the admin-managed clinic GCash QR
+php artisan storage:link
+
+# 5. demo accounts + real e-mail templates (replaces the 'TODO' bodies; safe to re-run)
 php artisan db:seed
 
 # 4. copy your pictures to public/images/  (logo-removebg-preview.png, logo.png)
@@ -55,7 +61,7 @@ under *Audit & E-mail Logs*. A mail failure never blocks a booking; it shows as 
 3. **Auto-confirm** keeps the prototype's behaviour. Turn it off in *Clinic Settings → Booking rules* for a staff approval flow (pending → confirm/reject). Reject is stored as `cancelled` + `rejection_reason`.
 4. **Specialty enforcement is off by default.** Many services in the SQL seed need Prosthodontics/Orthodontics/etc. (placeholders per the SQL comments). Seeded dentists only have General Dentistry; flip *Only offer a procedure to dentists with its required specialty* once the clinic confirms.
 5. Passwords are min 8 characters (prototype: 6).
-6. Not in the prototype, so **not built yet**: `pay_*` (payments/installments), `pat_visit_records/prescriptions/lab/attachments`, `bot_*` (Clary), `sys_backups`, service change requests.
+6. Payments and installments support manual GCash proof review. Admins and dentists review plans and proofs. The clinic can adjust installment minimums, maximum term, flat finance rate per approval, and GCash details. No payment gateway or automatic late fees are used.
 7. Extra settings keys (`auto_confirm_bookings`, `reminders_enabled`, `enforce_service_specialty`, `emergency_release_minutes`, `round_robin_last_dentist_id`, …) are *rows*, not schema changes; defaults live in `app/Support/Settings.php`.
 
 ## Code map

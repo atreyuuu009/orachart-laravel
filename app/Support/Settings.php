@@ -26,6 +26,7 @@ class Settings
         'clinic_name' => 'Guda & Soriano Dental Clinic', 'session_timeout_minutes' => '15',
         'privacy_policy_version' => '1.0', 'auto_confirm_bookings' => '1', 'enforce_service_specialty' => '0',
         'reminders_enabled' => '1', 'reminder_hours_before' => '24', 'recall_months' => '6',
+        'installment_min_amount' => '5000', 'installment_max_months' => '12', 'installment_reminder_days' => '3', 'gcash_qr_path' => '', 'gcash_account_name' => '', 'gcash_account_number' => '',
     ];
 
     private static array $cache = [];

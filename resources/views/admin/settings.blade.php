@@ -6,7 +6,7 @@
 @php
   $days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   $tab = session('tab', old('_tab', 'hours'));
-  $tabs = ['hours' => 'Weekly hours', 'overrides' => 'Date overrides', 'rules' => 'Booking rules', 'dentists' => 'Dentists', 'emergency' => 'Emergency windows'];
+  $tabs = ['hours' => 'Weekly hours', 'overrides' => 'Date overrides', 'rules' => 'Booking rules', 'gcash' => 'GCash QR', 'dentists' => 'Dentists', 'emergency' => 'Emergency windows'];
 @endphp
 <ul class="nav nav-tabs mb-3" role="tablist">
   @foreach ($tabs as $k => $l)<li class="nav-item"><button class="nav-link {{ $tab === $k ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="#t-{{ $k }}" type="button">{{ $l }}</button></li>@endforeach
@@ -259,6 +259,7 @@
       ['slot_lock_minutes', 'Slot hold while booking (min)', 1, 30], ['max_patients_per_day', 'Max patients per day (clinic)', 1, 200],
       ['emergency_release_minutes', 'Release unused emergency slots (min before)', 0, 240], ['arrival_notice_minutes', 'Ask patients to arrive early (min)', 0, 120],
       ['reminder_hours_before', 'Reminder e-mail (hours before)', 1, 168], ['session_timeout_minutes', 'Inactivity logout (minutes)', 5, 120],
+      ['installment_min_amount', 'Installment minimum (₱)', 0, 10000000], ['installment_max_months', 'Installment maximum months', 2, 60], ['installment_reminder_days', 'Installment reminder lead days', 1, 30],
     ] as [$k, $label, $min, $max])
       <div class="col-md-6 col-lg-4"><label class="form-label">{{ $label }}</label><input type="number" class="form-control" name="{{ $k }}" min="{{ $min }}" max="{{ $max }}" value="{{ old($k, $rules[$k]) }}" required></div>
     @endforeach
@@ -270,6 +271,12 @@
     @endforeach
   </div></div><div class="card-footer bg-white text-end"><button class="btn btn-primary">Save rules</button></div></form>
 </div>
+
+<div class="tab-pane fade {{ $tab === 'gcash' ? 'show active' : '' }}" id="t-gcash"><div class="card"><div class="card-header bg-white fw-bold">GCash payment QR</div><div class="card-body">
+  <p class="text-secondary">Patients use this clinic QR to make installment payments. Updating the image replaces the one shown in their payment instructions.</p>
+  @if (\App\Support\Settings::get('gcash_qr_path'))<img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url(\App\Support\Settings::get('gcash_qr_path')) }}" alt="Clinic GCash QR" style="max-width:240px" class="d-block mb-3">@endif
+  <form method="POST" enctype="multipart/form-data" action="{{ route('admin.settings.gcash') }}">@csrf<div class="row g-2"><div class="col-md-4"><label class="form-label">GCash account name</label><input class="form-control" name="gcash_account_name" maxlength="100" value="{{ \App\Support\Settings::get('gcash_account_name') }}"></div><div class="col-md-4"><label class="form-label">GCash account number</label><input class="form-control" name="gcash_account_number" maxlength="40" value="{{ \App\Support\Settings::get('gcash_account_number') }}"></div><div class="col-md-4"><label class="form-label">Replace QR image</label><input class="form-control" type="file" name="gcash_qr" accept="image/jpeg,image/png,image/webp"></div><div class="col-12"><button class="btn btn-primary">Save GCash details</button></div></div></form>
+</div></div></div>
 
 <div class="tab-pane fade {{ $tab === 'dentists' ? 'show active' : '' }}" id="t-dentists">
   <form method="POST" action="{{ route('admin.settings.dentists') }}" class="card">@csrf<div class="card-body">

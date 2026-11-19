@@ -123,6 +123,11 @@ class PaymentService
         });
     }
 
+    public function issueInstallmentReceipt(Payment $payment, int $userId): void
+    {
+        $this->issueReceipt($payment, $userId);
+    }
+
     private function issueReceipt(Payment $payment, int $userId): void
     {
         if (! $payment->receipt()->exists()) Receipt::create(['payment_id' => $payment->payment_id,

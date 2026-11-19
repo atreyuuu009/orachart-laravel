@@ -7,6 +7,7 @@
       ['dashboard', 'Home', 'dashboard', 'bi-house-door'],
       ['booking.create', 'Book Appointment', 'booking.*', 'bi-calendar-plus'],
       ['appointments.mine', 'My Appointments', 'appointments.mine', 'bi-calendar-check'],
+      ['installments.mine', 'My Installments', 'installments.*', 'bi-credit-card'],
       ['patients.own', 'My Patient Record', 'patients.own', 'bi-file-earmark-medical'],
     ],
     'clinic_staff' => [
@@ -15,6 +16,7 @@
       ['appointments.index', 'Manage Appointments', 'appointments.index', 'bi-calendar-check'],
       ['calendar', 'Appointment Calendar', 'calendar', 'bi-calendar3'],
       ['payments.index', 'Payments', 'payments.*', 'bi-receipt'],
+      ['installments.index', 'Installments', 'installments.*', 'bi-credit-card'],
     ],
     'dentist' => [
       ['dashboard', 'Dashboard', 'dashboard', 'bi-speedometer2'],
@@ -24,6 +26,7 @@
       ['odontogram', 'Digital Odontogram', 'odontogram*', 'bi-clipboard2-pulse'],
       ['patients.index', 'Patients', 'patients.*', 'bi-people'],
       ['payments.index', 'Payments', 'payments.*', 'bi-receipt'],
+      ['installments.index', 'Installments', 'installments.*', 'bi-credit-card'],
     ],
     'admin' => [
       ['dashboard', 'Dashboard', 'dashboard', 'bi-speedometer2'],
@@ -36,6 +39,7 @@
       ['admin.settings', 'Clinic Settings', 'admin.settings*', 'bi-gear'],
       ['admin.users', 'User Management', 'admin.users*', 'bi-person-gear'],
       ['admin.logs', 'Audit & E-mail Logs', 'admin.logs', 'bi-journal-text'],
+      ['installments.index', 'Installments', 'installments.*', 'bi-credit-card'],
     ],
     default => [['dashboard', 'Dashboard', 'dashboard', 'bi-speedometer2']],
   };

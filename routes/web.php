@@ -6,6 +6,8 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LandingController;
+use App\Http\Controllers\InstallmentController;
+use App\Http\Controllers\InstallmentReviewController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\OdontogramController;
 use App\Http\Controllers\PatientController;
@@ -43,6 +45,11 @@ Route::middleware('auth')->group(function () {
 
     // ---- patient
     Route::middleware('role:patient')->group(function () {
+        Route::get('/my-installments', [InstallmentController::class, 'mine'])->name('installments.mine');
+        Route::get('/my-installments/request', [InstallmentController::class, 'create'])->name('installments.create');
+        Route::post('/my-installments', [InstallmentController::class, 'store'])->name('installments.store');
+        Route::post('/my-installment-payments/{row}/proof', [InstallmentController::class, 'pay'])->middleware('throttle:5,1')->name('installments.pay');
+        Route::get('/my-installment-payments/{row}/proof', [InstallmentController::class, 'proof'])->name('installments.proof');
         Route::get('/my-profile', [PatientController::class, 'own'])->name('patients.own');
         Route::get('/my-profile/edit', [PatientController::class, 'editOwn'])->name('patients.own.edit');
         Route::put('/my-profile', [PatientController::class, 'updateOwn'])->name('patients.own.update');
@@ -50,6 +57,22 @@ Route::middleware('auth')->group(function () {
         Route::get('/book', [BookingController::class, 'create'])->name('booking.create');
         Route::post('/book', [BookingController::class, 'store'])->name('booking.store');
         Route::get('/my-appointments', [AppointmentController::class, 'mine'])->name('appointments.mine');
+    });
+
+    // These actions authorize by the signed-in user's patient record and plan ownership.
+    Route::post('/my-installments/{plan}/accept', [InstallmentController::class, 'accept'])->name('installments.accept');
+    Route::post('/my-installments/{plan}/decline', [InstallmentController::class, 'decline'])->name('installments.decline');
+
+    Route::middleware('role:admin,clinic_staff,dentist')->get('/installments', [InstallmentReviewController::class, 'index'])->name('installments.index');
+    Route::middleware('role:admin,dentist')->prefix('installments')->name('installments.')->group(function () {
+        Route::get('/{plan}', [InstallmentReviewController::class, 'show'])->name('show');
+        Route::post('/{plan}/approve', [InstallmentReviewController::class, 'approve'])->name('approve');
+        Route::post('/{plan}/reject', [InstallmentReviewController::class, 'reject'])->name('reject');
+    });
+    Route::middleware('role:admin,clinic_staff')->get('/installment-proofs/{row}/file', [InstallmentReviewController::class, 'proof'])->name('installments.proof.view');
+    Route::middleware('role:admin,clinic_staff')->group(function () {
+        Route::post('/installment-proofs/{row}/verify', [InstallmentReviewController::class, 'verify'])->name('installments.verify');
+        Route::post('/installment-proofs/{row}/reject', [InstallmentReviewController::class, 'rejectProof'])->name('installments.proof.reject');
     });
 
     // ---- clinic side
@@ -140,6 +163,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/settings', [SettingsController::class, 'show'])->name('admin.settings');
         Route::post('/settings/hours', [SettingsController::class, 'saveHours'])->name('admin.settings.hours');
         Route::post('/settings/rules', [SettingsController::class, 'saveRules'])->name('admin.settings.rules');
+        Route::post('/settings/gcash-qr', [SettingsController::class, 'saveGcashQr'])->name('admin.settings.gcash');
         Route::post('/settings/overrides/preview', [SettingsController::class, 'previewOverride'])->name('admin.settings.overrides.preview');
         Route::get('/settings/overrides/{override}/call-list', [SettingsController::class, 'callList'])->name('admin.settings.overrides.calllist');
         Route::post('/settings/overrides', [SettingsController::class, 'storeOverride'])->name('admin.settings.overrides.store');

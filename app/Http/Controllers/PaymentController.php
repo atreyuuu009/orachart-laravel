@@ -98,7 +98,7 @@ class PaymentController extends Controller
         Notifier::queue($key, $patient->email, ['first_name' => $patient->first_name, 'patient_name' => $patient->full_name,
             'total_amount' => number_format((float) $payment->total_amount, 2), 'amount_paid' => number_format((float) $payment->amount_paid, 2),
             'balance_amount' => number_format((float) $payment->balance_amount, 2), 'receipt_number' => $payment->receipt?->receipt_number ?? '',
-            'reason' => $reason], $patient->user_id);
+            'reason' => $reason, 'payment_context' => ''], $patient->user_id);
         Audit::log('update', 'pay_payments', $payment->payment_id, 'Payment notification requested: '.$key);
     }
 }

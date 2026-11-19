@@ -13,6 +13,7 @@ use App\Support\Settings;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 /** Admin > Clinic Settings (hours, date overrides, booking rules, dentists, emergency windows). */
 class SettingsController extends Controller
@@ -21,7 +22,7 @@ class SettingsController extends Controller
     {
         $keys = ['slot_interval_minutes', 'buffer_before_minutes', 'buffer_after_minutes', 'min_booking_notice_hours',
             'slot_lock_minutes', 'max_patients_per_day', 'emergency_release_minutes', 'arrival_notice_minutes',
-            'reminder_hours_before', 'session_timeout_minutes'];
+            'reminder_hours_before', 'session_timeout_minutes', 'installment_min_amount', 'installment_max_months', 'installment_reminder_days'];
         $rules = collect($keys)->mapWithKeys(fn ($k) => [$k => Settings::get($k)])->all();
 
         return view('admin.settings', [
@@ -208,6 +209,9 @@ class SettingsController extends Controller
             'arrival_notice_minutes' => 'required|integer|min:0|max:120',
             'reminder_hours_before' => 'required|integer|min:1|max:168',
             'session_timeout_minutes' => 'required|integer|min:5|max:120',
+            'installment_min_amount' => 'required|numeric|min:0|max:10000000',
+            'installment_max_months' => 'required|integer|min:2|max:60',
+            'installment_reminder_days' => 'required|integer|min:1|max:30',
         ]);
         foreach ($v as $k => $val) Settings::set($k, $val);
         foreach (['auto_confirm_bookings', 'enforce_service_specialty', 'reminders_enabled'] as $flag) {
@@ -215,6 +219,21 @@ class SettingsController extends Controller
         }
         Audit::log('update', 'sch_settings', null, 'Booking rules updated');
         return back()->with('tab', 'rules')->with('status', 'Booking rules saved.');
+    }
+
+    public function saveGcashQr(Request $request)
+    {
+        $v = $request->validate(['gcash_qr' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120','gcash_account_name'=>'nullable|string|max:100','gcash_account_number'=>'nullable|string|max:40']);
+        $old = Settings::get('gcash_qr_path');
+        if ($request->hasFile('gcash_qr')) {
+            $path = $v['gcash_qr']->store('clinic-settings', 'public');
+            Settings::set('gcash_qr_path', $path);
+            if ($old) Storage::disk('public')->delete($old);
+        }
+        Settings::set('gcash_account_name', $v['gcash_account_name'] ?? '');
+        Settings::set('gcash_account_number', $v['gcash_account_number'] ?? '');
+        Audit::log('update', 'sys_settings', 'gcash_qr_path', 'Clinic GCash payment details updated');
+        return back()->with('tab', 'gcash')->with('status', 'GCash payment details updated.');
     }
 
     public function saveDentists(Request $request)
