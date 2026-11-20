@@ -76,13 +76,14 @@
 .why-item-title { display: flex; align-items: center; gap: .6rem; color: #253b71; font-size: .9rem; }
 .why-item-title i { color: #315cc0; }
 .why-item p { margin: .3rem 0 0 1.25rem; color: #727f9b; font-size: .78rem; line-height: 1.5; }
+.why-section .why-list { max-width: 760px; }
 .why-visual { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; max-width: 590px; margin-left: auto; }
 .why-photo-panel { position: relative; height: 280px; overflow: hidden; background: repeating-linear-gradient(30deg,#f7f9fc,#f7f9fc 12px,#edf1f7 13px,#edf1f7 14px); }
 .why-photo-panel img { width: 100%; height: 100%; object-fit: cover; mix-blend-mode: multiply; }
 .why-stamp { position: absolute; top: 50%; left: 50%; display: flex; width: 128px; height: 128px; flex-direction: column; align-items: center; justify-content: center; gap: .25rem; transform: translate(-50%,-50%) rotate(-12deg); border: 1px solid #25365e; border-radius: 50%; outline: 5px solid rgba(255,255,255,.85); background: rgba(255,255,255,.86); color: #1b315e; font-size: .57rem; letter-spacing: .16em; box-shadow: 0 4px 12px rgba(25,45,90,.08); }
 .why-stamp i { font-size: 1.15rem; letter-spacing: 0; }
-@media(max-width: 991.98px) { .landing-nav .navbar-collapse { padding: .75rem 0; }.landing-hero { min-height: 520px; }.why-visual { margin: 0 auto; } }
-@media(max-width: 575.98px) { .landing-hero { padding-top: 2.2rem; }.availability-pill { font-size: .62rem; }.hero-art { height: 205px; }.hero-platform { width: 250px; }.label-cleaning { left: 3%; }.label-fillings { right: 4%; }.label-braces { right: 0; top: 125px; }.label-crowns { left: 3%; top: 170px; }.why-photo-panel { height: 205px; }.why-stamp { width: 95px; height: 95px; font-size: .48rem; } }
+@media(max-width: 991.98px) { .landing-nav .navbar-collapse { padding: .75rem 0; }.landing-hero { min-height: 520px; } }
+@media(max-width: 575.98px) { .landing-hero { padding-top: 2.2rem; }.availability-pill { font-size: .62rem; }.hero-art { height: 205px; }.hero-platform { width: 250px; }.label-cleaning { left: 3%; }.label-fillings { right: 4%; }.label-braces { right: 0; top: 125px; }.label-crowns { left: 3%; top: 170px; }.why-section .why-kicker { display: flex; width: fit-content; margin-right: auto; margin-left: auto; }.why-section h2 { font-size: 1.8rem; text-align: center; } }
 
 /* Compact icon service grid, matching the supplied price guide reference */
 .services-section { padding: 3rem 0 3.5rem; border-top: 2px solid #315cc0; background: #f4f6fb; }

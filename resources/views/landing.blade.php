@@ -59,8 +59,8 @@
   @include('partials.services', ['categories' => $categories])
 </div></section>
 
-<section id="why" class="section-pad why-section scroll-reveal"><div class="container"><div class="row align-items-center g-5">
-  <div class="col-lg-5">
+<section id="why" class="section-pad why-section scroll-reveal"><div class="container"><div class="row justify-content-center">
+  <div class="col-lg-9">
     <div class="why-kicker"><span>＋</span> WHY PATIENTS CHOOSE US</div>
     <h2>Dental care that feels<br class="d-none d-lg-block"> clear and comfortable</h2>
     <div class="why-list">
@@ -72,10 +72,6 @@
       @endforeach
     </div>
   </div>
-  <div class="col-lg-7"><div class="why-visual">
-    <div class="why-photo-panel"><img src="{{ asset('images/deep cleaning.png') }}" alt="Dental cleaning treatment"><span class="why-stamp"><i class="bi bi-patch-check"></i> LICENSED CARE</span></div>
-    <div class="why-photo-panel"><img src="{{ asset('images/Upper and Lower Metal Braces.png') }}" alt="Orthodontic braces treatment"><span class="why-stamp"><i class="bi bi-tag"></i> CLEAR PRICES</span></div>
-  </div></div>
 </div></div></section>
 
 <section id="dentists" class="section-pad scroll-reveal"><div class="container">
