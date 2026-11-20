@@ -114,7 +114,27 @@ class Notifier
     {
         $due = EmailLog::where('status', 'queued')->whereNotNull('scheduled_for')
             ->where('scheduled_for', '<=', now())->orderBy('scheduled_for')->limit($limit)->get();
-        foreach ($due as $log) self::deliver($log);
+
+        $appointmentReminderTemplateIds = EmailTemplate::whereIn('template_key', [
+            'appointment_reminder', 'treatment_reminder',
+        ])->pluck('template_id')->all();
+
+        foreach ($due as $log) {
+            if ($log->related_appointment_id && in_array($log->template_id, $appointmentReminderTemplateIds)) {
+                $appointment = Appointment::find($log->related_appointment_id);
+
+                if ($appointment && $appointment->start_at->lte(now())) {
+                    $log->update([
+                        'status' => 'cancelled',
+                        'error_message' => 'Cancelled because the appointment start time has passed.',
+                    ]);
+                    continue;
+                }
+            }
+
+            self::deliver($log);
+        }
+
         return $due->count();
     }
 
