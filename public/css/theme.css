@@ -17,9 +17,17 @@
 .form-label { font-weight: 600; font-size: .9rem; }
 
 /* ---------- landing ---------- */
+body:has(.landing-nav) {
+  background-color: #edf2fc;
+  background-image:
+    radial-gradient(ellipse at 52% 10%, rgba(250, 231, 218, .72) 0, rgba(250, 231, 218, 0) 34%),
+    radial-gradient(ellipse at 100% 62%, rgba(107, 151, 235, .82) 0, rgba(145, 176, 241, .44) 27%, rgba(145, 176, 241, 0) 54%),
+    linear-gradient(110deg, #eef2fc 0%, #f0f3fb 56%, #e8eefc 100%);
+  background-attachment: fixed;
+}
 .landing-nav { background: rgba(255,255,255,.92); backdrop-filter: blur(6px); border-bottom: 1px solid var(--bs-border-color); }
 .brand-logo { width: 42px; height: 42px; object-fit: contain; }
-.landing-hero { background: linear-gradient(135deg, var(--gs-blue-light) 0%, #fff 60%); padding: 4.5rem 0 4rem; }
+.landing-hero { background: transparent; padding: 4.5rem 0 4rem; }
 .landing-hero h1 { font-weight: 800; letter-spacing: -.02em; }
 .landing-hero h1 span { color: var(--gs-primary); }
 .eyebrow { font-size: .78rem; letter-spacing: .14em; font-weight: 700; color: var(--gs-primary); }
