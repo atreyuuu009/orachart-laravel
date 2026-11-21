@@ -19,7 +19,6 @@
         </a>
         <div class="collapse navbar-collapse" id="lnav">
           <ul class="navbar-nav landing-nav-links align-items-lg-center gap-lg-3">
-            <li class="nav-item"><a class="nav-link active" href="{{ route('landing') }}">Home</a></li>
             <li class="nav-item"><a class="nav-link" href="#services">Services</a></li>
             <li class="nav-item"><a class="nav-link" href="#why">Why Us</a></li>
             <li class="nav-item"><a class="nav-link" href="#dentists">Dentists</a></li>
