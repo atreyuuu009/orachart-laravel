@@ -20,8 +20,6 @@
 body:has(.landing-nav) {
   background: #f4faf7;
 }
-.landing-page-shell { width: min(1600px, calc(100% - 64px)); min-height: 100vh; margin: 32px auto; padding: 36px; overflow: hidden; border-radius: 24px; background: #f4faf7; }
-.landing-page-content { min-height: calc(100vh - 136px); overflow: hidden; border: 5px solid #b9e5d5; border-radius: 38px; background: #f4faf7; }
 .landing-main { min-height: calc(100vh - 216px); }
 .landing-nav { padding: 0; background: transparent; }
 .landing-nav-frame { width: calc(100% - 64px); margin: 28px auto 0; padding: 0; }
@@ -70,8 +68,6 @@ body:has(.landing-nav) {
 .service-card-image { display: block; width: 100%; height: 180px; object-fit: cover; border-radius: .85rem .85rem 0 0; background: #fff; }
 .price-old { text-decoration: line-through; color: #8a93a5; font-size: .85rem; }
 @media (max-width: 991.98px) {
-  .landing-page-shell { width: calc(100% - 20px); margin: 10px auto; padding: 10px; border-radius: 18px; }
-  .landing-page-content { border-width: 3px; border-radius: 24px; }
   .landing-nav-frame { width: calc(100% - 24px); margin: 14px auto 0; }
   .landing-nav-inner { min-height: 64px; padding: .4rem 0; border-radius: 22px; }
   .landing-nav .navbar-brand { order: 1; margin-right: 0; }
