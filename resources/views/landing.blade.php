@@ -7,6 +7,7 @@
 @endphp
 @section('body')
 <div class="landing-page-shell">
+<div class="landing-page-content">
 <nav class="landing-nav navbar navbar-expand-lg sticky-top">
   <div class="landing-nav-frame">
     <div class="landing-nav-inner">
@@ -18,6 +19,7 @@
         </a>
         <div class="collapse navbar-collapse" id="lnav">
           <ul class="navbar-nav landing-nav-links align-items-lg-center gap-lg-3">
+            <li class="nav-item"><a class="nav-link active" href="{{ route('landing') }}">Home</a></li>
             <li class="nav-item"><a class="nav-link" href="#services">Services</a></li>
             <li class="nav-item"><a class="nav-link" href="#why">Why Us</a></li>
             <li class="nav-item"><a class="nav-link" href="#dentists">Dentists</a></li>
@@ -101,5 +103,6 @@
 <footer class="bg-white border-top py-4"><div class="container d-flex flex-wrap justify-content-between gap-2 small text-secondary">
   <strong>Guda &amp; Soriano Dental Clinic</strong><span>© {{ date('Y') }} Dental Clinic Management System</span>
 </div></footer>
+</div>
 </div>
 @endsection
