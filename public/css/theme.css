@@ -18,10 +18,10 @@
 
 /* ---------- landing ---------- */
 body:has(.landing-nav) {
-  background: linear-gradient(120deg, #1760e8, #3179f2 55%, #1452df) fixed;
+  background: #dff2eb;
 }
-.landing-page-shell { width: min(1600px, calc(100% - 64px)); min-height: 100vh; margin: 32px auto; padding: 36px; overflow: hidden; border-radius: 24px; background: linear-gradient(120deg, #1760e8, #3179f2 55%, #1452df); }
-.landing-page-content { min-height: calc(100vh - 136px); overflow: hidden; border: 5px solid #82aaff; border-radius: 38px; background: #f5f7fc; }
+.landing-page-shell { width: min(1600px, calc(100% - 64px)); min-height: 100vh; margin: 32px auto; padding: 36px; overflow: hidden; border-radius: 24px; background: linear-gradient(120deg, #d2eee4, #e4f5ee 55%, #c8eadc); }
+.landing-page-content { min-height: calc(100vh - 136px); overflow: hidden; border: 5px solid #b9e5d5; border-radius: 38px; background: #f4faf7; }
 .landing-main { min-height: calc(100vh - 216px); }
 .landing-nav { padding: 0; background: transparent; }
 .landing-nav-frame { width: calc(100% - 64px); margin: 28px auto 0; padding: 0; }
@@ -59,7 +59,7 @@ body:has(.landing-nav) {
 .landing-hero .small.text-secondary { color: #6d778a !important; }
 .section-pad { padding: 3rem 0; }
 #services { position: relative; padding: 2rem 0 4rem; margin-top: 0; }
-#services::before { content: ""; position: absolute; z-index: 0; top: 7rem; bottom: 1rem; left: 8%; right: 8%; border-radius: 34px; background: linear-gradient(110deg, #286ef0, #b9ddfa); }
+#services::before { content: ""; position: absolute; z-index: 0; top: 7rem; bottom: 1rem; left: 8%; right: 8%; border-radius: 34px; background: linear-gradient(110deg, #a8dfcb, #d0eee2); }
 #services > .container { position: relative; z-index: 1; max-width: 1080px; padding: 2rem; border: 2px solid #dce6fa; border-radius: 28px; background: #fff; box-shadow: 0 16px 36px rgba(26, 54, 105, .1); }
 #services h2 { color: #111e42; }
 .why-icon { width: 52px; height: 52px; border-radius: 14px; background: var(--gs-blue-light); display: grid; place-items: center; font-size: 1.5rem; margin-bottom: .75rem; }
