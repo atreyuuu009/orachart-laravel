@@ -10,24 +10,26 @@
   <div class="landing-nav-frame">
     <div class="landing-nav-inner">
       <div class="container-fluid px-3 px-xl-5">
-    <a class="navbar-brand d-flex align-items-center gap-3" href="{{ route('landing') }}">
-      <img class="brand-logo" src="{{ asset('images/logo-removebg-preview.png') }}" alt="Logo">
-      <span class="lh-sm"><strong class="text-primary">Guda &amp; Soriano</strong><br><small class="text-secondary">Dental Clinic</small></span>
-    </a>
-    <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#lnav"><span class="navbar-toggler-icon"></span></button>
-    <div class="collapse navbar-collapse" id="lnav">
-      <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-4">
-        <li class="nav-item"><a class="nav-link" href="#services">Services</a></li>
-        <li class="nav-item"><a class="nav-link" href="#why">Why Us</a></li>
-        <li class="nav-item"><a class="nav-link" href="#dentists">Dentists</a></li>
-        @auth
-          <li class="nav-item"><a class="btn btn-primary" href="{{ route('dashboard') }}">Go to my account</a></li>
-        @else
-          <li class="nav-item"><a class="nav-link nav-login" href="{{ route('login') }}">Login</a></li>
-          <li class="nav-item"><a class="btn btn-primary" href="{{ route('register') }}">Register</a></li>
-        @endauth
-      </ul>
-    </div>
+        <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#lnav" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+        <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('landing') }}">
+          <img class="brand-logo" src="{{ asset('images/logo-removebg-preview.png') }}" alt="">
+          <span class="lh-sm"><strong class="text-primary">Guda &amp; Soriano</strong><br><small class="text-secondary">Dental Clinic</small></span>
+        </a>
+        <div class="collapse navbar-collapse" id="lnav">
+          <ul class="navbar-nav landing-nav-links align-items-lg-center gap-lg-3">
+            <li class="nav-item"><a class="nav-link" href="#services">Services</a></li>
+            <li class="nav-item"><a class="nav-link" href="#why">Why Us</a></li>
+            <li class="nav-item"><a class="nav-link" href="#dentists">Dentists</a></li>
+          </ul>
+          <ul class="navbar-nav landing-nav-actions align-items-lg-center gap-lg-2">
+            @auth
+              <li class="nav-item"><a class="btn btn-primary" href="{{ route('dashboard') }}">Go to my account</a></li>
+            @else
+              <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Login</a></li>
+              <li class="nav-item"><a class="btn btn-primary" href="{{ route('register') }}">Register</a></li>
+            @endauth
+          </ul>
+        </div>
       </div>
     </div>
   </div>
