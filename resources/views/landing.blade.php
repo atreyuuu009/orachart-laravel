@@ -6,6 +6,7 @@
   $hoursText = $open->isEmpty() ? 'By appointment' : $dayNames[$open->first()->day_of_week].'–'.$dayNames[$open->last()->day_of_week];
 @endphp
 @section('body')
+<div class="landing-page-shell">
 <nav class="landing-nav navbar navbar-expand-lg sticky-top">
   <div class="landing-nav-frame">
     <div class="landing-nav-inner">
@@ -35,6 +36,7 @@
   </div>
 </nav>
 
+<main class="landing-main">
 <header class="landing-hero">
   <div class="container"><div class="row align-items-center g-5">
     <div class="col-lg-7">
@@ -95,7 +97,9 @@
   <div class="d-flex gap-2"><a class="btn btn-light" href="{{ route('login') }}">Login</a><a class="btn btn-outline-light" href="{{ route('register') }}">Register</a></div>
 </div></div></section>
 
+</main>
 <footer class="bg-white border-top py-4"><div class="container d-flex flex-wrap justify-content-between gap-2 small text-secondary">
   <strong>Guda &amp; Soriano Dental Clinic</strong><span>© {{ date('Y') }} Dental Clinic Management System</span>
 </div></footer>
+</div>
 @endsection
