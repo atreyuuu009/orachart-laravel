@@ -18,7 +18,7 @@
 
 /* ---------- landing ---------- */
 body:has(.landing-nav) {
-  background: #151515;
+  background: linear-gradient(120deg, #1760e8, #3179f2 55%, #1452df) fixed;
 }
 .landing-page-shell { width: min(1600px, calc(100% - 64px)); min-height: 100vh; margin: 32px auto; padding: 36px; overflow: hidden; border-radius: 24px; background: linear-gradient(120deg, #1760e8, #3179f2 55%, #1452df); }
 .landing-page-content { min-height: calc(100vh - 136px); overflow: hidden; border: 5px solid #82aaff; border-radius: 38px; background: #f5f7fc; }
