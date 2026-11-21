@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class PatientService
 {
-    /** Creates pat_patients (+ empty health profile) with the next GS-YYYY-00001 code. */
+    /** Creates pat_patients (+ empty health profile) with the next 00001-YYYY-GS code. */
     public function create(array $d, ?User $account = null, ?User $createdBy = null): Patient
     {
         return DB::transaction(function () use ($d, $account, $createdBy) {

@@ -64,6 +64,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/my-installments/{plan}/decline', [InstallmentController::class, 'decline'])->name('installments.decline');
 
     Route::middleware('role:admin,clinic_staff,dentist')->get('/installments', [InstallmentReviewController::class, 'index'])->name('installments.index');
+    Route::middleware('role:admin')->prefix('installments')->name('installments.')->group(function () {
+        Route::get('/new-for-patient', [InstallmentReviewController::class, 'createForPatient'])->name('create-for-patient');
+        Route::post('/new-for-patient', [InstallmentReviewController::class, 'storeForPatient'])->name('store-for-patient');
+    });
     Route::middleware('role:admin,dentist')->prefix('installments')->name('installments.')->group(function () {
         Route::get('/{plan}', [InstallmentReviewController::class, 'show'])->name('show');
         Route::post('/{plan}/approve', [InstallmentReviewController::class, 'approve'])->name('approve');

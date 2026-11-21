@@ -12,15 +12,15 @@ use Illuminate\Validation\ValidationException;
 class InstallmentService
 {
     public function eligibleServices() { return Service::bookable()->where('price_min_amount','>=',Settings::int('installment_min_amount'))->orWhere(function($q){$q->where('is_active',1)->where('is_bookable',1)->where('is_addon',0)->where('is_multi_visit',1)->where('price_min_amount','>',0); })->orderBy('service_name'); }
-    public function request(Patient $patient, Service $service, int $months, int $userId): InstallmentPlan
+    public function request(Patient $patient, Service $service, int $months, int $userId, bool $onBehalf = false): InstallmentPlan
     {
         if (!$patient->user_id || !$this->eligibleServices()->where('service_id',$service->service_id)->exists()) throw ValidationException::withMessages(['service_id'=>'This service is not eligible for installments.']);
         if ($months < 2 || $months > Settings::int('installment_max_months')) throw ValidationException::withMessages(['months'=>'Choose a valid installment term.']);
-        return DB::transaction(function()use($patient,$service,$months){Patient::whereKey($patient->patient_id)->lockForUpdate()->firstOrFail();
+        return DB::transaction(function()use($patient,$service,$months,$userId,$onBehalf){Patient::whereKey($patient->patient_id)->lockForUpdate()->firstOrFail();
             if (InstallmentPlan::where('patient_id',$patient->patient_id)->where('service_id',$service->service_id)->whereIn('status',['requested','approved','active'])->exists()) throw ValidationException::withMessages(['service_id'=>'You already have an open plan for this service.']);
             $treatment= $service->is_multi_visit ? \App\Models\TreatmentPlan::where('patient_id',$patient->patient_id)->where('service_id',$service->service_id)->where('status','active')->latest('treatment_plan_id')->first() : null;
             $plan=InstallmentPlan::create(['patient_id'=>$patient->patient_id,'service_id'=>$service->service_id,'treatment_plan_id'=>$treatment?->treatment_plan_id,'total_amount'=>$service->price_min_amount,'net_amount'=>$service->price_min_amount,'number_of_installments'=>$months,'status'=>'requested']);
-            Audit::log('request','pay_installment_plans',$plan->installment_plan_id,'Installment plan requested'); return $plan;
+            Audit::log('request','pay_installment_plans',$plan->installment_plan_id,$onBehalf?'Admin created an installment request for patient':'Installment plan requested',null,null,$userId); return $plan;
         });
     }
     public function approve(InstallmentPlan $plan,array $v,int $userId): void

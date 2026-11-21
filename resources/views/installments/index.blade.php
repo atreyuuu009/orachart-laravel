@@ -1,5 +1,6 @@
 @extends('layouts.app') @section('title','Installments') @section('page_title','Installments')
 @section('content')
+@if(auth()->user()->hasRole('admin'))<div class="d-flex justify-content-end mb-3"><a class="btn btn-primary" href="{{ route('installments.create-for-patient') }}">Create installment for patient</a></div>@endif
 <ul class="nav nav-tabs">
 @if(auth()->user()->hasRole('admin','dentist'))<li class="nav-item"><button class="nav-link {{ auth()->user()->hasRole('clinic_staff')?'':'active' }}" data-bs-toggle="tab" data-bs-target="#requests">Requests <span class="badge text-bg-secondary">{{ $requests->count() }}</span></button></li>@endif
 @if(auth()->user()->hasRole('admin','clinic_staff'))<li class="nav-item"><button class="nav-link {{ auth()->user()->hasRole('clinic_staff')?'active':'' }}" data-bs-toggle="tab" data-bs-target="#proofs">Proofs to verify <span class="badge text-bg-warning">{{ $proofs->count() }}</span></button></li>@endif

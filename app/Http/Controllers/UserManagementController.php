@@ -20,9 +20,20 @@ class UserManagementController extends Controller
     public function index(Request $request)
     {
         $q = User::with(['role', 'dentist.specialties', 'patient'])->when($request->filled('search'), function ($q) use ($request) {
-            $term = '%'.$request->string('search').'%';
-            $q->where(fn ($w) => $w->where('first_name', 'like', $term)->orWhere('last_name', 'like', $term)
-                ->orWhere('username', 'like', $term)->orWhere('email', 'like', $term));
+            $search = trim((string) $request->string('search'));
+            $terms = preg_split('/\s+/', $search, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+            $q->where(function ($w) use ($search, $terms) {
+                foreach ($terms as $term) {
+                    $like = '%'.$term.'%';
+                    $w->where(fn ($name) => $name->where('first_name', 'like', $like)
+                        ->orWhere('last_name', 'like', $like));
+                }
+
+                $fullSearch = '%'.$search.'%';
+                $w->orWhere('username', 'like', $fullSearch)
+                    ->orWhere('email', 'like', $fullSearch);
+            });
         })->when($request->filled('role'), fn ($q) => $q->whereHas('role', fn ($r) => $r->where('role_name', $request->role)))
           ->when($request->status === 'active', fn ($q) => $q->where('is_active', 1))
           ->when($request->status === 'inactive', fn ($q) => $q->where('is_active', 0))

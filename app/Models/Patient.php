@@ -29,13 +29,27 @@ class Patient extends Model
     }
     public function getAgeAttribute(): int { return Carbon::parse($this->birth_date)->age; }
 
-    /** Next auto-index code, e.g. GS-2026-00001. Call inside a transaction. */
+    /** Next auto-index code, e.g. 00001-2026-GS. Call inside a transaction. */
     public static function nextCode(): string
     {
         $year = now()->year;
-        $last = static::withTrashed()->where('patient_code', 'like', "GS-$year-%")
-            ->orderByDesc('patient_code')->lockForUpdate()->value('patient_code');
-        $n = $last ? ((int) substr($last, -5)) + 1 : 1;
-        return sprintf('GS-%d-%05d', $year, $n);
+        $codes = static::withTrashed()
+            ->where(function ($query) use ($year) {
+                $query->where('patient_code', 'like', "GS-$year-%")
+                    ->orWhere('patient_code', 'like', "%-$year-GS");
+            })
+            ->lockForUpdate()
+            ->pluck('patient_code');
+
+        $n = $codes->map(function (string $code) use ($year) {
+            if (preg_match('/^GS-' . $year . '-(\d+)$/', $code, $matches)
+                || preg_match('/^(\d+)-' . $year . '-GS$/', $code, $matches)) {
+                return (int) $matches[1];
+            }
+
+            return 0;
+        })->max() + 1;
+
+        return sprintf('%05d-%d-GS', $n, $year);
     }
 }

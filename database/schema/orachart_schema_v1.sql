@@ -256,7 +256,7 @@ CREATE TABLE sch_emergency_blocks (
 CREATE TABLE pat_patients (
   patient_id                 INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   user_id                    INT UNSIGNED NULL,
-  patient_code               VARCHAR(20) NOT NULL,      -- e.g. GS-2026-00001 (auto-index)
+  patient_code               VARCHAR(20) NOT NULL,      -- e.g. 00001-2026-GS (auto-index)
   first_name                 VARCHAR(100) NOT NULL,
   middle_name                VARCHAR(100) NULL,
   last_name                  VARCHAR(100) NOT NULL,
