@@ -18,7 +18,7 @@
 
 /* ---------- landing ---------- */
 body:has(.landing-nav) {
-  background: #f4faf7;
+  background: #c4ebdc;
 }
 .landing-main { min-height: calc(100vh - 216px); }
 .landing-nav { padding: 0; background: transparent; }
