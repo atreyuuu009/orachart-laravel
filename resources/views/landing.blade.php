@@ -40,7 +40,7 @@
   <div class="container"><div class="row align-items-center g-5">
     <div class="col-lg-7">
       <div class="eyebrow mb-2">GUDA &amp; SORIANO DENTAL CLINIC</div>
-      <h1 class="display-5 mb-3">Healthy smiles start with <span>trusted dental care.</span></h1>
+      <h1 class="display-5 mb-3">Healthy smiles come from <span>trusted dental care.</span></h1>
       <p class="lead text-secondary">From cleanings and fillings to braces, extractions, and crowns — clear prices, careful treatment, and a calm clinic experience for every patient.</p>
       <div class="d-flex flex-wrap gap-2 my-4">
         <a class="btn btn-primary btn-lg" href="{{ auth()->check() ? route('booking.create') : route('register') }}">Book Appointment</a>
