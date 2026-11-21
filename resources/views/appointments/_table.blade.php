@@ -1,6 +1,6 @@
 {{-- rows, actions(bool), empty(string), patientView(bool optional) --}}
 @php $patientView = $patientView ?? false; @endphp
-<div class="table-responsive">
+<div class="table-responsive appointments-table-responsive">
   <table class="table table-hover mb-0">
     <thead><tr>
       @unless ($patientView)<th>Patient</th>@endunless
