@@ -25,7 +25,18 @@ body:has(.landing-nav) {
     linear-gradient(110deg, #eef2fc 0%, #f0f3fb 56%, #e8eefc 100%);
   background-attachment: fixed;
 }
-.landing-nav { background: rgba(255,255,255,.92); backdrop-filter: blur(6px); border-bottom: 1px solid var(--bs-border-color); }
+.landing-nav { padding: 0; background: transparent; }
+.landing-nav-frame { width: min(1140px, calc(100% - 32px)); margin: 1rem auto; padding: 0; }
+.landing-nav-inner { min-height: 76px; display: flex; align-items: center; border-radius: 14px; background: #fff; box-shadow: 0 6px 24px rgba(24, 39, 75, .08); }
+.landing-nav .container-fluid { display: flex; align-items: center; }
+.landing-nav .navbar-brand { margin-right: 1.5rem; color: #243b8f; }
+.landing-nav .navbar-brand strong { font-size: 1.25rem; font-weight: 600; letter-spacing: -.025em; }
+.landing-nav .navbar-brand small { font-size: .95rem; color: #626d7e !important; }
+.landing-nav .nav-link { color: #273142; font-size: 1rem; padding: .5rem .55rem !important; }
+.landing-nav .nav-link:hover { color: var(--gs-primary); }
+.landing-nav .nav-login { margin-left: clamp(.5rem, 3vw, 2rem); }
+.landing-nav .btn-primary { min-width: 0; padding: .6rem 1.15rem; border-radius: 8px; font-size: 1rem; font-weight: 600; }
+.landing-nav .navbar-toggler { border-color: rgba(36,59,143,.25); }
 .brand-logo { width: 42px; height: 42px; object-fit: contain; }
 .landing-hero { background: transparent; padding: 4.5rem 0 4rem; }
 .landing-hero h1 { font-weight: 800; letter-spacing: -.02em; }
@@ -42,6 +53,16 @@ body:has(.landing-nav) {
 .service-card:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(36,59,143,.12); }
 .service-card-image { display: block; width: 100%; height: 180px; object-fit: cover; border-radius: .85rem .85rem 0 0; background: #fff; }
 .price-old { text-decoration: line-through; color: #8a93a5; font-size: .85rem; }
+@media (max-width: 991.98px) {
+  .landing-nav-frame { width: calc(100% - 24px); margin: .75rem auto; }
+  .landing-nav-inner { min-height: 64px; padding: .4rem 0; }
+  .landing-nav .navbar-brand strong { font-size: 1.35rem; }
+  .landing-nav .navbar-brand small { font-size: 1rem; }
+  .landing-nav .nav-login { margin-left: 0; }
+  .landing-nav .navbar-nav { padding-top: .75rem; }
+  .landing-nav .nav-link { font-size: 1.1rem; }
+  .landing-nav .btn-primary { min-width: 0; padding: .65rem 1rem; font-size: 1rem; }
+}
 
 /* ---------- auth ---------- */
 .auth-wrap { min-height: 100vh; display: grid; place-items: center; background: linear-gradient(135deg, var(--gs-blue-light), #fff); padding: 1.5rem; }
