@@ -4,7 +4,6 @@
   $role = $u->roleName();
   $nav = match ($role) {
     'patient' => [
-      ['dashboard', 'Home', 'dashboard', 'bi-house-door'],
       ['booking.create', 'Book Appointment', 'booking.*', 'bi-calendar-plus'],
       ['appointments.mine', 'My Appointments', 'appointments.mine', 'bi-calendar-check'],
       ['installments.mine', 'My Installments', 'installments.*', 'bi-credit-card'],
@@ -14,15 +13,12 @@
       ['dashboard', 'Dashboard', 'dashboard', 'bi-speedometer2'],
       ['booking.staff', 'Create Appointment', 'booking.staff*', 'bi-calendar-plus'],
       ['appointments.index', 'Manage Appointments', 'appointments.index', 'bi-calendar-check'],
-      ['calendar', 'Appointment Calendar', 'calendar', 'bi-calendar3'],
       ['payments.index', 'Payments', 'payments.*', 'bi-receipt'],
       ['installments.index', 'Installments', 'installments.*', 'bi-credit-card'],
     ],
     'dentist' => [
       ['dashboard', 'Dashboard', 'dashboard', 'bi-speedometer2'],
       ['appointments.index', 'My Appointments', 'appointments.index', 'bi-calendar-check'],
-      ['calendar', 'My Schedule', 'calendar', 'bi-calendar3'],
-      ['schedule', 'Hours & Time Off', 'schedule*', 'bi-clock-history'],
       ['odontogram', 'Digital Odontogram', 'odontogram*', 'bi-clipboard2-pulse'],
       ['patients.index', 'Patients', 'patients.*', 'bi-people'],
       ['payments.index', 'Payments', 'payments.*', 'bi-receipt'],
@@ -33,7 +29,6 @@
       ['appointments.index', 'View Appointments', 'appointments.index', 'bi-calendar-check'],
       ['patients.index', 'Patients', 'patients.*', 'bi-people'],
       ['booking.staff', 'Create Appointment', 'booking.staff*', 'bi-calendar-plus'],
-      ['calendar', 'Appointment Calendar', 'calendar', 'bi-calendar3'],
       ['odontogram', 'Digital Odontogram', 'odontogram*', 'bi-clipboard2-pulse'],
       ['schedule', 'Dentist Schedules', 'schedule*', 'bi-clock-history'],
       ['admin.settings', 'Clinic Settings', 'admin.settings*', 'bi-gear'],

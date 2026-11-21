@@ -43,18 +43,22 @@ class SettingsController extends Controller
 
     public function saveHours(Request $request)
     {
-        foreach (range(0, 6) as $d) {
-            $closed = $request->boolean("hours.$d.closed");
-            $open = $request->input("hours.$d.open"); $close = $request->input("hours.$d.close");
-            if (! $closed && (! preg_match('/^\d{2}:\d{2}/', (string) $open) || ! preg_match('/^\d{2}:\d{2}/', (string) $close) || $open >= $close)) {
-                return back()->withInput()->withErrors(['hours' => 'Open days need an opening time earlier than the closing time.']);
+        $v = $request->validate([
+            'default_open' => 'required|date_format:H:i',
+            'default_close' => 'required|date_format:H:i|after:default_open',
+        ], [
+            'default_close.after' => 'Closing time must be later than opening time.',
+        ]);
+
+        DB::transaction(function () use ($v) {
+            foreach (range(0, 6) as $d) {
+                ClinicHour::updateOrCreate(['day_of_week' => $d], [
+                    'is_closed' => 0, 'open_time' => $v['default_open'], 'close_time' => $v['default_close'],
+                ]);
             }
-            ClinicHour::updateOrCreate(['day_of_week' => $d], [
-                'is_closed' => $closed ? 1 : 0, 'open_time' => $closed ? null : $open, 'close_time' => $closed ? null : $close,
-            ]);
-        }
-        Audit::log('update', 'sch_clinic_hours', null, 'Weekly clinic hours updated');
-        return back()->with('status', 'Clinic hours saved. They apply to new bookings; existing appointments are not changed.')->with('tab', 'hours');
+        });
+        Audit::log('update', 'sch_clinic_hours', null, 'Default clinic working hours updated for every day');
+        return back()->with('status', 'Default clinic hours saved for every day. Patient appointment availability uses these hours for all upcoming dates.')->with('tab', 'hours');
     }
 
     public function previewOverride(Request $request, ScheduleService $schedule)

@@ -3,7 +3,8 @@
 @php
   $dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   $open = $hours->where('is_closed', false);
-  $hoursText = $open->isEmpty() ? 'By appointment' : $dayNames[$open->first()->day_of_week].'–'.$dayNames[$open->last()->day_of_week];
+  $dailyHours = $open->count() === 7 && $open->every(fn ($h) => $h->open_time === $open->first()->open_time && $h->close_time === $open->first()->close_time);
+  $hoursText = $open->isEmpty() ? 'By appointment' : ($dailyHours ? 'Daily '.\Carbon\Carbon::parse($open->first()->open_time)->format('g:i A').'–'.\Carbon\Carbon::parse($open->first()->close_time)->format('g:i A') : $dayNames[$open->first()->day_of_week].'–'.$dayNames[$open->last()->day_of_week]);
 @endphp
 @section('body')
 <nav class="landing-nav navbar navbar-expand-lg sticky-top">

@@ -132,13 +132,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/appointments/{appointment}/reschedule', [AppointmentController::class, 'rescheduleForm'])->name('appointments.reschedule');
     Route::post('/appointments/{appointment}/reschedule', [AppointmentController::class, 'reschedule'])->name('appointments.reschedule.store');
 
-    // ---- dentist schedule + time off (dentist: own, admin: any)
-    Route::middleware('role:admin,dentist')->group(function () {
+    // ---- admin-managed dentist schedules and days off
+    Route::middleware('role:admin')->group(function () {
         Route::get('/schedule/{dentist?}', [ScheduleController::class, 'show'])->name('schedule');
         Route::post('/schedule/{dentist}/hours', [ScheduleController::class, 'saveHours'])->name('schedule.hours');
         Route::post('/schedule/{dentist}/time-off', [ScheduleController::class, 'storeTimeOff'])->name('schedule.timeoff.store');
         Route::delete('/schedule/time-off/{timeOff}', [ScheduleController::class, 'destroyTimeOff'])->name('schedule.timeoff.destroy');
+    });
 
+    Route::middleware('role:admin,dentist')->group(function () {
         // odontogram (dentists write, admin is read-only)
         Route::get('/odontogram', [OdontogramController::class, 'index'])->name('odontogram');
         Route::get('/odontogram/{patient}/findings', [OdontogramController::class, 'findings'])->name('odontogram.findings');

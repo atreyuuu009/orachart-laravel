@@ -15,16 +15,18 @@
 
 <div class="tab-pane fade {{ $tab === 'hours' ? 'show active' : '' }}" id="t-hours">
   <form method="POST" action="{{ route('admin.settings.hours') }}" class="card">@csrf<div class="card-body">
-    <p class="text-secondary">Default opening hours for every week. Use a date override for holidays or special days.</p>
-    @foreach ($days as $i => $name)
-      @php $h = $hours[$i] ?? null; $closed = old("hours.$i.closed", $h ? $h->is_closed : ($i === 0)); @endphp
-      <div class="row g-2 align-items-center mb-2">
-        <div class="col-md-3 fw-semibold">{{ $name }}</div>
-        <div class="col-5 col-md-3"><input type="time" class="form-control" name="hours[{{ $i }}][open]" value="{{ old("hours.$i.open", $h && $h->open_time ? substr($h->open_time, 0, 5) : '09:00') }}"></div>
-        <div class="col-5 col-md-3"><input type="time" class="form-control" name="hours[{{ $i }}][close]" value="{{ old("hours.$i.close", $h && $h->close_time ? substr($h->close_time, 0, 5) : '18:00') }}"></div>
-        <div class="col-2 col-md-3"><div class="form-check"><input class="form-check-input" type="checkbox" name="hours[{{ $i }}][closed]" value="1" id="cl{{ $i }}" @checked($closed)><label class="form-check-label" for="cl{{ $i }}">Closed</label></div></div>
-      </div>
-    @endforeach
+    @php
+      $firstHour = $hours->first();
+      $sameHoursEveryDay = $hours->count() === 7 && $hours->every(fn ($h) => ! $h->is_closed && $h->open_time === $firstHour->open_time && $h->close_time === $firstHour->close_time);
+      $defaultOpen = old('default_open', $sameHoursEveryDay ? substr($firstHour->open_time, 0, 5) : '08:00');
+      $defaultClose = old('default_close', $sameHoursEveryDay ? substr($firstHour->close_time, 0, 5) : '19:00');
+    @endphp
+    <p class="text-secondary">Set one default schedule for every day. It applies to patient appointment availability for all upcoming dates. Use a date override for holidays or special days.</p>
+    <div class="row g-3 align-items-end">
+      <div class="col-sm-4"><label class="form-label fw-semibold" for="defaultOpen">Default working hours</label><input id="defaultOpen" type="time" class="form-control" name="default_open" value="{{ $defaultOpen }}" required></div>
+      <div class="col-sm-4"><label class="form-label" for="defaultClose">Until</label><input id="defaultClose" type="time" class="form-control" name="default_close" value="{{ $defaultClose }}" required></div>
+      <div class="col-sm-4 text-secondary small">{{ $sameHoursEveryDay ? 'Currently applied every day.' : 'Saving applies these hours Sunday through Saturday.' }}</div>
+    </div>
   </div><div class="card-footer bg-white text-end"><button class="btn btn-primary">Save hours</button></div></form>
 </div>
 

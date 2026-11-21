@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Appointment;
 use App\Models\Dentist;
+use App\Models\Service;
 use App\Services\BookingService;
 use App\Services\Notifier;
 use App\Services\SlotUnavailable;
@@ -20,6 +21,8 @@ class AppointmentController extends Controller
         $request->validate([
             'status' => 'nullable|in:pending,confirmed,rescheduled,cancelled,completed,no_show,needs_reschedule',
             'from' => 'nullable|date', 'to' => 'nullable|date', 'q' => 'nullable|string|max:100',
+            'dentist' => 'nullable|exists:usr_dentists,dentist_id', 'procedure' => 'nullable|exists:svc_services,service_id',
+            'period' => 'nullable|in:day,week,month,year', 'date' => 'nullable|date', 'sort' => 'nullable|in:asc,desc',
         ]);
 
         $isNeedsReschedule = $request->query('status') === 'needs_reschedule';
@@ -43,8 +46,17 @@ class AppointmentController extends Controller
             if ($s = $request->query('status')) {
                 $q->where('status', $s);
             }
-            $q->orderByDesc('start_at');
+            $q->orderBy('start_at', $request->query('sort', 'desc'));
         }
+
+        if ($dentist = $request->query('dentist')) $q->where('assigned_dentist_id', $dentist);
+        if ($procedure = $request->query('procedure')) $q->where('service_id', $procedure);
+
+        $date = Carbon::parse($request->query('date', today()->toDateString()));
+        $period = $request->query('period', 'day');
+        $start = $date->copy()->{'startOf'.ucfirst($period)}();
+        $end = $date->copy()->{'endOf'.ucfirst($period)}();
+        $q->whereBetween('start_at', [$start, $end]);
 
         if ($f = $request->query('from')) $q->where('start_at', '>=', Carbon::parse($f)->startOfDay());
         if ($t = $request->query('to')) $q->where('start_at', '<=', Carbon::parse($t)->endOfDay());
@@ -71,6 +83,7 @@ class AppointmentController extends Controller
         return view('appointments.index', [
             'appointments' => $q->paginate(15)->withQueryString(),
             'dentists' => Dentist::with('user')->get(),
+            'services' => Service::listed()->orderBy('service_name')->get(),
             'isNeedsReschedule' => $isNeedsReschedule,
             'emergencyCallList' => $emergencyCallList,
             'needsRescheduleCount' => $needsRescheduleCount,

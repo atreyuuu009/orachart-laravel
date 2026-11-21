@@ -35,12 +35,19 @@
       @forelse ($list as $a)
         <div class="list-group-item">
           <div class="d-flex justify-content-between"><strong>{{ $a->start_at->format('g:i A') }}</strong>@include('partials.status', ['a' => $a])</div>
-          <div>{{ $a->patient->full_name }}</div>
+          <div>@if ($a->start_at->isFuture() && $a->isOpen())<a class="fw-semibold" href="{{ route('patients.show', $a->patient) }}">{{ $a->patient->full_name }}</a>@else<strong>{{ $a->patient->full_name }}</strong>@endif</div>
           <div class="small text-secondary">{{ $a->service->service_name }} · {{ $a->dentist->name }}</div>
+          @if ($a->start_at->isFuture() && $a->isOpen())
+            <div class="d-flex gap-2 mt-2">
+              <a class="btn btn-sm btn-outline-primary" href="{{ route('appointments.reschedule', $a) }}">Reschedule</a>
+              <button type="button" class="btn btn-sm btn-outline-danger" data-reason-action="{{ route('appointments.cancel', $a) }}" data-reason-title="Cancel appointment">Cancel</button>
+            </div>
+          @endif
         </div>
       @empty
         <div class="list-group-item text-secondary text-center py-4">No appointments on this day.</div>
       @endforelse
     </div></div></div>
 </div>
+@include('appointments._modals')
 @endsection
