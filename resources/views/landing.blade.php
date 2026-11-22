@@ -13,8 +13,8 @@
         <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('landing') }}">
           <span class="brand-tooth" aria-hidden="true">
             <svg viewBox="0 0 32 32" focusable="false">
-              <path d="M10.1 4.2c-3.5 0-6.1 2.7-6.1 6.3 0 4.4 2.1 7.8 3 12.7.4 2 1.1 4.6 2.7 4.6 1.3 0 1.8-2.6 2.5-5.3.6-2.4 1.1-4 2.1-4s1.5 1.6 2.1 4c.7 2.7 1.2 5.3 2.5 5.3 1.6 0 2.3-2.6 2.7-4.6.9-4.9 3-8.3 3-12.7 0-3.6-2.6-6.3-6.1-6.3-1.8 0-3.1.9-4.2 2-1.1-1.1-2.4-2-4.2-2Z" fill="currentColor"/>
-              <path d="M10.2 10.2c1.5-.6 2.9-.6 4.3 0m3.1 0c1.4-.6 2.8-.6 4.3 0" fill="none" stroke="#0b8e76" stroke-linecap="round" stroke-width="1.4"/>
+              <path d="M10.1 5.1c-3.4 0-5.8 2.6-5.8 6.1 0 4.2 2.1 7.4 2.9 12 .4 2.2 1.1 5 2.8 5 1.4 0 2-2.8 2.7-5.6.6-2.4 1.2-4.2 2.3-4.2s1.7 1.8 2.3 4.2c.7 2.8 1.3 5.6 2.7 5.6 1.7 0 2.4-2.8 2.8-5 .8-4.6 2.9-7.8 2.9-12 0-3.5-2.4-6.1-5.8-6.1-2 0-3.5 1.2-4.9 2.4-1.4-1.2-2.9-2.4-4.9-2.4Z" fill="currentColor"/>
+              <path d="M25 1.5 26.2 5l3.3 1.2-3.3 1.2L25 11l-1.2-3.6-3.3-1.2L23.8 5 25 1.5Z" fill="currentColor"/>
             </svg>
           </span>
           <span class="lh-sm"><strong>Guda &amp; Soriano</strong><br><small>Dental Clinic</small></span>
