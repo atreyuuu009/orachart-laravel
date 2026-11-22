@@ -10,26 +10,15 @@
   <div class="landing-nav-frame">
     <div class="landing-nav-inner">
       <div class="container-fluid px-3 px-xl-5">
-        <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#lnav" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
         <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('landing') }}">
           <img class="brand-logo" src="{{ asset('images/logo-removebg-preview.png') }}" alt="">
-          <span class="lh-sm"><strong class="text-primary">Guda &amp; Soriano</strong><br><small class="text-secondary">Dental Clinic</small></span>
+          <span class="lh-sm"><strong>Guda &amp; Soriano</strong><br><small>Dental Clinic</small></span>
         </a>
-        <div class="collapse navbar-collapse" id="lnav">
-          <ul class="navbar-nav landing-nav-links align-items-lg-center gap-lg-3">
-            <li class="nav-item"><a class="nav-link" href="#services">Services</a></li>
-            <li class="nav-item"><a class="nav-link" href="#why">Why Us</a></li>
-            <li class="nav-item"><a class="nav-link" href="#dentists">Dentists</a></li>
-          </ul>
-          <ul class="navbar-nav landing-nav-actions align-items-lg-center gap-lg-2">
-            @auth
-              <li class="nav-item"><a class="btn btn-primary" href="{{ route('dashboard') }}">Go to my account</a></li>
-            @else
-              <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Login</a></li>
-              <li class="nav-item"><a class="btn btn-primary" href="{{ route('register') }}">Register</a></li>
-            @endauth
-          </ul>
-        </div>
+        @auth
+          <a class="btn btn-primary" href="{{ route('dashboard') }}">My Account</a>
+        @else
+          <a class="btn btn-primary" href="{{ route('register') }}">Register</a>
+        @endauth
       </div>
     </div>
   </div>
@@ -37,24 +26,23 @@
 
 <main class="landing-main">
 <header class="landing-hero">
-  <div class="container"><div class="row align-items-center g-5">
-    <div class="col-lg-7">
-      <div class="eyebrow mb-2">GUDA &amp; SORIANO DENTAL CLINIC</div>
-      <h1 class="display-5 mb-3">Healthy smiles come from <span>trusted dental care.</span></h1>
-      <p class="lead text-secondary">From cleanings and fillings to braces, extractions, and crowns — clear prices, careful treatment, and a calm clinic experience for every patient.</p>
-      <div class="d-flex flex-wrap gap-2 my-4">
-        <a class="btn btn-primary btn-lg" href="{{ auth()->check() ? route('booking.create') : route('register') }}">Book Appointment</a>
-        <a class="btn btn-outline-primary btn-lg" href="#services">See Services &amp; Prices</a>
-      </div>
-      <div class="row text-center text-sm-start g-3 trust-item">
-        <div class="col-4"><strong>{{ $dentists->count() }}</strong><span class="text-secondary small">Licensed Dentists</span></div>
-        <div class="col-4"><strong>{{ $serviceCount }}+</strong><span class="text-secondary small">Dental Services</span></div>
-        <div class="col-4"><strong>{{ $hoursText }}</strong><span class="text-secondary small">Clinic Hours</span></div>
-      </div>
-      <p class="small text-secondary mt-3 mb-0">Appointments are subject to clinic availability.</p>
+  <div class="container">
+    <div class="eyebrow mb-3">Guda &amp; Soriano Dental Clinic</div>
+    <h1>Healthy Smiles Start With <span>Trusted<br class="d-none d-md-block"> Dental Care.</span></h1>
+    <p class="lead">From cleanings and fillings to braces, extractions, and crowns — clear<br class="d-none d-md-block"> prices, careful treatment, and a calm clinic experience for every<br class="d-none d-md-block"> patient.</p>
+    <div class="d-flex flex-wrap justify-content-center gap-2 hero-actions">
+      <a class="btn btn-primary btn-lg" href="{{ auth()->check() ? route('booking.create') : route('register') }}">Book Appointment <i class="bi bi-arrow-right ms-2"></i></a>
+      <a class="btn btn-outline-primary btn-lg" href="#services">See Services &amp; Prices</a>
     </div>
-    <div class="col-lg-5"><div class="hero-logo-card"><img src="{{ asset('images/logo-removebg-preview.png') }}" alt="Guda &amp; Soriano Dental Clinic logo"></div></div>
-  </div></div>
+    <div class="popular-treatments">
+      <p>Browse our most popular <a href="#services">dental treatments</a></p>
+      <div class="treatment-list">
+        @foreach (['Cleaning', 'Braces', 'Fillings', 'Crowns', 'Whitening'] as $treatment)
+          <a href="#services"><span aria-hidden="true">&#10022;</span>{{ $treatment }}</a>
+        @endforeach
+      </div>
+    </div>
+  </div>
 </header>
 
 <section id="services" class="section-pad"><div class="container">
