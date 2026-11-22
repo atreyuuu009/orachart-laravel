@@ -11,7 +11,12 @@
     <div class="landing-nav-inner">
       <div class="container-fluid px-3 px-xl-5">
         <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('landing') }}">
-          <img class="brand-logo" src="{{ asset('images/logo-removebg-preview.png') }}" alt="">
+          <span class="brand-tooth" aria-hidden="true">
+            <svg viewBox="0 0 32 32" focusable="false">
+              <path d="M10.1 4.2c-3.5 0-6.1 2.7-6.1 6.3 0 4.4 2.1 7.8 3 12.7.4 2 1.1 4.6 2.7 4.6 1.3 0 1.8-2.6 2.5-5.3.6-2.4 1.1-4 2.1-4s1.5 1.6 2.1 4c.7 2.7 1.2 5.3 2.5 5.3 1.6 0 2.3-2.6 2.7-4.6.9-4.9 3-8.3 3-12.7 0-3.6-2.6-6.3-6.1-6.3-1.8 0-3.1.9-4.2 2-1.1-1.1-2.4-2-4.2-2Z" fill="currentColor"/>
+              <path d="M10.2 10.2c1.5-.6 2.9-.6 4.3 0m3.1 0c1.4-.6 2.8-.6 4.3 0" fill="none" stroke="#0b8e76" stroke-linecap="round" stroke-width="1.4"/>
+            </svg>
+          </span>
           <span class="lh-sm"><strong>Guda &amp; Soriano</strong><br><small>Dental Clinic</small></span>
         </a>
         @auth
