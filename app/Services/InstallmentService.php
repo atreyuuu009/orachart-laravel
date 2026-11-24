@@ -1,7 +1,7 @@
 <?php
 namespace App\Services;
 
-use App\Models\{Consent, Discount, EmailLog, InstallmentPayment, InstallmentPlan, Payment, PaymentItem, Patient, Service, TreatmentPlan};
+use App\Models\{EmailLog, InstallmentPayment, InstallmentPlan, Payment, PaymentItem, Patient, Service};
 use App\Support\Audit;
 use App\Support\Settings;
 use Carbon\Carbon;
@@ -11,34 +11,78 @@ use Illuminate\Validation\ValidationException;
 
 class InstallmentService
 {
-    public function eligibleServices() { return Service::bookable()->where('price_min_amount','>=',Settings::int('installment_min_amount'))->orWhere(function($q){$q->where('is_active',1)->where('is_bookable',1)->where('is_addon',0)->where('is_multi_visit',1)->where('price_min_amount','>',0); })->orderBy('service_name'); }
-    public function request(Patient $patient, Service $service, int $months, int $userId, bool $onBehalf = false): InstallmentPlan
+    public function eligibleServices()
     {
-        if (!$patient->user_id || !$this->eligibleServices()->where('service_id',$service->service_id)->exists()) throw ValidationException::withMessages(['service_id'=>'This service is not eligible for installments.']);
-        if ($months < 2 || $months > Settings::int('installment_max_months')) throw ValidationException::withMessages(['months'=>'Choose a valid installment term.']);
-        return DB::transaction(function()use($patient,$service,$months,$userId,$onBehalf){Patient::whereKey($patient->patient_id)->lockForUpdate()->firstOrFail();
+        return Service::bookable()
+            ->where('price_min_amount', '>=', max(10000, Settings::int('installment_min_amount')))
+            ->orderBy('service_name');
+    }
+
+    public function createPlan(Patient $patient, Service $service, array $terms, int $userId): InstallmentPlan
+    {
+        $minimum = max(10000, Settings::int('installment_min_amount'));
+        $total = round((float) $terms['total_amount'], 2);
+        $percent = round((float) $terms['downpayment_percent'], 2);
+        $months = (int) $terms['number_of_installments'];
+
+        if (! $patient->user_id || ! $this->eligibleServices()->where('service_id', $service->service_id)->exists()) {
+            throw ValidationException::withMessages(['service_id' => 'Only eligible treatments costing at least ₱'.number_format($minimum, 2).' can have installments.']);
+        }
+        if ($total < $minimum) throw ValidationException::withMessages(['total_amount' => 'The installment treatment total must be at least ₱'.number_format($minimum, 2).'.']);
+        if ($percent <= 0 || $percent >= 100) throw ValidationException::withMessages(['downpayment_percent' => 'Enter a clinic down payment between 0% and 100%.']);
+        if ($months < 2 || $months > Settings::int('installment_max_months')) throw ValidationException::withMessages(['number_of_installments' => 'Choose a valid installment term.']);
+
+        return DB::transaction(function () use ($patient, $service, $terms, $userId, $total, $percent, $months) {
+            Patient::whereKey($patient->patient_id)->lockForUpdate()->firstOrFail();
             if (InstallmentPlan::where('patient_id',$patient->patient_id)->where('service_id',$service->service_id)->whereIn('status',['requested','approved','active'])->exists()) throw ValidationException::withMessages(['service_id'=>'You already have an open plan for this service.']);
-            $treatment= $service->is_multi_visit ? \App\Models\TreatmentPlan::where('patient_id',$patient->patient_id)->where('service_id',$service->service_id)->where('status','active')->latest('treatment_plan_id')->first() : null;
-            $plan=InstallmentPlan::create(['patient_id'=>$patient->patient_id,'service_id'=>$service->service_id,'treatment_plan_id'=>$treatment?->treatment_plan_id,'total_amount'=>$service->price_min_amount,'net_amount'=>$service->price_min_amount,'number_of_installments'=>$months,'status'=>'requested']);
-            Audit::log('request','pay_installment_plans',$plan->installment_plan_id,$onBehalf?'Admin created an installment request for patient':'Installment plan requested',null,null,$userId); return $plan;
+
+            $downpayment = round($total * $percent / 100, 2);
+            $remaining = round($total - $downpayment, 2);
+            $downpaymentPayment = (new PaymentService)->create([
+                'patient_id' => $patient->patient_id,
+                'appointment_id' => null,
+                'invoice_number' => null,
+                'items' => [[
+                    'service_id' => $service->service_id,
+                    'quantity' => 1,
+                    'unit_price_amount' => $downpayment,
+                ]],
+                'discount_type' => 'none',
+                'amount_paid' => $downpayment,
+                'payment_method' => 'cash',
+                'payment_date' => today()->toDateString(),
+            ], $userId);
+
+            $first = Carbon::parse($terms['first_due_date']);
+            $plan = InstallmentPlan::create([
+                'patient_id' => $patient->patient_id,
+                'service_id' => $service->service_id,
+                'total_amount' => $total,
+                'discount_amount' => 0,
+                'interest_rate_percent' => 0,
+                'interest_amount' => 0,
+                'downpayment_percent' => $percent,
+                'downpayment_amount' => $downpayment,
+                'downpayment_payment_id' => $downpaymentPayment->payment_id,
+                'net_amount' => $remaining,
+                'number_of_installments' => $months,
+                'first_due_date' => $first->toDateString(),
+                'terms_note' => $terms['terms_note'] ?? null,
+                'status' => 'active',
+                'reviewed_by_user_id' => $userId,
+                'reviewed_at' => now(),
+                'accepted_at' => now(),
+            ]);
+            $monthly = round($remaining / $months, 2);
+            for ($i = 1; $i <= $months; $i++) {
+                $due = $i === $months ? round($remaining - $monthly * ($months - 1), 2) : $monthly;
+                InstallmentPayment::create(['installment_plan_id' => $plan->installment_plan_id, 'installment_number' => $i, 'due_date' => $first->copy()->addMonthsNoOverflow($i - 1)->toDateString(), 'amount_due' => $due, 'status' => 'unpaid']);
+            }
+            Audit::log('create', 'pay_installment_plans', $plan->installment_plan_id, 'Clinic-created installment plan with in-clinic down payment', null, ['total' => $total, 'downpayment_percent' => $percent, 'downpayment_amount' => $downpayment, 'remaining' => $remaining, 'months' => $months], $userId);
+            $this->notify($plan->fresh(), 'installment_approved', ['months' => $months, 'net_amount' => number_format($remaining, 2)]);
+            return $plan;
         });
     }
-    public function approve(InstallmentPlan $plan,array $v,int $userId): void
-    {
-        DB::transaction(function()use($plan,$v,$userId){$p=InstallmentPlan::whereKey($plan->installment_plan_id)->lockForUpdate()->firstOrFail(); if($p->status!=='requested') throw ValidationException::withMessages(['plan'=>'This request has already been reviewed.']);
-            $total=(float)$v['total_amount']; $discountId=$v['discount_id']??null; $discount=0;
-            if($discountId){$d=Discount::where('is_active',1)->findOrFail($discountId);$discount=round($total*(float)$d->discount_percent/100,2);}
-            if($discount>$total) throw ValidationException::withMessages(['discount_id'=>'Discount exceeds plan total.']);
-            $rate=(float)($v['interest_rate_percent']??0); $netBase=round($total-$discount,2); $charge=round($netBase*$rate/100,2); $net=round($netBase+$charge,2); $n=(int)$v['number_of_installments']; $first=Carbon::parse($v['first_due_date']);
-            $p->update(['total_amount'=>$total,'discount_id'=>$discountId,'discount_amount'=>$discount,'interest_rate_percent'=>$rate,'interest_amount'=>$charge,'net_amount'=>$net,'number_of_installments'=>$n,'first_due_date'=>$first->toDateString(),'terms_note'=>$v['terms_note']??null,'status'=>'approved','reviewed_by_user_id'=>$userId,'reviewed_at'=>now(),'rejection_reason'=>null]);
-            $monthly=round($net/$n,2); for($i=1;$i<=$n;$i++){ $due=$i===$n?round($net-$monthly*($n-1),2):$monthly; InstallmentPayment::create(['installment_plan_id'=>$p->installment_plan_id,'installment_number'=>$i,'due_date'=>$first->copy()->addMonthsNoOverflow($i-1)->toDateString(),'amount_due'=>$due,'status'=>'unpaid']); }
-            Audit::log('approve','pay_installment_plans',$p->installment_plan_id,'Installment terms approved',null,['total'=>$total,'discount'=>$discount,'interest_rate_percent'=>$rate,'interest_amount'=>$charge,'net_amount'=>$net,'months'=>$n,'first_due_date'=>$first->toDateString()]);
-            $this->notify($p->fresh(),'installment_approved',['months'=>$n,'net_amount'=>number_format($net,2)]);
-        });
-    }
-    public function reject(InstallmentPlan $plan,string $reason,int $userId):void{DB::transaction(function()use($plan,$reason,$userId){$p=InstallmentPlan::whereKey($plan->installment_plan_id)->lockForUpdate()->firstOrFail();if($p->status!=='requested')throw ValidationException::withMessages(['plan'=>'Only pending requests can be rejected.']);$p->update(['status'=>'rejected','rejection_reason'=>$reason,'reviewed_by_user_id'=>$userId,'reviewed_at'=>now()]);Audit::log('reject','pay_installment_plans',$p->installment_plan_id,'Installment request rejected: '.$reason);$this->notify($p,'installment_rejected',['reason'=>$reason]);});}
-    public function accept(InstallmentPlan $plan,int $userId):void{DB::transaction(function()use($plan,$userId){$p=InstallmentPlan::whereKey($plan->installment_plan_id)->lockForUpdate()->firstOrFail();if($p->status!=='approved')throw ValidationException::withMessages(['plan'=>'Only approved plans can be accepted.']);$p->update(['status'=>'active','accepted_at'=>now()]);Consent::create(['user_id'=>$userId,'patient_id'=>$p->patient_id,'consent_type'=>'installment_terms','policy_version'=>'plan-'.$p->installment_plan_id,'is_accepted'=>1,'accepted_at'=>now(),'ip_address'=>request()->ip()]);Audit::log('accept','pay_installment_plans',$p->installment_plan_id,'Patient accepted disclosed installment terms');});}
-    public function decline(InstallmentPlan $plan):void{DB::transaction(function()use($plan){$p=InstallmentPlan::whereKey($plan->installment_plan_id)->lockForUpdate()->firstOrFail();if($p->status!=='approved')throw ValidationException::withMessages(['plan'=>'Only approved plans can be declined.']);$p->update(['status'=>'cancelled']);Audit::log('decline','pay_installment_plans',$p->installment_plan_id,'Patient declined installment terms');});}
     public function submitProof(InstallmentPayment $row,$file,?string $reference):void{$old=$row->proof_file_path;$path=$file->store('installment-proofs/'.$row->installment_plan_id);$row->update(['proof_file_path'=>$path,'proof_uploaded_at'=>now(),'reference_number'=>$reference,'status'=>'proof_submitted','rejection_reason'=>null]);if($old)Storage::disk('local')->delete($old);Audit::log('upload_proof','pay_installment_payments',$row->installment_payment_id,'Payment proof uploaded');}
     public function verify(InstallmentPayment $row,int $userId):void
     {

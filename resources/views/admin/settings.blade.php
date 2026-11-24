@@ -18,14 +18,38 @@
     @php
       $firstHour = $hours->first();
       $sameHoursEveryDay = $hours->count() === 7 && $hours->every(fn ($h) => ! $h->is_closed && $h->open_time === $firstHour->open_time && $h->close_time === $firstHour->close_time);
-      $defaultOpen = old('default_open', $sameHoursEveryDay ? substr($firstHour->open_time, 0, 5) : '08:00');
-      $defaultClose = old('default_close', $sameHoursEveryDay ? substr($firstHour->close_time, 0, 5) : '19:00');
+      $commonHours = $hours->where('is_closed', false)->groupBy(fn ($h) => substr($h->open_time, 0, 5).'|'.substr($h->close_time, 0, 5))->sortByDesc(fn ($rows) => $rows->count())->keys()->first();
+      [$commonOpen, $commonClose] = $commonHours ? explode('|', $commonHours) : ['08:00', '19:00'];
+      $defaultOpen = old('default_open', $commonOpen);
+      $defaultClose = old('default_close', $commonClose);
     @endphp
-    <p class="text-secondary">Set one default schedule for every day. It applies to patient appointment availability for all upcoming dates. Use a date override for holidays or special days.</p>
+    <p class="text-secondary">Set one default schedule for every day. It applies to patient appointment availability for all upcoming dates. Add a recurring weekday adjustment below when a particular day has different hours. Use a date override for holidays or one-off special days.</p>
     <div class="row g-3 align-items-end">
       <div class="col-sm-4"><label class="form-label fw-semibold" for="defaultOpen">Default working hours</label><input id="defaultOpen" type="time" class="form-control" name="default_open" value="{{ $defaultOpen }}" required></div>
       <div class="col-sm-4"><label class="form-label" for="defaultClose">Until</label><input id="defaultClose" type="time" class="form-control" name="default_close" value="{{ $defaultClose }}" required></div>
-      <div class="col-sm-4 text-secondary small">{{ $sameHoursEveryDay ? 'Currently applied every day.' : 'Saving applies these hours Sunday through Saturday.' }}</div>
+      <div class="col-sm-4 text-secondary small">The default applies to every weekday unless an adjustment below is enabled.</div>
+    </div>
+    <hr class="my-4">
+    <h2 class="h6 mb-1">Recurring weekday adjustments</h2>
+    <p class="text-secondary small mb-3">Edit any weekday directly. Hours matching the default follow the default; different hours are saved as a recurring adjustment.</p>
+    <div class="row g-3">
+      @foreach ($days as $dayNumber => $dayName)
+        @php
+          $hour = $hours->get($dayNumber);
+          $open = old("days.$dayNumber.open", $hour?->open_time ? substr($hour->open_time, 0, 5) : $defaultOpen);
+          $close = old("days.$dayNumber.close", $hour?->close_time ? substr($hour->close_time, 0, 5) : $defaultClose);
+          $isClosed = old("days.$dayNumber.closed", (bool) $hour?->is_closed);
+        @endphp
+        <div class="col-md-6 col-xl-4">
+          <div class="border rounded p-3 h-100">
+            <div class="d-flex justify-content-between gap-2 mb-3"><div class="fw-semibold">{{ $dayName }}</div><div class="form-check"><input class="form-check-input" type="checkbox" name="days[{{ $dayNumber }}][closed]" value="1" id="closedDay{{ $dayNumber }}" @checked($isClosed)><label class="form-check-label small" for="closedDay{{ $dayNumber }}">Closed</label></div></div>
+            <div class="row g-2">
+              <div class="col-6"><label class="form-label small" for="dayOpen{{ $dayNumber }}">Open</label><input id="dayOpen{{ $dayNumber }}" type="time" class="form-control" name="days[{{ $dayNumber }}][open]" value="{{ $open }}"></div>
+              <div class="col-6"><label class="form-label small" for="dayClose{{ $dayNumber }}">Until</label><input id="dayClose{{ $dayNumber }}" type="time" class="form-control @error("days.$dayNumber.close") is-invalid @enderror" name="days[{{ $dayNumber }}][close]" value="{{ $close }}">@error("days.$dayNumber.close")<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
+            </div>
+          </div>
+        </div>
+      @endforeach
     </div>
   </div><div class="card-footer bg-white text-end"><button class="btn btn-primary">Save hours</button></div></form>
 </div>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Dentist;
 use App\Models\OdoConditionCode;
 use App\Models\OdoFinding;
 use App\Models\OdoFindingHistory;
@@ -12,7 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 /**
- * Digital odontogram (FDI). Dentists create/edit/remove findings; admin has read-only access.
+ * Digital odontogram (FDI). Dentists and admins create/edit/remove findings.
  * Every change is appended to odo_finding_history (never updated or deleted).
  */
 class OdontogramController extends Controller
@@ -24,7 +25,7 @@ class OdontogramController extends Controller
         return view('odontogram.index', [
             'patients' => Patient::orderBy('last_name')->orderBy('first_name')->get(['patient_id', 'patient_code', 'first_name', 'middle_name', 'last_name', 'birth_date', 'sex']),
             'conditions' => OdoConditionCode::where('is_active', 1)->orderBy('category')->orderBy('label')->get(),
-            'canEdit' => $request->user()->hasRole('dentist') && $request->user()->dentist,
+            'canEdit' => $request->user()->hasRole('admin', 'dentist'),
             'selected' => (int) $request->query('patient'),
         ]);
     }
@@ -106,9 +107,19 @@ class OdontogramController extends Controller
     // ---------------------------------------------------------------- helpers
     private function writer(Request $request)
     {
-        $d = $request->user()->hasRole('dentist') ? $request->user()->dentist : null;
-        abort_if(! $d, 403, 'Only dentists can edit the odontogram.');
-        return $d;
+        $user = $request->user();
+        abort_unless($user->hasRole('admin', 'dentist'), 403, 'Only dentists and admins can edit the odontogram.');
+
+        if ($user->dentist) {
+            return $user->dentist;
+        }
+
+        // Odontogram findings reference a dentist record. Create one for an admin
+        // on first use, while keeping it out of the booking-provider list.
+        return Dentist::create([
+            'user_id' => $user->user_id,
+            'is_accepting_bookings' => false,
+        ]);
     }
 
     private function validated(Request $request): array
