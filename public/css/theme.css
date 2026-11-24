@@ -242,7 +242,7 @@ body:has(.landing-nav) {
 /* Landing page visual refresh */
 body:has(.landing-nav) { background: #062d29; color: #f5fffc; }
 .landing-nav { position: relative !important; background: transparent; }
-.landing-nav-frame { width: 100%; margin: 0 auto; padding: 0 24px; background: linear-gradient(105deg, #104b3d 0%, #073b39 48%, #082f3a 100%); }
+.landing-nav-frame { width: 100%; margin: 0 auto; padding: 0 24px; background: transparent; }
 .landing-nav-inner { min-height: 80px; border: 0; border-radius: 0; background: transparent; }
 .landing-nav .container-fluid { padding-left: 0 !important; padding-right: 0 !important; justify-content: space-between; }
 .landing-nav .navbar-brand { color: #f5fffc; margin: 0; gap: 12px; text-decoration: none; }
