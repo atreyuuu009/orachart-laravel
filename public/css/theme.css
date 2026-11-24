@@ -241,7 +241,7 @@ body:has(.landing-nav) {
 
 /* Landing page visual refresh */
 body:has(.landing-nav) { background: #062d29; color: #f5fffc; }
-.landing-nav { position: relative !important; background: transparent; }
+.landing-nav { position: absolute !important; top: 0; left: 0; z-index: 1030; width: 100%; background: transparent; border: 0; box-shadow: none; }
 .landing-nav-frame { width: 100%; margin: 0 auto; padding: 0 24px; background: transparent; }
 .landing-nav-inner { min-height: 80px; border: 0; border-radius: 0; background: transparent; }
 .landing-nav .container-fluid { padding-left: 0 !important; padding-right: 0 !important; justify-content: space-between; }
@@ -253,7 +253,7 @@ body:has(.landing-nav) { background: #062d29; color: #f5fffc; }
 .brand-tooth svg { display: block; width: 34px; height: 34px; }
 .landing-nav .btn-primary.nav-cta { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; border: 1px solid rgba(101, 185, 157, .22); border-radius: 999px; background: rgba(3, 42, 38, .62); color: #fff; font-size: .88rem; font-weight: 650; padding: .65rem 1.35rem; white-space: nowrap; }
 .landing-nav .btn-primary.nav-cta:hover, .landing-nav .btn-primary.nav-cta:focus-visible { background: #145347; border-color: rgba(142, 219, 189, .55); color: #fff; }
-.landing-hero { min-height: 510px; padding: 2.8rem 0 3rem; text-align: left; background: radial-gradient(ellipse at 12% 5%, rgba(12, 101, 70, .48), transparent 48%), radial-gradient(ellipse at 92% 12%, rgba(12, 57, 83, .62), transparent 52%), linear-gradient(120deg, #073a30, #062c2d 58%, #062b36); }
+.landing-hero { min-height: 510px; padding: 8rem 0 3rem; text-align: left; background: radial-gradient(ellipse at 12% 5%, rgba(12, 101, 70, .48), transparent 48%), radial-gradient(ellipse at 92% 12%, rgba(12, 57, 83, .62), transparent 52%), linear-gradient(120deg, #073a30, #062c2d 58%, #062b36); }
 .landing-hero .container { width: 100%; max-width: none; margin: 0; padding: 0 24px 0 40px; }
 .landing-hero .eyebrow { margin-top: .1rem; padding: .38rem .95rem; border: 1px solid rgba(73, 192, 164, .2); background: rgba(3, 35, 32, .45); color: #35d4b5; font-size: .76rem; font-weight: 500; letter-spacing: 0; }
 .landing-hero h1 { max-width: 900px; margin: .8rem 0 1rem; color: #f7fbfa; font-size: clamp(2.35rem, 5.2vw, 3rem); font-weight: 750; letter-spacing: -.025em; line-height: 1.12; }
@@ -278,7 +278,7 @@ body:has(.landing-nav) { background: #062d29; color: #f5fffc; }
   .landing-nav .brand-divider { height: 26px; }
   .landing-nav .brand-clinic { font-size: .52rem; }
   .landing-nav .btn-primary.nav-cta { min-height: 40px; padding: .5rem .85rem; font-size: .8rem; }
-  .landing-hero { min-height: 540px; padding: 3rem 0 2.5rem; }
+  .landing-hero { min-height: 540px; padding: 7rem 0 2.5rem; }
   .landing-hero .container { padding: 0 40px; }
   .landing-hero h1 { font-size: clamp(2.1rem, 9vw, 2.65rem); }
   .landing-hero .lead { font-size: 1.05rem; }
