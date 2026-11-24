@@ -10,19 +10,15 @@
   <div class="landing-nav-frame">
     <div class="landing-nav-inner">
       <div class="container-fluid px-3 px-xl-5">
-        <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('landing') }}">
-          <span class="brand-tooth" aria-hidden="true">
-            <svg viewBox="0 0 32 32" focusable="false">
-              <path d="M10.1 5.1c-3.4 0-5.8 2.6-5.8 6.1 0 4.2 2.1 7.4 2.9 12 .4 2.2 1.1 5 2.8 5 1.4 0 2-2.8 2.7-5.6.6-2.4 1.2-4.2 2.3-4.2s1.7 1.8 2.3 4.2c.7 2.8 1.3 5.6 2.7 5.6 1.7 0 2.4-2.8 2.8-5 .8-4.6 2.9-7.8 2.9-12 0-3.5-2.4-6.1-5.8-6.1-2 0-3.5 1.2-4.9 2.4-1.4-1.2-2.9-2.4-4.9-2.4Z" fill="currentColor"/>
-              <path d="M25 1.5 26.2 5l3.3 1.2-3.3 1.2L25 11l-1.2-3.6-3.3-1.2L23.8 5 25 1.5Z" fill="currentColor"/>
-            </svg>
-          </span>
-          <span class="lh-sm"><strong>Guda &amp; Soriano</strong><br><small>Dental Clinic</small></span>
+        <a class="navbar-brand d-flex align-items-center" href="{{ route('landing') }}">
+          <span class="brand-name">Guda &amp; Soriano</span>
+          <span class="brand-divider" aria-hidden="true"></span>
+          <span class="brand-clinic">Dental<br>Clinic</span>
         </a>
         @auth
-          <a class="btn btn-primary" href="{{ route('dashboard') }}">My Account</a>
+          <a class="btn btn-primary nav-cta" href="{{ route('dashboard') }}">My Account <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i></a>
         @else
-          <a class="btn btn-primary" href="{{ route('register') }}">Register</a>
+          <a class="btn btn-primary nav-cta" href="{{ route('register') }}">Register <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i></a>
         @endauth
       </div>
     </div>
