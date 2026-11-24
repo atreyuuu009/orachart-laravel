@@ -270,6 +270,33 @@ body:has(.landing-nav) { background: #062d29; color: #f5fffc; }
 .treatment-list { display: flex; justify-content: flex-start; flex-wrap: wrap; gap: 2rem; }
 .treatment-list a { display: inline-flex; align-items: center; gap: .65rem; color: #f0f8f6; font-size: .9rem; font-weight: 600; text-decoration: none; }
 .treatment-list a span { color: #13bd9d; font-size: 1.1rem; }
+.landing-hero .container { display: flex; align-items: center; justify-content: space-between; gap: clamp(2rem, 5vw, 6rem); }
+.hero-copy { position: relative; z-index: 1; flex: 0 1 58%; min-width: 0; }
+.hero-copy h1 { max-width: 700px; }
+.hero-copy .lead { max-width: 580px; }
+.hero-tooth-stage { position: relative; display: grid; flex: 0 1 42%; min-width: 300px; min-height: 390px; place-items: center; perspective: 1000px; }
+.hero-tooth-glow { position: absolute; width: min(34vw, 440px); aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, rgba(31, 180, 159, .22), rgba(31, 180, 159, .07) 44%, transparent 72%); filter: blur(12px); }
+.hero-tooth { position: relative; z-index: 1; display: block; width: min(100%, 410px); max-height: 410px; overflow: visible; transform-style: preserve-3d; animation: tooth-turn 13s ease-in-out infinite; }
+.tooth-depth { fill: #6ca7a7; opacity: .78; }
+.tooth-shell { fill: url(#toothShell); stroke: rgba(224, 255, 251, .72); stroke-width: 5; stroke-linejoin: round; }
+.tooth-highlight { fill: none; stroke: rgba(245, 255, 255, .72); stroke-width: 8; stroke-linejoin: round; }
+.tooth-inner { fill: rgba(221, 247, 245, .48); stroke: rgba(147, 202, 201, .48); stroke-width: 5; }
+.tooth-shine { fill: none; stroke: rgba(255, 255, 255, .7); stroke-width: 5; stroke-linecap: round; }
+@keyframes tooth-turn {
+  0%, 12% { transform: rotateY(-18deg) rotateX(2deg) translateY(0); }
+  50% { transform: rotateY(18deg) rotateX(-2deg) translateY(-8px); }
+  88%, 100% { transform: rotateY(-18deg) rotateX(2deg) translateY(0); }
+}
+@media (max-width: 767.98px) {
+  .landing-hero .container { flex-direction: column; align-items: stretch; gap: 1rem; }
+  .hero-copy { flex-basis: auto; }
+  .hero-tooth-stage { min-width: 0; min-height: 280px; flex-basis: auto; }
+  .hero-tooth { width: min(76vw, 290px); max-height: 290px; }
+  .hero-tooth-glow { width: min(70vw, 300px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-tooth { animation: none; }
+}
 @media (max-width: 575.98px) {
   .landing-nav-frame { padding: 0 16px; }
   .landing-nav-inner { min-height: 68px; }

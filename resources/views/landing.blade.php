@@ -28,6 +28,7 @@
 <main class="landing-main">
 <header class="landing-hero">
   <div class="container">
+    <div class="hero-copy">
     <div class="eyebrow mb-3">Guda &amp; Soriano Dental Clinic</div>
     <h1>Healthy Smiles Start With <span>Trusted<br class="d-none d-md-block"> Dental Care.</span></h1>
     <p class="lead">From cleanings and fillings to braces, extractions, and crowns — clear<br class="d-none d-md-block"> prices, careful treatment, and a calm clinic experience for every<br class="d-none d-md-block"> patient.</p>
@@ -42,6 +43,35 @@
           <a href="#services"><span aria-hidden="true">&#10022;</span>{{ $treatment }}</a>
         @endforeach
       </div>
+    </div>
+    </div>
+    <div class="hero-tooth-stage" aria-hidden="true">
+      <div class="hero-tooth-glow"></div>
+      <svg class="hero-tooth" viewBox="0 0 420 460" role="presentation" focusable="false">
+        <defs>
+          <linearGradient id="toothShell" x1=".12" y1=".04" x2=".9" y2=".94">
+            <stop offset="0" stop-color="#f5ffff"/>
+            <stop offset=".42" stop-color="#d8f2ef"/>
+            <stop offset=".76" stop-color="#a9d7d4"/>
+            <stop offset="1" stop-color="#75b5b2"/>
+          </linearGradient>
+          <linearGradient id="toothSide" x1="0" y1="0" x2="1" y2="1">
+            <stop stop-color="#b7e2df"/>
+            <stop offset="1" stop-color="#6ea9a8"/>
+          </linearGradient>
+          <filter id="toothShadow" x="-40%" y="-30%" width="180%" height="180%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="12"/>
+            <feOffset dy="14"/>
+            <feComponentTransfer><feFuncA type="linear" slope=".3"/></feComponentTransfer>
+            <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <path class="tooth-depth" d="M210 76c-43-42-111-45-151-5-43 44-27 112-13 165l33 130c8 32 31 45 49 18l38-78c11-22 28-22 39 0l38 78c18 27 41 14 49-18l33-130c14-53 30-121-13-165-40-40-108-37-151 5z" transform="translate(18 8)"/>
+        <path class="tooth-shell" filter="url(#toothShadow)" d="M210 76c-43-42-111-45-151-5-43 44-27 112-13 165l33 130c8 32 31 45 49 18l38-78c11-22 28-22 39 0l38 78c18 27 41 14 49-18l33-130c14-53 30-121-13-165-40-40-108-37-151 5z"/>
+        <path class="tooth-highlight" d="M207 119c-34-31-86-34-116-4-30 31-17 83-6 126l29 107c4 15 12 18 21 2l34-70c23-47 50-47 73 0l34 70c9 16 17 13 21-2l29-107c11-43 24-95-6-126-30-30-82-27-116 4z"/>
+        <path class="tooth-inner" d="M207 151c-26-22-62-23-83-2-22 23-11 62-3 94l23 84c3 10 7 11 13 1l27-54c17-34 37-34 54 0l27 54c6 10 10 9 13-1l23-84c8-32 19-71-3-94-21-21-57-20-83 2z"/>
+        <path class="tooth-shine" d="M102 103c27-25 66-27 95-11M83 134c-12 25-6 61 1 88M318 103c-27-25-66-27-95-11"/>
+      </svg>
     </div>
   </div>
 </header>
