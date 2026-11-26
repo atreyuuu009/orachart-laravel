@@ -35,6 +35,8 @@
       ['admin.settings', 'Clinic Settings', 'admin.settings*', 'bi-gear'],
       ['admin.users', 'User Management', 'admin.users*', 'bi-person-gear'],
       ['admin.logs', 'Audit & E-mail Logs', 'admin.logs', 'bi-journal-text'],
+      ['admin.revenue', 'Revenue', 'admin.revenue*', 'bi-graph-up-arrow'],
+      ['admin.demographics', 'Patient Demographics', 'admin.demographics*', 'bi-pie-chart'],
       ['installments.index', 'Installments', 'installments.*', 'bi-credit-card'],
     ],
     default => [['dashboard', 'Dashboard', 'dashboard', 'bi-speedometer2']],
