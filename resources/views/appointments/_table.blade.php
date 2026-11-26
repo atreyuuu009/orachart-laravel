@@ -18,7 +18,7 @@
         $isNeedsResched = $a->needs_reschedule && $a->isOpen();
         $latestEmail = $isNeedsResched && ! $patientView ? $a->latestRescheduleEmail() : null;
       @endphp
-      <div class="apt-row {{ $patientView ? 'apt-row-patient' : '' }} {{ $isNeedsResched ? 'apt-row-needs-reschedule' : '' }} {{ $a->is_emergency ? 'apt-row-emergency' : '' }}">
+      <div class="apt-row {{ $patientView ? 'apt-row-patient' : '' }} {{ $actions ? '' : 'apt-row-no-actions' }} {{ $isNeedsResched ? 'apt-row-needs-reschedule' : '' }} {{ $a->is_emergency ? 'apt-row-emergency' : '' }}">
         <div class="apt-col-time">
           <div class="apt-time-main">{{ $a->start_at->format('g:i A') }}</div>
           <div class="apt-time-sub">to {{ $a->start_at->copy()->addMinutes($a->service->duration_minutes)->format('g:i A') }}</div>

@@ -103,15 +103,24 @@ class PatientController extends Controller
         }
 
         // Clinical alert filter: allergies, medical conditions or flagged checklist items.
+        $hasAlerts = function ($profile) {
+            $profile->where(function ($w) {
+                $w->where(fn ($x) => $x->whereNotNull('allergies')->where('allergies', '!=', ''))
+                    ->orWhere(fn ($x) => $x->whereNotNull('medical_conditions')->where('medical_conditions', '!=', ''))
+                    ->orWhereJsonLength('structured_checklist->items', '>', 0);
+            });
+        };
+
+        $totalBeforeAlerts = (clone $query)->count();
+        $withAlertsCount = (clone $query)->whereHas('healthProfile', $hasAlerts)->count();
+        $alertCounts = [
+            'all' => $totalBeforeAlerts,
+            'with' => $withAlertsCount,
+            'without' => max(0, $totalBeforeAlerts - $withAlertsCount),
+        ];
+
         $alerts = (string) $request->query('alerts');
         if (in_array($alerts, ['with', 'without'], true)) {
-            $hasAlerts = function ($profile) {
-                $profile->where(function ($w) {
-                    $w->where(fn ($x) => $x->whereNotNull('allergies')->where('allergies', '!=', ''))
-                        ->orWhere(fn ($x) => $x->whereNotNull('medical_conditions')->where('medical_conditions', '!=', ''))
-                        ->orWhereJsonLength('structured_checklist->items', '>', 0);
-                });
-            };
             $alerts === 'with'
                 ? $query->whereHas('healthProfile', $hasAlerts)
                 : $query->whereDoesntHave('healthProfile', $hasAlerts);
@@ -141,7 +150,13 @@ class PatientController extends Controller
                 break;
         }
 
-        return view('patients.index', ['patients' => $query->paginate(20)->withQueryString()]);
+        return view('patients.index', [
+            'patients' => $query->paginate(20)->withQueryString(),
+            'alertCounts' => $alertCounts,
+            'activeVisit' => $visit,
+            'activeAlerts' => $alerts,
+            'activeSort' => $sort,
+        ]);
     }
 
     public function create(Request $request)

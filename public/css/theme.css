@@ -263,13 +263,15 @@
 .apt-date-header:first-child { border-top-left-radius: .85rem; border-top-right-radius: .85rem; }
 .apt-date-count { font-weight: 500; color: #64748b; }
 
-.apt-row { display: grid; grid-template-columns: 110px minmax(170px, 1.1fr) minmax(200px, 1.4fr) auto auto; align-items: center; gap: 1rem; padding: .85rem 1.25rem; border-bottom: 1px solid #f1f5f9; transition: background-color .12s ease; position: relative; }
-.apt-row.apt-row-patient { grid-template-columns: 110px minmax(220px, 1.5fr) auto auto; }
+.apt-row { display: grid; grid-template-columns: 105px minmax(170px, 1fr) minmax(210px, 1.3fr) 230px 145px; align-items: center; gap: 1rem; padding: .85rem 1.25rem .85rem calc(1.25rem - 3px); border-bottom: 1px solid #f1f5f9; border-left: 3px solid transparent; transition: background-color .12s ease; position: relative; }
+.apt-row.apt-row-no-actions { grid-template-columns: 105px minmax(170px, 1fr) minmax(210px, 1.3fr) 230px; }
+.apt-row.apt-row-patient { grid-template-columns: 105px minmax(220px, 1.4fr) 230px 145px; }
+.apt-row.apt-row-patient.apt-row-no-actions { grid-template-columns: 105px minmax(220px, 1.4fr) 230px; }
 .apt-row:last-child { border-bottom: 0; border-bottom-left-radius: .85rem; border-bottom-right-radius: .85rem; }
 .apt-row:hover { background-color: #f8fafc; }
 .apt-row-needs-reschedule { background-color: #fef3c7; border-bottom-color: #fde68a; }
 .apt-row-needs-reschedule:hover { background-color: #fde68a; }
-.apt-row-emergency { border-left: 3px solid #dc2626; padding-left: calc(1.25rem - 3px); }
+.apt-row-emergency { border-left-color: #dc2626; }
 
 .apt-time-main { font-weight: 700; font-size: .88rem; color: #0f172a; line-height: 1.25; }
 .apt-time-sub { font-size: .78rem; color: #64748b; margin-top: 2px; }
@@ -305,4 +307,50 @@
   .apt-col-procedure { grid-column: 1 / -1; }
   .apt-col-status { grid-column: 1 / -1; justify-content: flex-start; }
   .apt-status-group { justify-content: flex-start; }
+}
+
+/* ---------- patients list redesign ---------- */
+.pat-row { display: grid; grid-template-columns: minmax(190px, 1.15fr) minmax(210px, 1.35fr) minmax(170px, 1fr) minmax(130px, .8fr) 120px; align-items: center; gap: 1rem; padding: .9rem 1.25rem .9rem calc(1.25rem - 3px); border-bottom: 1px solid #f1f5f9; border-left: 3px solid transparent; transition: background-color .12s ease; }
+.pat-row:last-child { border-bottom: 0; border-bottom-left-radius: .85rem; border-bottom-right-radius: .85rem; }
+.pat-row:hover { background-color: #f8fafc; }
+.pat-row-alert { border-left-color: #dc2626; }
+.pat-name { font-weight: 600; font-size: .92rem; color: var(--gs-primary); text-decoration: none; line-height: 1.25; }
+.pat-name:hover { text-decoration: underline; }
+.pat-sub { font-size: .78rem; color: #64748b; margin-top: 2px; }
+.pat-contact-main { font-weight: 500; font-size: .88rem; color: #0f172a; line-height: 1.25; }
+.pat-visit-main { font-weight: 500; font-size: .86rem; color: #0f172a; line-height: 1.25; }
+.pat-muted { font-size: .82rem; color: #94a3b8; }
+@media (max-width: 991.98px) {
+  .pat-row { grid-template-columns: 1fr auto; gap: .5rem .75rem; }
+  .pat-col-main { grid-column: 1 / 2; }
+  .pat-col-action { grid-column: 2 / 3; grid-row: 1 / 2; }
+  .pat-col-alerts, .pat-col-contact, .pat-col-visit { grid-column: 1 / -1; }
+}
+
+/* ---------- user management list redesign ---------- */
+.usr-row { display: grid; grid-template-columns: minmax(180px, 1.1fr) minmax(180px, 1fr) 160px 145px 380px; align-items: center; gap: 1rem; padding: .9rem 1.25rem .9rem calc(1.25rem - 4px); border-bottom: 1px solid #f1f5f9; border-left: 4px solid transparent; transition: background-color .12s ease; }
+.usr-row:last-child { border-bottom: 0; border-bottom-left-radius: .85rem; border-bottom-right-radius: .85rem; }
+.usr-row:hover { background-color: #f8fafc; }
+.usr-row-active { border-left-color: #16a34a; }
+.usr-row-inactive { border-left-color: #dc2626; background-color: #fef2f2; }
+.usr-row-inactive:hover { background-color: #fee2e2; }
+@media (max-width: 1199.98px) {
+  .usr-row { grid-template-columns: 1fr 1fr; gap: .6rem 1rem; }
+  .usr-col-actions { grid-column: 1 / -1; }
+}
+@media (max-width: 767.98px) {
+  .usr-row { grid-template-columns: 1fr; }
+}
+
+/* ---------- dentist schedule redesign ---------- */
+.sch-day-row { display: grid; grid-template-columns: 145px 1fr 1fr auto; align-items: center; gap: .75rem; padding: .7rem 1.25rem; border-bottom: 1px solid #f1f5f9; transition: background-color .12s ease; }
+.sch-day-row:last-child { border-bottom: 0; }
+.sch-day-row:hover { background-color: #f8fafc; }
+.sch-day-off { background-color: #fafafa; }
+.sch-clear-btn { border: 1px solid #e2e8f0; background: #fff; color: #64748b; font-size: .75rem; font-weight: 600; padding: .25rem .55rem; border-radius: .45rem; }
+.sch-clear-btn:hover { background: #f1f5f9; color: #0f172a; }
+.sch-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .85rem 1.25rem; background: #f8fafc; border-top: 1px solid #e2e8f0; border-bottom-left-radius: .85rem; border-bottom-right-radius: .85rem; }
+@media (max-width: 575.98px) {
+  .sch-day-row { grid-template-columns: 1fr 1fr; }
+  .sch-day-label { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; }
 }
