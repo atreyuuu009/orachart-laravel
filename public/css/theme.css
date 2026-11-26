@@ -343,6 +343,103 @@ body:has(.landing-nav) { background: #062d29; color: #f5fffc; }
 .slot.selected { background: var(--gs-primary); color: #fff; border-color: var(--gs-primary); }
 .slot.selected small { color: #dbe4ff; }
 .slot:disabled { background: #f1f3f7; color: #aab1bf; cursor: not-allowed; }
+
+/* ---------- landing service cards ---------- */
+body:has(.landing-nav) #services {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: clamp(3.5rem, 7vw, 6rem) 0;
+  background: radial-gradient(ellipse at 12% 5%, #073e62 0, transparent 45%),
+              linear-gradient(118deg, #03273e 0%, #011b2b 48%, #020b12 100%);
+}
+body:has(.landing-nav) #services::before { display: none; }
+body:has(.landing-nav) #services > .container {
+  max-width: 1080px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+body:has(.landing-nav) #services .eyebrow { color: #8bd3ff; }
+body:has(.landing-nav) #services h2 { color: #f4f9ff; }
+body:has(.landing-nav) #services .text-secondary { color: #a9bac9 !important; }
+.service-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.service-card--glass {
+  position: relative;
+  display: flex;
+  min-height: 172px;
+  align-items: flex-end;
+  overflow: hidden;
+  padding: 24px 58px 20px 20px;
+  border: 1px solid rgba(209, 232, 248, .34);
+  border-radius: 24px;
+  background: linear-gradient(145deg, rgba(220, 242, 255, .25), rgba(111, 153, 181, .13) 46%, rgba(1, 16, 27, .72));
+  box-shadow: 0 9px 0 rgba(2, 20, 32, .65), 0 12px 28px rgba(17, 114, 171, .13), inset 0 1px rgba(255, 255, 255, .08);
+  backdrop-filter: blur(14px);
+  transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease, background .25s ease;
+}
+.service-card--glass::before {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 18% 0%, rgba(179, 225, 255, .13), transparent 58%);
+  content: "";
+  pointer-events: none;
+}
+.service-card--glass:hover {
+  transform: translateY(-6px);
+  border-color: rgba(165, 221, 255, .7);
+  box-shadow: 0 13px 0 rgba(2, 20, 32, .55), 0 18px 38px rgba(39, 161, 228, .24), 0 0 24px rgba(94, 190, 247, .12), inset 0 1px rgba(255, 255, 255, .12);
+}
+.service-card-icon {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, .72);
+  border-radius: 50%;
+  background: linear-gradient(145deg, #f6fcff, #8dcefa);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, .26), inset 0 1px 3px rgba(255, 255, 255, .9);
+  color: #1474b4;
+  font-size: 1.35rem;
+}
+.service-card-copy { position: relative; z-index: 1; min-width: 0; }
+.service-card-copy h3 { margin: 0 0 3px; color: #f2f7fc; font-size: 1rem; font-weight: 650; letter-spacing: -.015em; }
+.service-card-copy p { margin: 0; color: #b7c8d5; font-size: .88rem; }
+.service-card-arrow {
+  position: absolute;
+  right: 16px;
+  bottom: 18px;
+  z-index: 1;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, .8);
+  border-radius: 50%;
+  background: linear-gradient(145deg, #f3fbff, #83c8f5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .24);
+  color: #0b5789;
+  font-size: 1.05rem;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.service-card-arrow:hover, .service-card-arrow:focus-visible { transform: translateX(3px); box-shadow: 0 0 18px rgba(119, 204, 255, .5); }
+@media (max-width: 767.98px) {
+  .service-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .service-card--glass { min-height: 162px; padding-left: 16px; }
+}
+@media (max-width: 479.98px) {
+  body:has(.landing-nav) #services > .container { padding: 0 18px; }
+  .service-grid { grid-template-columns: 1fr; gap: 14px; }
+  .service-card--glass { min-height: 156px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .service-card--glass, .service-card-arrow { transition: none; }
+}
 .proc-option { border: 1px solid var(--bs-border-color); border-radius: .65rem; padding: .65rem .85rem; cursor: pointer; display: flex; gap: .75rem; align-items: flex-start; }
 .proc-option:hover { background: var(--gs-blue-light); }
 .proc-option input { margin-top: .3rem; }

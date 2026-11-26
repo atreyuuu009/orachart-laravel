@@ -82,7 +82,7 @@
     <h2>Dental Services &amp; Price Guide</h2>
     <p class="text-secondary">Browse our treatments and indicative prices before creating an account.</p>
   </div>
-  @include('partials.services', ['categories' => $categories])
+  @include('partials.landing-services', ['categories' => $categories])
 </div></section>
 
 <section id="why" class="section-pad bg-white"><div class="container">
