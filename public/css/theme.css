@@ -484,3 +484,7 @@ body:has(.landing-nav) .landing-hero,
 body:has(.landing-nav) #services {
   background: transparent;
 }
+body:has(.landing-nav) .landing-hero .eyebrow,
+body:has(.landing-nav) .landing-hero h1 span {
+  color: #8bd3ff;
+}
