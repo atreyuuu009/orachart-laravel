@@ -488,3 +488,14 @@ body:has(.landing-nav) .landing-hero .eyebrow,
 body:has(.landing-nav) .landing-hero h1 span {
   color: #8bd3ff;
 }
+body:has(.landing-nav) .landing-hero .hero-actions .btn-primary {
+  border-color: #8bd3ff;
+  background: #8bd3ff;
+  color: #062239;
+}
+body:has(.landing-nav) .landing-hero .hero-actions .btn-primary:hover,
+body:has(.landing-nav) .landing-hero .hero-actions .btn-primary:focus-visible {
+  border-color: #a5dfff;
+  background: #a5dfff;
+  color: #062239;
+}
