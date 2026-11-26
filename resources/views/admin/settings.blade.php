@@ -6,15 +6,24 @@
 @php
   $days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   $tab = session('tab', old('_tab', 'hours'));
-  $tabs = ['hours' => 'Weekly hours', 'overrides' => 'Date overrides', 'rules' => 'Booking rules', 'gcash' => 'GCash QR', 'dentists' => 'Dentists', 'emergency' => 'Emergency windows'];
+  $tabs = [
+    'hours' => ['Weekly hours', 'Set your regular opening schedule.', 'bi-clock'],
+    'overrides' => ['Date overrides', 'Plan holidays and special closures.', 'bi-calendar-x'],
+    'rules' => ['Booking rules', 'Control booking and reminder behavior.', 'bi-sliders'],
+    'gcash' => ['GCash QR', 'Manage payment details shown to patients.', 'bi-qr-code'],
+    'dentists' => ['Dentists', 'Choose who can be booked and their services.', 'bi-person-badge'],
+    'emergency' => ['Emergency windows', 'Reserve time for urgent appointments.', 'bi-heart-pulse'],
+  ];
 @endphp
-<ul class="nav nav-tabs mb-3" role="tablist">
-  @foreach ($tabs as $k => $l)<li class="nav-item"><button class="nav-link {{ $tab === $k ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="#t-{{ $k }}" type="button">{{ $l }}</button></li>@endforeach
+<ul class="nav nav-tabs mb-4 settings-nav" role="tablist" aria-label="Clinic settings sections">
+  @foreach ($tabs as $k => [$label, $description, $icon])
+    <li class="nav-item"><button class="nav-link settings-nav-item {{ $tab === $k ? 'active' : '' }}" id="tab-{{ $k }}" data-bs-toggle="tab" data-bs-target="#t-{{ $k }}" type="button" role="tab" aria-controls="t-{{ $k }}" aria-selected="{{ $tab === $k ? 'true' : 'false' }}"><span class="settings-nav-icon"><i class="bi {{ $icon }}"></i></span><span class="settings-nav-copy"><span class="settings-nav-title">{{ $label }}</span><span class="settings-nav-description">{{ $description }}</span></span><i class="bi bi-chevron-right settings-nav-arrow" aria-hidden="true"></i></button></li>
+  @endforeach
 </ul>
 <div class="tab-content">
 
 <div class="tab-pane fade {{ $tab === 'hours' ? 'show active' : '' }}" id="t-hours">
-  <form method="POST" action="{{ route('admin.settings.hours') }}" class="card">@csrf<div class="card-body">
+  <form method="POST" action="{{ route('admin.settings.hours') }}" class="card hours-settings-form">@csrf<div class="card-body">
     @php
       $firstHour = $hours->first();
       $sameHoursEveryDay = $hours->count() === 7 && $hours->every(fn ($h) => ! $h->is_closed && $h->open_time === $firstHour->open_time && $h->close_time === $firstHour->close_time);
@@ -23,15 +32,20 @@
       $defaultOpen = old('default_open', $commonOpen);
       $defaultClose = old('default_close', $commonClose);
     @endphp
-    <p class="text-secondary">Set one default schedule for every day. It applies to patient appointment availability for all upcoming dates. Add a recurring weekday adjustment below when a particular day has different hours. Use a date override for holidays or one-off special days.</p>
-    <div class="row g-3 align-items-end">
-      <div class="col-sm-4"><label class="form-label fw-semibold" for="defaultOpen">Default working hours</label><input id="defaultOpen" type="time" class="form-control" name="default_open" value="{{ $defaultOpen }}" required></div>
-      <div class="col-sm-4"><label class="form-label" for="defaultClose">Until</label><input id="defaultClose" type="time" class="form-control" name="default_close" value="{{ $defaultClose }}" required></div>
-      <div class="col-sm-4 text-secondary small">The default applies to every weekday unless an adjustment below is enabled.</div>
+    <div class="settings-section-heading d-flex align-items-start gap-3 mb-4">
+      <span class="settings-heading-icon"><i class="bi bi-calendar-week"></i></span>
+      <div><h2 class="h5 mb-1">Your regular schedule</h2></div>
     </div>
-    <hr class="my-4">
-    <h2 class="h6 mb-1">Recurring weekday adjustments</h2>
-    <p class="text-secondary small mb-3">Edit any weekday directly. Hours matching the default follow the default; different hours are saved as a recurring adjustment.</p>
+    <div class="default-hours-panel mb-4">
+      <div class="d-flex align-items-center gap-2 mb-3"><i class="bi bi-clock text-primary"></i><span class="fw-semibold">Default working hours</span><span class="badge rounded-pill text-bg-light border text-secondary ms-auto">All weekdays</span></div>
+      <div class="row g-3 align-items-end">
+        <div class="col-md-5"><label class="form-label small text-secondary default-hour-label" for="defaultOpen">Opens</label><input id="defaultOpen" type="time" class="form-control default-hour-input" name="default_open" value="{{ $defaultOpen }}" required></div>
+        <div class="col-md-5"><label class="form-label small text-secondary default-hour-label" for="defaultClose">Closes</label><input id="defaultClose" type="time" class="form-control default-hour-input" name="default_close" value="{{ $defaultClose }}" required></div>
+      </div>
+    </div>
+    <div class="d-flex align-items-end justify-content-between gap-3 flex-wrap mb-3">
+      <div><h2 class="h6 mb-1">Adjust a weekday</h2></div>
+    </div>
     <div class="row g-3">
       @foreach ($days as $dayNumber => $dayName)
         @php
@@ -39,11 +53,12 @@
           $open = old("days.$dayNumber.open", $hour?->open_time ? substr($hour->open_time, 0, 5) : $defaultOpen);
           $close = old("days.$dayNumber.close", $hour?->close_time ? substr($hour->close_time, 0, 5) : $defaultClose);
           $isClosed = old("days.$dayNumber.closed", (bool) $hour?->is_closed);
+          $followsDefault = $isClosed || ($open === $defaultOpen && $close === $defaultClose);
         @endphp
         <div class="col-md-6 col-xl-4">
-          <div class="border rounded p-3 h-100">
-            <div class="d-flex justify-content-between gap-2 mb-3"><div class="fw-semibold">{{ $dayName }}</div><div class="form-check"><input class="form-check-input" type="checkbox" name="days[{{ $dayNumber }}][closed]" value="1" id="closedDay{{ $dayNumber }}" @checked($isClosed)><label class="form-check-label small" for="closedDay{{ $dayNumber }}">Closed</label></div></div>
-            <div class="row g-2">
+          <div class="weekday-card {{ $isClosed ? 'weekday-card-closed' : '' }} p-3 h-100" data-follow-default="{{ $followsDefault ? 'true' : 'false' }}">
+            <div class="d-flex justify-content-between align-items-center gap-2 mb-3"><div class="fw-semibold">{{ $dayName }}</div><div class="form-check form-switch mb-0"><input class="form-check-input" type="checkbox" name="days[{{ $dayNumber }}][closed]" value="1" id="closedDay{{ $dayNumber }}" @checked($isClosed)><label class="form-check-label small" for="closedDay{{ $dayNumber }}">Closed</label></div></div>
+            <div class="row g-2 weekday-hours {{ $isClosed ? 'opacity-50' : '' }}">
               <div class="col-6"><label class="form-label small" for="dayOpen{{ $dayNumber }}">Open</label><input id="dayOpen{{ $dayNumber }}" type="time" class="form-control" name="days[{{ $dayNumber }}][open]" value="{{ $open }}"></div>
               <div class="col-6"><label class="form-label small" for="dayClose{{ $dayNumber }}">Until</label><input id="dayClose{{ $dayNumber }}" type="time" class="form-control @error("days.$dayNumber.close") is-invalid @enderror" name="days[{{ $dayNumber }}][close]" value="{{ $close }}">@error("days.$dayNumber.close")<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
             </div>
@@ -104,7 +119,7 @@
     </div>
   @endif
 
-  <div class="row g-4">
+  <div class="row g-4 overrides-layout">
     <div class="col-lg-5">
       <form method="POST" action="{{ route('admin.settings.overrides.store') }}" id="overrideForm" class="card">
         @csrf
@@ -278,7 +293,7 @@
 </div>
 
 <div class="tab-pane fade {{ $tab === 'rules' ? 'show active' : '' }}" id="t-rules">
-  <form method="POST" action="{{ route('admin.settings.rules') }}" class="card">@csrf<div class="card-body"><div class="row g-3">
+  <form method="POST" action="{{ route('admin.settings.rules') }}" class="card rules-settings-form">@csrf<div class="card-body"><div class="row g-3">
     @foreach ([
       ['slot_interval_minutes', 'Slot interval (minutes)', 5, 120], ['buffer_before_minutes', 'Buffer before treatment (min)', 0, 120],
       ['buffer_after_minutes', 'Buffer after treatment (min)', 0, 120], ['min_booking_notice_hours', 'Minimum booking notice (hours)', 0, 168],
@@ -287,7 +302,7 @@
       ['reminder_hours_before', 'Reminder e-mail (hours before)', 1, 168], ['session_timeout_minutes', 'Inactivity logout (minutes)', 5, 120],
       ['installment_min_amount', 'Installment minimum (₱)', 0, 10000000], ['installment_max_months', 'Installment maximum months', 2, 60], ['installment_reminder_days', 'Installment reminder lead days', 1, 30],
     ] as [$k, $label, $min, $max])
-      <div class="col-md-6 col-lg-4"><label class="form-label">{{ $label }}</label><input type="number" class="form-control" name="{{ $k }}" min="{{ $min }}" max="{{ $max }}" value="{{ old($k, $rules[$k]) }}" required></div>
+      <div class="col-md-6 col-lg-4"><label class="form-label">{{ $label }}</label><input type="number" class="form-control settings-rule-input" name="{{ $k }}" min="{{ $min }}" max="{{ $max }}" value="{{ old($k, $rules[$k]) }}" required></div>
     @endforeach
     <div class="col-12"><hr></div>
     @foreach (['auto_confirm_bookings' => 'Auto-confirm patient bookings (otherwise staff must confirm each request)',
@@ -298,14 +313,14 @@
   </div></div><div class="card-footer bg-white text-end"><button class="btn btn-primary">Save rules</button></div></form>
 </div>
 
-<div class="tab-pane fade {{ $tab === 'gcash' ? 'show active' : '' }}" id="t-gcash"><div class="card"><div class="card-header bg-white fw-bold">GCash payment QR</div><div class="card-body">
+<div class="tab-pane fade {{ $tab === 'gcash' ? 'show active' : '' }}" id="t-gcash"><div class="card gcash-settings-card"><div class="card-header bg-white fw-bold">GCash payment QR</div><div class="card-body">
   <p class="text-secondary">Patients use this clinic QR to make installment payments. Updating the image replaces the one shown in their payment instructions.</p>
   @if (\App\Support\Settings::get('gcash_qr_path'))<img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url(\App\Support\Settings::get('gcash_qr_path')) }}" alt="Clinic GCash QR" style="max-width:240px" class="d-block mb-3">@endif
-  <form method="POST" enctype="multipart/form-data" action="{{ route('admin.settings.gcash') }}">@csrf<div class="row g-2"><div class="col-md-4"><label class="form-label">GCash account name</label><input class="form-control" name="gcash_account_name" maxlength="100" value="{{ \App\Support\Settings::get('gcash_account_name') }}"></div><div class="col-md-4"><label class="form-label">GCash account number</label><input class="form-control" name="gcash_account_number" maxlength="40" value="{{ \App\Support\Settings::get('gcash_account_number') }}"></div><div class="col-md-4"><label class="form-label">Replace QR image</label><input class="form-control" type="file" name="gcash_qr" accept="image/jpeg,image/png,image/webp"></div><div class="col-12"><button class="btn btn-primary">Save GCash details</button></div></div></form>
+  <form method="POST" enctype="multipart/form-data" action="{{ route('admin.settings.gcash') }}" class="gcash-settings-form">@csrf<div class="row g-2"><div class="col-md-4"><label class="form-label">GCash account name</label><input class="form-control gcash-settings-input" name="gcash_account_name" maxlength="100" value="{{ \App\Support\Settings::get('gcash_account_name') }}"></div><div class="col-md-4"><label class="form-label">GCash account number</label><input class="form-control gcash-settings-input" name="gcash_account_number" maxlength="40" value="{{ \App\Support\Settings::get('gcash_account_number') }}"></div><div class="col-md-4"><label class="form-label">Replace QR image</label><input class="form-control gcash-settings-input" type="file" name="gcash_qr" accept="image/jpeg,image/png,image/webp"></div><div class="col-12"><button class="btn btn-primary">Save GCash details</button></div></div></form>
 </div></div></div>
 
 <div class="tab-pane fade {{ $tab === 'dentists' ? 'show active' : '' }}" id="t-dentists">
-  <form method="POST" action="{{ route('admin.settings.dentists') }}" class="card">@csrf<div class="card-body">
+  <form method="POST" action="{{ route('admin.settings.dentists') }}" class="card dentists-settings-form">@csrf<div class="card-body">
     @foreach ($dentists as $d)
       <div class="border rounded-3 p-3 mb-3">
         <div class="d-flex justify-content-between flex-wrap gap-2"><strong>{{ $d->name }}</strong>
@@ -341,9 +356,72 @@
 </div>
 @endsection
 
+@push('head')
+<style>
+  .settings-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem}
+  .hours-settings-form{width:min(100%, 1440px);max-width:1440px;margin-inline:auto}
+  .overrides-layout{max-width:1000px;margin-inline:auto}
+  .settings-rule-input{width:100%;max-width:200px}
+  .rules-settings-form{width:min(100%, 1100px);max-width:1100px;margin-inline:auto}
+  .gcash-settings-card{width:min(100%, 1100px);max-width:1200px;margin-inline:auto}
+  .gcash-settings-form{max-width:1080px;margin-inline:auto}
+  .gcash-settings-input{width:100%;max-width:320px}
+  .dentists-settings-form{width:min(100%, 1100px);max-width:1100px;margin-inline:auto}
+  .settings-nav{border:0}
+  .settings-nav-item.nav-link{display:flex;align-items:center;gap:.8rem;text-align:left;min-width:0;width:100%;padding:.85rem 1rem;border:1px solid var(--bs-border-color);border-radius:.75rem;background:var(--bs-body-bg);color:var(--bs-body-color);text-decoration:none;transition:border-color .15s,background-color .15s,box-shadow .15s}
+  .settings-nav-item.nav-link:hover{border-color:var(--bs-primary);background:rgba(var(--bs-primary-rgb),.035);color:var(--bs-body-color)}
+  .settings-nav-item.nav-link.active{border:1px solid var(--bs-primary);background:rgba(var(--bs-primary-rgb),.07);color:var(--bs-body-color);box-shadow:0 0 0 1px rgba(var(--bs-primary-rgb),.12)}
+  .settings-nav-icon,.settings-heading-icon{display:grid;place-items:center;flex:0 0 2.35rem;width:2.35rem;height:2.35rem;border-radius:.65rem;background:var(--bs-tertiary-bg);color:var(--bs-primary);font-size:1.1rem}
+  .settings-nav-item.active .settings-nav-icon{background:var(--bs-primary);color:#fff}
+  .settings-nav-copy{display:flex;flex-direction:column;gap:.12rem;min-width:0}.settings-nav-title{font-weight:600;font-size:.9rem}.settings-nav-description{font-size:.75rem;color:var(--bs-secondary-color);line-height:1.3}
+  .settings-nav-arrow{margin-left:auto;color:var(--bs-secondary-color);font-size:.75rem}.settings-nav-item.active .settings-nav-arrow{color:var(--bs-primary)}
+  .default-hours-panel{width:min(100%, 1200px);max-width:1200px;margin-inline:auto;padding:1rem 1.1rem;border:1px solid rgba(var(--bs-primary-rgb),.2);border-radius:.75rem;background:rgba(var(--bs-primary-rgb),.035)}
+  .default-hour-input{width:100%;max-width:380px}
+  @media(min-width:768px){.default-hour-input,.default-hour-label{display:block;width:100%;max-width:380px;margin-inline:auto}}
+  .weekday-card{border:1px solid var(--bs-border-color);border-radius:.7rem;background:var(--bs-body-bg);transition:border-color .15s,background-color .15s}.weekday-card:focus-within{border-color:rgba(var(--bs-primary-rgb),.55)}.weekday-card-closed{background:var(--bs-tertiary-bg)}
+  @media(max-width:767.98px){.settings-nav{grid-template-columns:repeat(2,minmax(0,1fr))}.settings-nav-item{padding:.75rem}.settings-nav-description{display:none}}
+  @media(max-width:420px){.settings-nav{grid-template-columns:1fr}}
+</style>
+@endpush
+
 @push('scripts')
 <script>
 (() => {
+  const defaultOpen = document.getElementById('defaultOpen');
+  const defaultClose = document.getElementById('defaultClose');
+  const weekdayCards = document.querySelectorAll('.weekday-card');
+  const syncFollowingDays = () => {
+    weekdayCards.forEach(card => {
+      if (card.dataset.followDefault !== 'true') return;
+      card.querySelector('[name$="[open]"]').value = defaultOpen.value;
+      card.querySelector('[name$="[close]"]').value = defaultClose.value;
+    });
+  };
+  const updateFollowDefault = card => {
+    const open = card.querySelector('[name$="[open]"]').value;
+    const close = card.querySelector('[name$="[close]"]').value;
+    card.dataset.followDefault = String(open === defaultOpen.value && close === defaultClose.value);
+  };
+
+  [defaultOpen, defaultClose].forEach(input => {
+    input.addEventListener('input', syncFollowingDays);
+    input.addEventListener('change', syncFollowingDays);
+  });
+
+  document.querySelectorAll('[id^="closedDay"]').forEach(toggle => {
+    const card = toggle.closest('.weekday-card');
+    const fields = card.querySelectorAll('.weekday-hours input');
+    const updateClosedDay = () => {
+      card.classList.toggle('weekday-card-closed', toggle.checked);
+      card.querySelector('.weekday-hours').classList.toggle('opacity-50', toggle.checked);
+      fields.forEach(field => field.disabled = toggle.checked);
+      if (!toggle.checked && card.dataset.followDefault === 'true') syncFollowingDays();
+    };
+    fields.forEach(field => field.addEventListener('input', () => updateFollowDefault(card)));
+    toggle.addEventListener('change', updateClosedDay);
+    updateClosedDay();
+  });
+
   const ovClosed = document.getElementById('ovClosed');
   const ovHoursWraps = document.querySelectorAll('.ov-hours-wrap');
   const ovStartTime = document.getElementById('ovStartTime');

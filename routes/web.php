@@ -15,6 +15,9 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\RevenueDashboardController;
+use App\Http\Controllers\DemographicsDashboardController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 // ---------------------------------------------------------------- public
@@ -45,6 +48,8 @@ Route::middleware('auth')->group(function () {
 
     // ---- patient
     Route::middleware('role:patient')->group(function () {
+        Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+        Route::post('/notifications/seen', [NotificationController::class, 'seen'])->name('notifications.seen');
         Route::get('/my-installments', [InstallmentController::class, 'mine'])->name('installments.mine');
         Route::post('/my-installment-payments/{row}/proof', [InstallmentController::class, 'pay'])->middleware('throttle:5,1')->name('installments.pay');
         Route::get('/my-installment-payments/{row}/proof', [InstallmentController::class, 'proof'])->name('installments.proof');
@@ -147,6 +152,11 @@ Route::middleware('auth')->group(function () {
 
     // ---- admin
     Route::middleware('role:admin')->prefix('admin')->group(function () {
+        Route::get('/revenue', [RevenueDashboardController::class, 'index'])->name('admin.revenue');
+        Route::get('/revenue/data', [RevenueDashboardController::class, 'data'])->name('admin.revenue.data');
+        Route::get('/revenue/export', [RevenueDashboardController::class, 'export'])->name('admin.revenue.export');
+        Route::get('/demographics', [DemographicsDashboardController::class, 'index'])->name('admin.demographics');
+        Route::get('/demographics/data', [DemographicsDashboardController::class, 'data'])->name('admin.demographics.data');
         Route::get('/users', [UserManagementController::class, 'index'])->name('admin.users');
         Route::get('/users/create', [UserManagementController::class, 'create'])->name('admin.users.create');
         Route::post('/users', [UserManagementController::class, 'store'])->name('admin.users.store');
