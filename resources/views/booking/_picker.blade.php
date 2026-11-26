@@ -2,7 +2,7 @@
 <div class="row g-3">
   <div class="col-md-6">
     <label class="form-label">Preferred dentist</label>
-    <select name="dentist_id" id="dentistSelect" class="form-select">
+    <select name="dentist_id" id="dentistSelect" class="form-select booking-compact-field">
       <option value="">No preference – assign available dentist</option>
       @foreach ($dentists as $d)
         <option value="{{ $d->dentist_id }}" @selected((string) old('dentist_id', $dentistValue ?? '') === (string) $d->dentist_id)>{{ $d->name }} ({{ $d->specialty_label }})</option>
@@ -11,7 +11,7 @@
   </div>
   <div class="col-md-6">
     <label class="form-label">Preferred date</label>
-    <input type="date" name="date" id="dateInput" class="form-control" min="{{ today()->toDateString() }}" value="{{ old('date') }}" required>
+    <input type="date" name="date" id="dateInput" class="form-control booking-compact-field" min="{{ today()->toDateString() }}" value="{{ old('date') }}" required>
   </div>
   <div class="col-12">
     <div class="form-check">
@@ -31,3 +31,8 @@
     <div id="holdBox" class="alert alert-info py-2 mt-3 d-none mb-0"></div>
   </div>
 </div>
+@push('head')
+<style>
+  .booking-compact-field{width:100%;max-width:640px}
+</style>
+@endpush

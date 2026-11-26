@@ -14,7 +14,7 @@
       <label class="btn btn-outline-primary" for="pmNew">New / walk-in patient</label>
     </div>
     <div id="existingBox" class="mb-4">
-      <select name="patient_id" class="form-select">
+      <select name="patient_id" class="form-select booking-compact-field">
         <option value="">Select a patient…</option>
         @foreach ($patients as $p)<option value="{{ $p->patient_id }}" @selected((string) old('patient_id') === (string) $p->patient_id)>{{ $p->last_name }}, {{ $p->first_name }} — {{ $p->patient_code }} — {{ $p->contact_number }}</option>@endforeach
       </select>
@@ -34,7 +34,7 @@
 
   <h5 class="mb-3">Procedure</h5>
   <input type="hidden" name="service_id" id="serviceId" value="{{ old('service_id') }}">
-  <button type="button" class="btn btn-outline-primary w-100 text-start mb-1" data-bs-toggle="modal" data-bs-target="#procModal" id="procBtn">Select a procedure…</button>
+  <button type="button" class="btn btn-outline-primary booking-compact-field text-start mb-1" data-bs-toggle="modal" data-bs-target="#procModal" id="procBtn">Select a procedure…</button>
   <div class="small text-secondary mb-4" id="procMeta"></div>
 
   <h5 class="mb-3">Schedule</h5>

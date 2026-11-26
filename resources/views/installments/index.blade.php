@@ -3,8 +3,7 @@
 @section('page_title', 'Installments')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-  <p class="text-secondary mb-0">Create plans after consultation and record the in-clinic down payment. Patients pay only the remaining balance online.</p>
+<div class="d-flex justify-content-end align-items-center flex-wrap gap-2 mb-3">
   <a class="btn btn-primary" href="{{ route('installments.create-for-patient') }}">Create installment plan</a>
 </div>
 
