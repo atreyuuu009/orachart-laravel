@@ -48,7 +48,10 @@ class PatientController extends Controller
     public function index(Request $request)
     {
         $this->clinicAccess($request);
-        $query = Patient::query()->with('user')->withCount('appointments');
+        $query = Patient::query()
+            ->with(['user', 'healthProfile'])
+            ->withCount('appointments')
+            ->withMax('visitRecords', 'visit_date');
         if ($request->user()->hasRole('dentist')) {
             $dentistId = $request->user()->dentist?->dentist_id ?? 0;
             $query->whereHas('appointments', fn ($a) => $a->where('assigned_dentist_id', $dentistId));
@@ -65,7 +68,7 @@ class PatientController extends Controller
                     ->orWhere('contact_number', 'like', "%$term%"));
             }
         }
-        return view('patients.index', ['patients' => $query->orderBy('last_name')->orderBy('first_name')->paginate(20)->withQueryString()]);
+        return view('patients.index', ['patients' => $query->orderByDesc('created_at')->orderByDesc('patient_id')->paginate(20)->withQueryString()]);
     }
 
     public function create(Request $request)
@@ -110,10 +113,10 @@ class PatientController extends Controller
             'patient' => $patient, 'records' => $records, 'consents' => $consents,
             'outstandingPayments' => $user->hasRole('clinic_staff', 'dentist') ? Payment::where('patient_id', $patient->patient_id)->where('balance_amount', '>', 0)->orderByDesc('payment_date')->get() : collect(),
             'appointments' => $user->hasRole('admin', 'clinic_staff') ? $patient->appointments()->with('dentist.user', 'service')->orderByDesc('start_at')->limit(20)->get() : collect(),
-            'canEditIdentity' => $user->hasRole('admin', 'clinic_staff', 'patient'),
+            'canEditIdentity' => $user->hasRole('admin', 'clinic_staff', 'dentist', 'patient'),
             'canEditHealth' => $user->hasRole('clinic_staff', 'dentist'),
             'canWriteVisits' => $user->hasRole('dentist') && (bool) $user->dentist,
-            'canUpload' => $user->hasRole('clinic_staff', 'dentist'),
+            'canUpload' => $user->hasRole('admin', 'clinic_staff', 'dentist'),
             'canReadAttachments' => $user->hasRole('admin', 'clinic_staff', 'dentist', 'patient'),
             'canEditVisits' => $user->hasRole('dentist') && (bool) $user->dentist,
             'canRecordConsent' => $user->hasRole('clinic_staff'),
@@ -125,14 +128,15 @@ class PatientController extends Controller
     public function edit(Request $request, Patient $patient)
     {
         $this->authorizePatient($request, $patient);
-        abort_unless($request->user()->hasRole('admin', 'clinic_staff'), 403);
+        abort_unless($request->user()->hasRole('admin', 'clinic_staff', 'dentist'), 403);
+        $patient->loadMissing('healthProfile');
         return view('patients.form', ['patient' => $patient, 'mode' => 'edit', 'ownProfile' => false]);
     }
 
     public function update(Request $request, Patient $patient)
     {
         $this->authorizePatient($request, $patient);
-        abort_unless($request->user()->hasRole('admin', 'clinic_staff'), 403);
+        abort_unless($request->user()->hasRole('admin', 'clinic_staff', 'dentist'), 403);
         $v = $this->identityData($request, $patient);
         $old = $patient->only(array_keys($v));
         $patient->update($v);
@@ -143,7 +147,7 @@ class PatientController extends Controller
     public function health(Request $request, Patient $patient)
     {
         $this->authorizePatient($request, $patient);
-        abort_unless($request->user()->hasRole('clinic_staff', 'dentist'), 403);
+        abort_unless($request->user()->hasRole('admin', 'clinic_staff', 'dentist'), 403);
         $v = $request->validate([
             'blood_type' => ['required', Rule::in(['A+','A-','B+','B-','AB+','AB-','O+','O-','unknown'])],
             'allergies' => 'nullable|string|max:20000', 'medical_conditions' => 'nullable|string|max:20000',
@@ -276,7 +280,7 @@ class PatientController extends Controller
     public function upload(Request $request, Patient $patient)
     {
         $this->authorizePatient($request, $patient);
-        abort_unless($request->user()->hasRole('clinic_staff', 'dentist'), 403);
+        abort_unless($request->user()->hasRole('admin', 'clinic_staff', 'dentist'), 403);
         if ($request->user()->hasRole('dentist')) $this->dentistPatient($request, $patient);
         $v = $request->validate([
             'attachment' => 'required|file|max:10240|mimes:pdf,jpg,jpeg,png,webp',
@@ -293,7 +297,7 @@ class PatientController extends Controller
         ]);
         Audit::log('create', 'pat_attachments', $attachment->attachment_id, 'Patient attachment uploaded');
         $message = 'Uploaded "'.$attachment->original_file_name.'" successfully.';
-        if ($request->user()->hasRole('clinic_staff')) {
+        if ($request->user()->hasRole('admin', 'clinic_staff')) {
             $message .= ' You can view and download it from the attachments list below.';
         }
         return back()->with('status', $message);

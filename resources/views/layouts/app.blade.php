@@ -13,6 +13,7 @@
       ['dashboard', 'Dashboard', 'dashboard', 'bi-speedometer2'],
       ['booking.staff', 'Create Appointment', 'booking.staff*', 'bi-calendar-plus'],
       ['appointments.index', 'Manage Appointments', 'appointments.index', 'bi-calendar-check'],
+      ['patients.index', 'Patient', 'patients.*', 'bi-people'],
       ['payments.index', 'Payments', 'payments.*', 'bi-receipt'],
       ['installments.index', 'Installments', 'installments.*', 'bi-credit-card'],
     ],

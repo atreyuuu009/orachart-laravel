@@ -4,7 +4,7 @@
 @section('page_subtitle', $patient->patient_code.' · '.($patient->birth_date?->format('M j, Y') ?? 'Birth date unavailable').' · '.($patient->age ?? '—').' years old')
 @section('page_actions')
   @if($canEditIdentity)<a class="btn btn-outline-primary" href="{{ auth()->user()->hasRole('patient') ? route('patients.own.edit') : route('patients.edit',$patient) }}">Edit identity</a>@endif
-  @if(auth()->user()->hasRole('admin','dentist'))<a class="btn btn-outline-secondary" href="{{ route('odontogram',['patient'=>$patient->patient_id]) }}">Odontogram</a>@endif
+  @if(auth()->user()->hasRole('admin','dentist'))<a class="btn btn-outline-primary" href="{{ route('odontogram',['patient'=>$patient->patient_id]) }}">Odontogram</a>@endif
 @endsection
 @section('content')
 @php
