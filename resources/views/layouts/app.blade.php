@@ -11,6 +11,7 @@
     ],
     'clinic_staff' => [
       ['dashboard', 'Dashboard', 'dashboard', 'bi-speedometer2'],
+      ['patients.index', 'Patients', 'patients.*', 'bi-people'],
       ['booking.staff', 'Create Appointment', 'booking.staff*', 'bi-calendar-plus'],
       ['appointments.index', 'Manage Appointments', 'appointments.index', 'bi-calendar-check'],
       ['calendar', 'Appointment Calendar', 'calendar', 'bi-calendar3'],

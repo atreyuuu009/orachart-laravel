@@ -46,7 +46,7 @@ under *Audit & E-mail Logs*. A mail failure never blocks a booking; it shows as 
 | Appointments | Confirm / reject / cancel / complete / no-show / reschedule (linked rows) / linked follow-up visits for multi-visit treatments; calendar; flags + e-mails when time-off or closures collide |
 | Dentists | Own weekly hours + time off |
 | Admin | Weekly hours, date overrides, booking rules, specialties, emergency windows, audit & e-mail logs |
-| Odontogram | FDI chart, findings per tooth/surface, append-only history; dentists write, admin read-only |
+| Odontogram | Interactive 3D FDI model (`public/models/teeth_fdi.glb`), findings per tooth/surface, append-only history; dentists write, admin read-only |
 | E-mail | verify, reset, received/confirmed/declined/cancelled, reminder, thank-you, recall, schedule-changed |
 
 ## Decisions you should review
@@ -61,6 +61,6 @@ under *Audit & E-mail Logs*. A mail failure never blocks a booking; it shows as 
 ## Code map
 `app/Services/AvailabilityService.php` (slot rules) · `BookingService.php` (transactions, reschedule, follow-ups) ·
 `Notifier.php` (Mailtrap + `ntf_email_log`) · `app/Support/SlotCalculator.php` (pure maths, unit-tested) ·
-`public/js/booking.js`, `odontogram.js` · `routes/web.php` · `database/seeders/`.
+`public/js/booking.js`, `odontogram.js` (Three.js from `public/vendor/three`, 3D model in `public/models/`) · `routes/web.php` · `database/seeders/`.
 
 Run the unit test: `php artisan test` (SlotCalculator).

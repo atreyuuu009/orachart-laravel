@@ -209,6 +209,23 @@
 .cal-num { font-weight: 700; font-size: .85rem; }
 
 /* ---------- odontogram ---------- */
+.odonto-viewer { position: relative; border: 1px solid var(--bs-border-color); border-radius: .85rem; overflow: hidden;
+  background: radial-gradient(circle at 50% 35%, #ffffff 0%, #eef3fb 55%, #dbe5f4 100%); }
+.odonto-canvas { width: 100%; height: 470px; touch-action: none; }
+.odonto-canvas canvas { display: block; width: 100%; height: 100%; }
+.odonto-toolbar { position: absolute; top: .6rem; left: .6rem; display: flex; flex-wrap: wrap; gap: .3rem; max-width: calc(100% - 1.2rem); }
+.odonto-toolbar .btn { padding: .18rem .5rem; font-size: .75rem; background: rgba(255,255,255,.9); backdrop-filter: blur(4px); }
+.odonto-hint { position: absolute; left: .7rem; bottom: .5rem; padding: .1rem .4rem; border-radius: .4rem; font-size: .72rem;
+  color: #64748b; background: rgba(255,255,255,.78); pointer-events: none; }
+.odonto-tooltip { position: absolute; z-index: 5; max-width: 250px; padding: .4rem .55rem; border-radius: .5rem;
+  background: rgba(23,32,51,.94); color: #fff; font-size: .75rem; line-height: 1.3; pointer-events: none;
+  opacity: 0; transform: translateY(4px); transition: opacity .12s ease, transform .12s ease; }
+.odonto-tooltip.show { opacity: 1; transform: none; }
+.odonto-tooltip .legend-dot { width: 9px; height: 9px; }
+.odonto-loading { position: absolute; inset: 0; z-index: 6; display: grid; place-items: center;
+  background: rgba(245,247,251,.86); backdrop-filter: blur(2px); }
+.odonto-loading-inner { width: 100%; max-width: 320px; padding: 1rem; text-align: center; }
+.odonto-loading .progress { width: min(260px, 70%); height: .5rem; margin: 0 auto; }
 .tooth-row { display: flex; justify-content: center; gap: 4px; flex-wrap: nowrap; }
 .tooth-gap { width: 14px; border-left: 2px dashed #c5ccd9; margin: 0 4px; }
 .tooth { width: 44px; border: 1px solid #b6bfd0; border-radius: .55rem; background: #fff; padding: 3px 0 4px; text-align: center; cursor: pointer; font-size: .72rem; font-weight: 700; position: relative; }
@@ -220,3 +237,4 @@
 .tooth .dots i { width: 9px; height: 9px; border-radius: 50%; border: 1px solid #fff; margin-left: -2px; }
 .legend-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: .35rem; }
 @media (max-width: 991px) { .odonto-scroll { overflow-x: auto; } .odonto-scroll .tooth-row { min-width: 760px; } }
+@media (max-width: 767px) { .odonto-canvas { height: 340px; } .odonto-hint { display: none; } }
