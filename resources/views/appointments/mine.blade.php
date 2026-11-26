@@ -15,9 +15,13 @@
     </div>
   </div>
 @endif
-<div class="card mb-4"><div class="card-header bg-white fw-bold">Upcoming</div>
-  @include('appointments._table', ['rows' => $upcoming, 'actions' => true, 'patientView' => true, 'empty' => 'You have no upcoming appointments.'])</div>
-<div class="card"><div class="card-header bg-white fw-bold">History</div>
-  @include('appointments._table', ['rows' => $history, 'actions' => false, 'patientView' => true, 'empty' => 'No past appointments yet.'])</div>
+<div class="mb-4">
+  <h6 class="fw-bold text-secondary text-uppercase small mb-2">Upcoming</h6>
+  @include('appointments._table', ['rows' => $upcoming, 'actions' => true, 'patientView' => true, 'empty' => 'You have no upcoming appointments.'])
+</div>
+<div>
+  <h6 class="fw-bold text-secondary text-uppercase small mb-2">History</h6>
+  @include('appointments._table', ['rows' => $history, 'actions' => false, 'patientView' => true, 'empty' => 'No past appointments yet.'])
+</div>
 @include('appointments._modals')
 @endsection

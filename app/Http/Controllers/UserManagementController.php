@@ -34,12 +34,24 @@ class UserManagementController extends Controller
                 $w->orWhere('username', 'like', $fullSearch)
                     ->orWhere('email', 'like', $fullSearch);
             });
-        })->when($request->filled('role'), fn ($q) => $q->whereHas('role', fn ($r) => $r->where('role_name', $request->role)))
-          ->when($request->status === 'active', fn ($q) => $q->where('is_active', 1))
+        })->when($request->filled('role'), fn ($q) => $q->whereHas('role', fn ($r) => $r->where('role_name', $request->role)));
+
+        $statusCounts = [
+            'all' => (clone $q)->count(),
+            'active' => (clone $q)->where('is_active', 1)->count(),
+            'inactive' => (clone $q)->where('is_active', 0)->count(),
+            'locked' => (clone $q)->where('locked_until', '>', now())->count(),
+        ];
+
+        $q->when($request->status === 'active', fn ($q) => $q->where('is_active', 1))
           ->when($request->status === 'inactive', fn ($q) => $q->where('is_active', 0))
           ->when($request->status === 'locked', fn ($q) => $q->where('locked_until', '>', now()))
           ->orderBy('last_name')->orderBy('first_name');
-        return view('admin.users.index', ['users' => $q->paginate(20)->withQueryString(), 'roles' => Role::whereIn('role_name', ['admin','clinic_staff','dentist','patient'])->get()]);
+        return view('admin.users.index', [
+            'users' => $q->paginate(20)->withQueryString(),
+            'roles' => Role::whereIn('role_name', ['admin','clinic_staff','dentist','patient'])->get(),
+            'statusCounts' => $statusCounts,
+        ]);
     }
 
     public function create() { return view('admin.users.form', ['user' => new User(), 'roles' => $this->staffRoles(), 'specialties' => Specialty::orderBy('specialty_name')->get(), 'editing' => false]); }

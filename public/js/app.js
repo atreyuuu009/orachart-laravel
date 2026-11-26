@@ -46,6 +46,17 @@ document.addEventListener('click', (e) => {
     bootstrap.Modal.getOrCreateInstance(document.getElementById('followModal')).show();
     return;
   }
+  // Appointment details modal
+  const det = e.target.closest('[data-apt-details]');
+  if (det) {
+    const tpl = document.getElementById('apt-tpl-' + det.dataset.aptDetails);
+    const body = document.getElementById('aptDetailsBody');
+    if (tpl && body) {
+      body.replaceChildren(tpl.content.cloneNode(true));
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('appointmentDetailsModal')).show();
+    }
+    return;
+  }
   // Quick reschedule modal (staff)
   const qr = e.target.closest('.quick-reschedule-btn');
   if (qr) {
