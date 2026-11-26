@@ -51,8 +51,8 @@ under *Audit & E-mail Logs*. A mail failure never blocks a booking; it shows as 
 | Booking | Service → dentist (or "no preference" round-robin) → date → live slots. Temporary 5-min slot hold (`apt_slot_locks`), `SELECT … FOR UPDATE` re-check on submit, min-notice, buffers, daily capacity, reserved emergency windows, emergency bookings |
 | Appointments | Confirm / reject / cancel / complete / no-show / reschedule (linked rows) / linked follow-up visits for multi-visit treatments; calendar; flags + e-mails when time-off or closures collide |
 | Dentists | Own weekly hours + time off |
-| Admin | Weekly hours, date overrides, booking rules, specialties, emergency windows, audit & e-mail logs |
-| Odontogram | FDI chart, findings per tooth/surface, append-only history; dentists write, admin read-only |
+| Admin | Default weekly hours with recurring weekday adjustments, date overrides, booking rules, specialties, emergency windows, audit & e-mail logs |
+| Odontogram | FDI chart, findings per tooth/surface, append-only history; dentists and admins can record findings |
 | E-mail | verify, reset, received/confirmed/declined/cancelled, reminder, thank-you, recall, schedule-changed |
 
 ## Decisions you should review

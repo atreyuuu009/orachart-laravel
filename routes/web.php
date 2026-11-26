@@ -46,8 +46,6 @@ Route::middleware('auth')->group(function () {
     // ---- patient
     Route::middleware('role:patient')->group(function () {
         Route::get('/my-installments', [InstallmentController::class, 'mine'])->name('installments.mine');
-        Route::get('/my-installments/request', [InstallmentController::class, 'create'])->name('installments.create');
-        Route::post('/my-installments', [InstallmentController::class, 'store'])->name('installments.store');
         Route::post('/my-installment-payments/{row}/proof', [InstallmentController::class, 'pay'])->middleware('throttle:5,1')->name('installments.pay');
         Route::get('/my-installment-payments/{row}/proof', [InstallmentController::class, 'proof'])->name('installments.proof');
         Route::get('/my-profile', [PatientController::class, 'own'])->name('patients.own');
@@ -59,19 +57,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/my-appointments', [AppointmentController::class, 'mine'])->name('appointments.mine');
     });
 
-    // These actions authorize by the signed-in user's patient record and plan ownership.
-    Route::post('/my-installments/{plan}/accept', [InstallmentController::class, 'accept'])->name('installments.accept');
-    Route::post('/my-installments/{plan}/decline', [InstallmentController::class, 'decline'])->name('installments.decline');
-
     Route::middleware('role:admin,clinic_staff,dentist')->get('/installments', [InstallmentReviewController::class, 'index'])->name('installments.index');
-    Route::middleware('role:admin')->prefix('installments')->name('installments.')->group(function () {
+    Route::middleware('role:admin,clinic_staff,dentist')->prefix('installments')->name('installments.')->group(function () {
         Route::get('/new-for-patient', [InstallmentReviewController::class, 'createForPatient'])->name('create-for-patient');
         Route::post('/new-for-patient', [InstallmentReviewController::class, 'storeForPatient'])->name('store-for-patient');
-    });
-    Route::middleware('role:admin,dentist')->prefix('installments')->name('installments.')->group(function () {
-        Route::get('/{plan}', [InstallmentReviewController::class, 'show'])->name('show');
-        Route::post('/{plan}/approve', [InstallmentReviewController::class, 'approve'])->name('approve');
-        Route::post('/{plan}/reject', [InstallmentReviewController::class, 'reject'])->name('reject');
     });
     Route::middleware('role:admin,clinic_staff')->get('/installment-proofs/{row}/file', [InstallmentReviewController::class, 'proof'])->name('installments.proof.view');
     Route::middleware('role:admin,clinic_staff')->group(function () {
@@ -147,7 +136,7 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::middleware('role:admin,dentist')->group(function () {
-        // odontogram (dentists write, admin is read-only)
+        // odontogram (dentists and admins can record findings)
         Route::get('/odontogram', [OdontogramController::class, 'index'])->name('odontogram');
         Route::get('/odontogram/{patient}/findings', [OdontogramController::class, 'findings'])->name('odontogram.findings');
         Route::get('/odontogram/{patient}/history', [OdontogramController::class, 'history'])->name('odontogram.history');

@@ -85,8 +85,8 @@ HTML],
             'installment_due' => ['Installment payment reminder', <<<'HTML'
 <p>Hi {first_name},</p><p>Installment {installment_number} of {months} for {service} is due {due_date}. Amount due: ₱{amount}.</p><p><a href="{action_url}">View your installment plan and payment instructions</a></p>
 HTML],
-            'installment_approved' => ['Your installment terms are ready', <<<'HTML'
-<p>Hi {first_name},</p><p>Your installment request for {service} has been approved. The total cost, including the disclosed finance charge, is ₱{net_amount} over {months} months.</p><p>Please sign in to review every due date and amount, then accept or decline the terms.</p><p><a href="{action_url}">Review installment terms</a></p>
+            'installment_approved' => ['Your installment plan is ready', <<<'HTML'
+<p>Hi {first_name},</p><p>Your installment plan for {service} is ready. Your clinic down payment has been recorded, and the remaining balance is ₱{net_amount} over {months} monthly payments.</p><p><a href="{action_url}">View your payment schedule</a></p>
 HTML],
             'installment_rejected' => ['Your installment request was declined', <<<'HTML'
 <p>Hi {first_name},</p><p>Your installment request for {service} was declined.</p><p>Reason: {reason}</p>

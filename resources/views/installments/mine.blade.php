@@ -1,14 +1,12 @@
 @extends('layouts.app')
 @section('title','My Installments') @section('page_title','My Installments')
-@section('page_actions')<a class="btn btn-primary" href="{{ route('installments.create') }}">Request installment</a>@endsection
 @section('content')
 @forelse($plans as $plan)
 <div class="card mb-4"><div class="card-header bg-white d-flex justify-content-between"><strong>{{ $plan->service->service_name }}</strong><span class="badge text-bg-secondary">{{ str_replace('_',' ',ucfirst($plan->status)) }}</span></div><div class="card-body">
-<p>Plan estimate / total: <strong>₱{{ number_format($plan->net_amount,2) }}</strong> · {{ $plan->number_of_installments }} months</p>
+<div class="row g-3 mb-3"><div class="col-md-4"><div class="small text-secondary">Treatment total</div><strong>₱{{ number_format($plan->total_amount,2) }}</strong></div><div class="col-md-4"><div class="small text-secondary">Down payment paid at clinic ({{ number_format($plan->downpayment_percent,2) }}%)</div><strong>₱{{ number_format($plan->downpayment_amount,2) }}</strong></div><div class="col-md-4"><div class="small text-secondary">Remaining balance to pay online</div><strong>₱{{ number_format($plan->net_amount,2) }}</strong></div></div>
 @if($plan->status==='approved')
-<div class="alert alert-info">Review before accepting: Total ₱{{ number_format($plan->net_amount,2) }} including finance charge ₱{{ number_format($plan->interest_amount,2) }} ({{ number_format($plan->interest_rate_percent,2) }}% flat). Discount: ₱{{ number_format($plan->discount_amount,2) }}.{{ $plan->terms_note?' '.$plan->terms_note:'' }} Accepting confirms you agree to the disclosed total and schedule.</div>
+<div class="alert alert-info">Your clinic is finalizing this older installment plan. Please contact the clinic for the payment schedule.</div>
 <table class="table table-sm"><thead><tr><th>#</th><th>Due date</th><th>Amount</th></tr></thead><tbody>@foreach($plan->payments as $row)<tr><td>{{ $row->installment_number }}</td><td>{{ $row->due_date->format('M j, Y') }}</td><td>₱{{ number_format($row->amount_due,2) }}</td></tr>@endforeach</tbody></table>
-<form method="POST" action="{{ route('installments.accept',$plan) }}" class="d-inline">@csrf<button class="btn btn-success">Accept terms</button></form> <form method="POST" action="{{ route('installments.decline',$plan) }}" class="d-inline">@csrf<button class="btn btn-outline-danger">Decline</button></form>
 @elseif($plan->payments->isNotEmpty())
 <div class="table-responsive"><table class="table align-middle"><thead><tr><th>#</th><th>Due</th><th>Amount</th><th>Status</th><th>Payment</th></tr></thead><tbody>@foreach($plan->payments as $row)<tr><td>{{ $row->installment_number }}</td><td>{{ $row->due_date->format('M j, Y') }}</td><td>₱{{ number_format($row->amount_due,2) }}</td><td>{{ str_replace('_',' ',ucfirst($row->status)) }} @if($row->rejection_reason)<div class="text-danger small">{{ $row->rejection_reason }}</div>@endif</td><td>
 @if($plan->status==='active'&&in_array($row->status,['unpaid','overdue','rejected']))<button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#pay{{ $row->installment_payment_id }}">Pay now</button>

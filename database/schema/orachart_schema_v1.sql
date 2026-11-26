@@ -575,6 +575,9 @@ CREATE TABLE pay_installment_plans (
   discount_amount       DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   interest_rate_percent DECIMAL(5,2) NOT NULL DEFAULT 0.00,
   interest_amount       DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  downpayment_percent   DECIMAL(5,2) NOT NULL DEFAULT 0.00,
+  downpayment_amount    DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  downpayment_payment_id INT UNSIGNED NULL,
   net_amount            DECIMAL(10,2) NOT NULL,
   number_of_installments INT UNSIGNED NOT NULL,
   first_due_date        DATE NULL,
@@ -589,6 +592,7 @@ CREATE TABLE pay_installment_plans (
   CONSTRAINT fk_pay_installment_plans_service_id        FOREIGN KEY (service_id) REFERENCES svc_services(service_id),
   CONSTRAINT fk_pay_installment_plans_treatment_plan_id FOREIGN KEY (treatment_plan_id) REFERENCES apt_treatment_plans(treatment_plan_id),
   CONSTRAINT fk_pay_installment_plans_discount_id       FOREIGN KEY (discount_id) REFERENCES pay_discounts(discount_id),
+  CONSTRAINT fk_pay_installment_plans_downpayment_payment_id FOREIGN KEY (downpayment_payment_id) REFERENCES pay_payments(payment_id),
   CONSTRAINT fk_pay_installment_plans_reviewed_by_user_id FOREIGN KEY (reviewed_by_user_id) REFERENCES usr_users(user_id)
 ) ENGINE=InnoDB;
 
@@ -747,7 +751,7 @@ INSERT INTO sys_settings (setting_key, setting_value, description) VALUES
   ('gcash_qr_path','','Path to clinic GCash QR image'),
   ('gcash_account_name','','Clinic GCash account name'),
   ('gcash_account_number','','Clinic GCash account number'),
-  ('installment_min_amount','5000','Minimum service price eligible for installments'),
+  ('installment_min_amount','10000','Minimum service price eligible for installments'),
   ('installment_max_months','12','Maximum installment plan length in months'),
   ('installment_reminder_days','3','Days before due date to send installment reminder');
 

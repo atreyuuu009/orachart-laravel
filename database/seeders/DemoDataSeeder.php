@@ -63,7 +63,7 @@ class DemoDataSeeder extends Seeder
 
         // Settings that are not in the SQL seed (defaults live in App\Support\Settings)
         foreach (['auto_confirm_bookings' => 1, 'reminders_enabled' => 1, 'enforce_service_specialty' => 0,
-            'installment_min_amount' => 5000, 'installment_max_months' => 12, 'installment_reminder_days' => 3,
+            'installment_min_amount' => 10000, 'installment_max_months' => 12, 'installment_reminder_days' => 3,
             'gcash_qr_path' => '', 'gcash_account_name' => '', 'gcash_account_number' => ''] as $k => $v) {
             \App\Models\SysSetting::firstOrCreate(['setting_key' => $k], ['setting_value' => (string) $v]);
         }

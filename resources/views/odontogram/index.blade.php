@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Digital Odontogram')
 @section('page_title', 'Digital Odontogram')
-@section('page_subtitle', $canEdit ? 'Click a tooth to record or review findings (FDI notation).' : 'Read-only view. Only dentists can record findings.')
+@section('page_subtitle', $canEdit ? 'Click a tooth to record or review findings (FDI notation).' : 'Read-only view. Only dentists and admins can record findings.')
 @section('content')
 <div class="card mb-3"><div class="card-body row g-3 align-items-end">
   <div class="col-md-6"><label class="form-label">Patient</label>

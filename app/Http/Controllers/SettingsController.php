@@ -46,19 +46,54 @@ class SettingsController extends Controller
         $v = $request->validate([
             'default_open' => 'required|date_format:H:i',
             'default_close' => 'required|date_format:H:i|after:default_open',
+            'days' => 'nullable|array',
+            'days.*.closed' => 'nullable|boolean',
+            'days.*.open' => 'nullable|date_format:H:i',
+            'days.*.close' => 'nullable|date_format:H:i',
         ], [
             'default_close.after' => 'Closing time must be later than opening time.',
         ]);
 
-        DB::transaction(function () use ($v) {
+        $customDays = [];
+        foreach (range(0, 6) as $day) {
+            $closed = $request->boolean("days.{$day}.closed");
+            $open = data_get($v, "days.{$day}.open");
+            $close = data_get($v, "days.{$day}.close");
+            if ($closed) {
+                $customDays[$day] = ['is_closed' => 1, 'open' => null, 'close' => null];
+                continue;
+            }
+            if ($open && $close && ($open !== $v['default_open'] || $close !== $v['default_close'])) {
+                if ($open >= $close) {
+                    return back()->withInput()->withErrors([
+                        "days.{$day}.close" => 'Closing time must be later than opening time.',
+                    ]);
+                }
+                $customDays[$day] = ['is_closed' => 0, 'open' => $open, 'close' => $close];
+            } elseif ($request->boolean("days.{$day}.custom") && (! $open || ! $close || $open >= $close)) {
+                return back()->withInput()->withErrors([
+                    "days.{$day}.close" => 'A custom day needs an opening time earlier than its closing time.',
+                ]);
+            } else {
+                $customDays[$day] = ['is_closed' => 0, 'open' => $v['default_open'], 'close' => $v['default_close']];
+            }
+        }
+
+        DB::transaction(function () use ($v, $customDays) {
             foreach (range(0, 6) as $d) {
                 ClinicHour::updateOrCreate(['day_of_week' => $d], [
                     'is_closed' => 0, 'open_time' => $v['default_open'], 'close_time' => $v['default_close'],
                 ]);
             }
+            foreach ($customDays as $day => $hours) {
+                ClinicHour::updateOrCreate(['day_of_week' => $day], [
+                    'is_closed' => $hours['is_closed'], 'open_time' => $hours['open'], 'close_time' => $hours['close'],
+                ]);
+            }
         });
-        Audit::log('update', 'sch_clinic_hours', null, 'Default clinic working hours updated for every day');
-        return back()->with('status', 'Default clinic hours saved for every day. Patient appointment availability uses these hours for all upcoming dates.')->with('tab', 'hours');
+        $customLabel = count($customDays) ? ' Custom hours were saved for '.count($customDays).' weekday(s).' : '';
+        Audit::log('update', 'sch_clinic_hours', null, 'Default clinic working hours and recurring weekday adjustments updated');
+        return back()->with('status', 'Default clinic hours saved for every day.'.$customLabel.' Patient appointment availability uses these hours for all upcoming dates.')->with('tab', 'hours');
     }
 
     public function previewOverride(Request $request, ScheduleService $schedule)
@@ -213,7 +248,7 @@ class SettingsController extends Controller
             'arrival_notice_minutes' => 'required|integer|min:0|max:120',
             'reminder_hours_before' => 'required|integer|min:1|max:168',
             'session_timeout_minutes' => 'required|integer|min:5|max:120',
-            'installment_min_amount' => 'required|numeric|min:0|max:10000000',
+            'installment_min_amount' => 'required|numeric|min:10000|max:10000000',
             'installment_max_months' => 'required|integer|min:2|max:60',
             'installment_reminder_days' => 'required|integer|min:1|max:30',
         ]);
