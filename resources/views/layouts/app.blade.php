@@ -86,7 +86,12 @@
       <h1 class="h4 mb-0">@yield('page_title')</h1>
       <small class="text-secondary">@yield('page_subtitle')</small>
     </div>
-    <div class="ms-auto">@yield('page_actions')</div>
+    <div class="ms-auto d-flex align-items-center gap-2">
+      @yield('page_actions')
+      @if ($u->role_id === 4)
+        @include('partials.notification-bell')
+      @endif
+    </div>
   </header>
   <main class="p-3 p-lg-4">
     @include('partials.flash')

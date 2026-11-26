@@ -17,6 +17,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\RevenueDashboardController;
 use App\Http\Controllers\DemographicsDashboardController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 // ---------------------------------------------------------------- public
@@ -47,6 +48,8 @@ Route::middleware('auth')->group(function () {
 
     // ---- patient
     Route::middleware('role:patient')->group(function () {
+        Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+        Route::post('/notifications/seen', [NotificationController::class, 'seen'])->name('notifications.seen');
         Route::get('/my-installments', [InstallmentController::class, 'mine'])->name('installments.mine');
         Route::post('/my-installment-payments/{row}/proof', [InstallmentController::class, 'pay'])->middleware('throttle:5,1')->name('installments.pay');
         Route::get('/my-installment-payments/{row}/proof', [InstallmentController::class, 'proof'])->name('installments.proof');
