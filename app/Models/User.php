@@ -32,8 +32,11 @@ class User extends Authenticatable
     public function patient() { return $this->hasOne(Patient::class, 'user_id'); }
     public function consents() { return $this->hasMany(Consent::class, 'user_id'); }
 
-    public function roleName(): string { return $this->role->role_name ?? ''; }
-    public function hasRole(string ...$roles): bool { return in_array($this->roleName(), $roles, true); }
+    public function roleName(): string { return strtolower(trim((string) ($this->role->role_name ?? ''))); }
+    public function hasRole(string ...$roles): bool
+    {
+        return in_array($this->roleName(), array_map(fn ($role) => strtolower(trim($role)), $roles), true);
+    }
     public function getFullNameAttribute(): string { return trim($this->first_name.' '.$this->last_name); }
     public function getRoleLabelAttribute(): string
     {

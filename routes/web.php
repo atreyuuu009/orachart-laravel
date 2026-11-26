@@ -83,6 +83,8 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin,clinic_staff')->group(function () {
         Route::get('/patients/create', [PatientController::class, 'create'])->name('patients.create');
         Route::post('/patients', [PatientController::class, 'store'])->name('patients.store');
+    });
+    Route::middleware('role:admin,clinic_staff,dentist')->group(function () {
         Route::get('/patients/{patient}/edit', [PatientController::class, 'edit'])->name('patients.edit');
         Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('patients.update');
     });
@@ -92,7 +94,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/patients/{patient}/attachments/{attachment}', [PatientController::class, 'downloadClinic'])->name('patients.attachments.download.clinic');
         Route::get('/patients/{patient}/attachments/{attachment}/view', [PatientController::class, 'viewAttachment'])->name('patients.attachments.view');
     });
-    Route::middleware('role:clinic_staff,dentist')->group(function () {
+    Route::middleware('role:admin,clinic_staff,dentist')->group(function () {
         Route::post('/patients/{patient}/attachments', [PatientController::class, 'upload'])->name('patients.attachments.store');
     });
     Route::middleware('role:clinic_staff,dentist')->prefix('payments')->name('payments.')->group(function () {
@@ -105,7 +107,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/{payment}/reject', [PaymentController::class, 'reject'])->name('reject');
         Route::get('/{payment}/receipt', [PaymentController::class, 'receipt'])->name('receipt');
     });
-    Route::middleware('role:clinic_staff,dentist')->group(function () {
+    Route::middleware('role:admin,clinic_staff,dentist')->group(function () {
         Route::put('/patients/{patient}/health', [PatientController::class, 'health'])->name('patients.health');
     });
     Route::middleware('role:clinic_staff')->group(function () {
