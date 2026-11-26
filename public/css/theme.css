@@ -383,6 +383,7 @@ body:has(.landing-nav) #services .text-secondary { color: #a9bac9 !important; }
 .service-card--glass::before {
   position: absolute;
   inset: 0;
+  z-index: 1;
   background: radial-gradient(ellipse at 18% 0%, rgba(179, 225, 255, .13), transparent 58%);
   content: "";
   pointer-events: none;
@@ -396,6 +397,7 @@ body:has(.landing-nav) #services .text-secondary { color: #a9bac9 !important; }
   position: absolute;
   top: 14px;
   left: 16px;
+  z-index: 2;
   display: grid;
   width: 58px;
   height: 58px;
@@ -407,14 +409,14 @@ body:has(.landing-nav) #services .text-secondary { color: #a9bac9 !important; }
   color: #1474b4;
   font-size: 1.35rem;
 }
-.service-card-copy { position: relative; z-index: 1; min-width: 0; }
+.service-card-copy { position: relative; z-index: 2; min-width: 0; }
 .service-card-copy h3 { margin: 0 0 3px; color: #f2f7fc; font-size: 1rem; font-weight: 650; letter-spacing: -.015em; }
 .service-card-copy p { margin: 0; color: #b7c8d5; font-size: .88rem; }
 .service-card-arrow {
   position: absolute;
   right: 16px;
   bottom: 18px;
-  z-index: 1;
+  z-index: 2;
   display: grid;
   width: 40px;
   height: 40px;
@@ -467,3 +469,18 @@ body:has(.landing-nav) #services .text-secondary { color: #a9bac9 !important; }
 .tooth .dots i { width: 9px; height: 9px; border-radius: 50%; border: 1px solid #fff; margin-left: -2px; }
 .legend-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: .35rem; }
 @media (max-width: 991px) { .odonto-scroll { overflow-x: auto; } .odonto-scroll .tooth-row { min-width: 760px; } }
+
+/* Landing hero and services share the blue-to-black backdrop from the reference. */
+body:has(.landing-nav) {
+  background: #020b12;
+  color: #f5faff;
+}
+body:has(.landing-nav) .landing-main {
+  background:
+    radial-gradient(ellipse at 8% 10%, rgba(18, 112, 173, .82), transparent 46%),
+    linear-gradient(115deg, #075b8c 0%, #033856 47%, #020b12 100%);
+}
+body:has(.landing-nav) .landing-hero,
+body:has(.landing-nav) #services {
+  background: transparent;
+}
