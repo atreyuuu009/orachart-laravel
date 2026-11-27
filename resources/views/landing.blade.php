@@ -42,10 +42,16 @@
     <div class="popular-treatments">
       <p>Browse our most popular <a href="#services">dental treatments</a></p>
       <div class="treatment-list">
-        @foreach (['Cleaning', 'Braces', 'Fillings', 'Crowns', 'Whitening'] as $treatment)
-          <a href="#services"><span aria-hidden="true">&#10022;</span>{{ $treatment }}</a>
+        @foreach ([['Cleaning','cleaning','bi-stars'], ['Braces','braces','bi-braces'], ['Fillings','fillings','bi-shield-plus'], ['Crowns','crowns','bi-award-fill'], ['Whitening','whitening','bi-brightness-high-fill']] as [$treatment, $categoryKey, $icon])
+          @php $category = $categories->first(fn ($item) => str_contains(mb_strtolower($item->category_name), $categoryKey)); @endphp
+          @if ($category)
+            <button type="button" class="treatment-chip" data-service-cat="{{ $category->category_id }}"><span class="treatment-chip-icon" aria-hidden="true"><i class="bi {{ $icon }}"></i></span><span>{{ $treatment }}</span></button>
+          @else
+            <a class="treatment-chip" href="#services"><span class="treatment-chip-icon" aria-hidden="true"><i class="bi {{ $icon }}"></i></span><span>{{ $treatment }}</span></a>
+          @endif
         @endforeach
       </div>
+      <a class="treatment-all-link" href="#services">View all treatments <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
     </div>
     </div>
     <div class="hero-tooth-stage" aria-hidden="true">
