@@ -21,15 +21,16 @@
           <label class="form-label" for="service_id">Eligible treatment</label>
           <select class="form-select @error('service_id') is-invalid @enderror" id="service_id" name="service_id" required>
             <option value="">Select a treatment</option>
-            @foreach($services as $service)<option value="{{ $service->service_id }}" data-price="{{ $service->price_min_amount }}" @selected(old('service_id') == $service->service_id)>{{ $service->service_name }} — {{ $service->price_label }}</option>@endforeach
+            @foreach($services as $service)<option value="{{ $service->service_id }}" @selected(old('service_id') == $service->service_id)>{{ $service->service_name }} — {{ $service->price_label }}</option>@endforeach
           </select>
           @error('service_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
-          <div class="form-text">Eligible treatments cost at least ₱{{ number_format($minimumAmount, 2) }}.</div>
+          <div class="form-text">The agreed treatment price is entered by the clinic, including when the service price is listed as a range.</div>
         </div>
         <div class="col-md-4">
           <label class="form-label" for="total_amount">Agreed treatment total</label>
           <input class="form-control @error('total_amount') is-invalid @enderror" id="total_amount" name="total_amount" type="number" min="{{ $minimumAmount }}" step="0.01" value="{{ old('total_amount') }}" required>
           @error('total_amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          <div class="form-text">Enter the agreed amount; it must be at least ₱{{ number_format($minimumAmount, 2) }}.</div>
         </div>
         <div class="col-md-4">
           <label class="form-label" for="downpayment_percent">Down payment collected at clinic</label>
@@ -71,7 +72,6 @@
 @push('scripts')
 <script>
 (() => {
-  const service = document.getElementById('service_id');
   const total = document.getElementById('total_amount');
   const percent = document.getElementById('downpayment_percent');
   const months = document.getElementById('number_of_installments');
@@ -86,7 +86,6 @@
     document.getElementById('remainingAmount').textContent = peso(remaining);
     document.getElementById('monthlyEstimate').textContent = term >= 2 ? `${term} payments of about ${peso(remaining / term)}.` : 'Enter a term of at least 2 months.';
   };
-  service.addEventListener('change', () => { if (!total.value) total.value = service.selectedOptions[0]?.dataset.price || ''; update(); });
   [total, percent, months].forEach(input => input.addEventListener('input', update));
   update();
 })();

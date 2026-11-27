@@ -603,6 +603,8 @@ CREATE TABLE pay_installment_payments (
   due_date               DATE NOT NULL,
   amount_due             DECIMAL(10,2) NOT NULL,
   amount_paid            DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  late_fee_amount        DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  late_fee_applied_at    DATETIME NULL,
   status                 ENUM('unpaid','proof_submitted','verified','rejected','overdue') NOT NULL DEFAULT 'unpaid',
   proof_file_path        VARCHAR(500) NULL,
   proof_uploaded_at      DATETIME NULL,
@@ -753,7 +755,9 @@ INSERT INTO sys_settings (setting_key, setting_value, description) VALUES
   ('gcash_account_number','','Clinic GCash account number'),
   ('installment_min_amount','10000','Minimum service price eligible for installments'),
   ('installment_max_months','12','Maximum installment plan length in months'),
-  ('installment_reminder_days','3','Days before due date to send installment reminder');
+  ('installment_reminder_days','3','Days before due date to send installment reminder'),
+  ('installment_late_fee_type','fixed','Late fee type: fixed pesos or percent'),
+  ('installment_late_fee_amount','0','Installment late fee amount or percent');
 
 INSERT INTO pay_discounts (discount_name, discount_percent) VALUES
   ('Senior Citizen',20.00),('PWD',20.00),
@@ -771,6 +775,8 @@ INSERT INTO ntf_templates (template_key, subject, body_html) VALUES
   ('recall_reminder','Time for your routine check-up','TODO'),
   ('treatment_reminder','Your next treatment visit','TODO'),
   ('installment_due','Installment payment reminder','TODO'),
+  ('installment_overdue','Installment payment overdue','TODO'),
+  ('installment_schedule_changed','Your installment schedule was adjusted','TODO'),
   ('installment_approved','Your installment plan was approved','TODO'),
   ('installment_rejected','Your installment request was declined','TODO'),
   ('payment_verified','Payment verified','TODO'),

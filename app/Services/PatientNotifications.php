@@ -57,13 +57,15 @@ class PatientNotifications
             ->where('pl.patient_id', $patient->patient_id)
             ->whereIn('pl.status', ['approved', 'active'])
             ->whereIn('ip.status', ['unpaid', 'rejected', 'overdue'])
-            ->whereDate('ip.due_date', '<=', today()->addDays(3))
-            ->select(['ip.installment_payment_id', 'ip.due_date', 'ip.status', 'pl.service_id', 's.service_name'])
+            ->where(fn ($query) => $query->where('ip.status', 'rejected')->orWhereDate('ip.due_date', '<=', today()->addDays(3)))
+            ->select(['ip.installment_payment_id', 'ip.due_date', 'ip.status', 'ip.rejection_reason', 'ip.late_fee_amount', 'pl.service_id', 's.service_name'])
             ->get()
             ->map(fn ($row) => [
                 'id' => 'installment-'.$row->installment_payment_id, 'key' => 'payment_due',
                 'title' => 'Payment due',
-                'message' => 'Your payment for '.($row->service_name ?: 'your treatment').' is '.($row->status === 'rejected' ? 'rejected; please submit it again.' : 'due '.(Carbon::parse($row->due_date)->isPast() ? 'now.' : 'by '.Carbon::parse($row->due_date)->format('M j').'.')),
+                'message' => $row->status === 'rejected'
+                    ? 'Your proof was rejected. '.($row->rejection_reason ?: 'Please upload a new JPG or PNG proof.').' Resubmit your proof from My Installments.'
+                    : 'Your payment for '.($row->service_name ?: 'your treatment').' is '.(Carbon::parse($row->due_date)->toDateString() < today()->toDateString() ? 'overdue; please contact the clinic if you need a schedule adjustment.' : (Carbon::parse($row->due_date)->isToday() ? 'due today.' : 'due by '.Carbon::parse($row->due_date)->format('M j').'.')).((float)$row->late_fee_amount > 0 ? ' Late fee included: ₱'.number_format((float)$row->late_fee_amount, 2).'.' : ''),
                 'tone' => 'red', 'sticky' => true, 'created_at' => Carbon::parse($row->due_date)->startOfDay(),
                 'url' => $this->paymentUrl(),
             ]);
@@ -104,6 +106,8 @@ class PatientNotifications
             'booking_confirmed' => ['Appointment confirmed', 'Your appointment is confirmed.', 'green'],
             'payment_verified' => ['Payment verified', 'Your payment has been verified.', 'green'],
             'installment_approved' => ['Installment approved', 'Your installment plan has been approved.', 'green'],
+            'installment_overdue' => ['Installment 7 days overdue', 'Your installment is 7 days overdue. Please view your schedule or contact the clinic to discuss an adjustment.', 'red'],
+            'installment_schedule_changed' => ['Installment schedule adjusted', 'The clinic adjusted your installment schedule. View your current due dates.', 'yellow'],
             'booking_received' => ['Booking received', 'We received your appointment request.', 'yellow'],
             'booking_rejected' => ['Booking declined', 'Your appointment request was declined.', 'yellow'],
             'appointment_cancelled' => ['Appointment cancelled', 'Your appointment was cancelled.', 'yellow'],
@@ -116,7 +120,7 @@ class PatientNotifications
             default => [$row->subject ?: 'Clinic update', 'There is an update about your care.', 'yellow'],
         };
         $when = Carbon::parse($row->sent_at ?: $row->created_at);
-        $url = in_array($key, ['booking_received'], true) ? $this->routeUrl('booking.create') : $this->routeUrl('appointments.mine');
+        $url = in_array($key, ['booking_received'], true) ? $this->routeUrl('booking.create') : (in_array($key, ['payment_rejected', 'installment_overdue', 'installment_schedule_changed'], true) ? $this->paymentUrl() : $this->routeUrl('appointments.mine'));
 
         return ['id' => 'email-'.$row->email_log_id, 'key' => $key, 'title' => $title, 'message' => $message,
             'tone' => $tone, 'sticky' => false, 'created_at' => $when, 'url' => $url];

@@ -13,8 +13,8 @@
 </ul>
 <div class="tab-content pt-3">
   <div class="tab-pane fade {{ auth()->user()->hasRole('clinic_staff') ? '' : 'show active' }}" id="plans">
-    <div class="card"><div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Patient</th><th>Treatment</th><th>Down payment</th><th>Remaining online balance</th><th>Term</th><th>Status</th></tr></thead><tbody>
-      @forelse($plans as $plan)<tr><td>{{ $plan->patient->full_name }}</td><td>{{ $plan->service->service_name }}</td><td>₱{{ number_format($plan->downpayment_amount, 2) }} <span class="text-secondary small">({{ number_format($plan->downpayment_percent, 2) }}%)</span></td><td>₱{{ number_format($plan->net_amount, 2) }}</td><td>{{ $plan->number_of_installments }} months</td><td>{{ ucfirst($plan->status) }}</td></tr>@empty<tr><td colspan="6" class="text-secondary">No installment plans yet.</td></tr>@endforelse
+    <div class="card"><div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Patient</th><th>Treatment</th><th>Down payment</th><th>Remaining online balance</th><th>Term</th><th>Status</th><th></th></tr></thead><tbody>
+      @forelse($plans as $plan)<tr><td>{{ $plan->patient->full_name }}</td><td>{{ $plan->service->service_name }}</td><td>₱{{ number_format($plan->downpayment_amount, 2) }} <span class="text-secondary small">({{ number_format($plan->downpayment_percent, 2) }}%)</span></td><td>₱{{ number_format($plan->net_amount, 2) }}</td><td>{{ $plan->number_of_installments }} months</td><td>{{ ucfirst($plan->status) }}</td><td>@if(auth()->user()->hasRole('admin') && $plan->status==='active')<a class="btn btn-sm btn-outline-primary" href="{{ route('installments.schedule',$plan) }}">Manage schedule</a>@endif</td></tr>@empty<tr><td colspan="7" class="text-secondary">No installment plans yet.</td></tr>@endforelse
     </tbody></table></div></div>
   </div>
   @if(auth()->user()->hasRole('admin','clinic_staff'))<div class="tab-pane fade {{ auth()->user()->hasRole('clinic_staff') ? 'show active' : '' }}" id="proofs">

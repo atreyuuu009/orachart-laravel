@@ -40,6 +40,11 @@ class DemoDataSeeder extends Seeder
         $this->patient(['user_id' => $pu->user_id, 'first_name' => 'Patient', 'last_name' => 'Patient', 'birth_date' => '1998-05-14',
             'contact_number' => '09170000000', 'email' => 'patient@demo.com', 'sex' => 'female']);
 
+        // Dedicated verified account for installment testing; intentionally has no existing installment plan.
+        $installmentPatient = $mk(4, 'installment-demo', 'installment.patient@demo.com', 'Installment', 'Demo', '09170000001');
+        $this->patient(['user_id' => $installmentPatient->user_id, 'first_name' => 'Installment', 'last_name' => 'Demo', 'birth_date' => '1999-06-15',
+            'contact_number' => '09170000001', 'email' => 'installment.patient@demo.com', 'sex' => 'female']);
+
         // Walk-in patients (no account) used by the odontogram demo
         $pedro = $this->patient(['first_name' => 'Pedro', 'last_name' => 'Penduko', 'birth_date' => '2002-03-02', 'contact_number' => '09175550001', 'sex' => 'male']);
         $this->patient(['first_name' => 'Marian', 'last_name' => 'Magdalena', 'birth_date' => '1995-08-21', 'contact_number' => '09175550002', 'sex' => 'female']);
@@ -63,7 +68,7 @@ class DemoDataSeeder extends Seeder
 
         // Settings that are not in the SQL seed (defaults live in App\Support\Settings)
         foreach (['auto_confirm_bookings' => 1, 'reminders_enabled' => 1, 'enforce_service_specialty' => 0,
-            'installment_min_amount' => 10000, 'installment_max_months' => 12, 'installment_reminder_days' => 3,
+            'installment_min_amount' => 10000, 'installment_max_months' => 12, 'installment_reminder_days' => 3, 'installment_late_fee_type' => 'fixed', 'installment_late_fee_amount' => 0,
             'gcash_qr_path' => '', 'gcash_account_name' => '', 'gcash_account_number' => ''] as $k => $v) {
             \App\Models\SysSetting::firstOrCreate(['setting_key' => $k], ['setting_value' => (string) $v]);
         }

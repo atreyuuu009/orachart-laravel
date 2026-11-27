@@ -300,10 +300,12 @@
       ['slot_lock_minutes', 'Slot hold while booking (min)', 1, 30], ['max_patients_per_day', 'Max patients per day (clinic)', 1, 200],
       ['emergency_release_minutes', 'Release unused emergency slots (min before)', 0, 240], ['arrival_notice_minutes', 'Ask patients to arrive early (min)', 0, 120],
       ['reminder_hours_before', 'Reminder e-mail (hours before)', 1, 168], ['session_timeout_minutes', 'Inactivity logout (minutes)', 5, 120],
-      ['installment_min_amount', 'Installment minimum (₱)', 0, 10000000], ['installment_max_months', 'Installment maximum months', 2, 60], ['installment_reminder_days', 'Installment reminder lead days', 1, 30],
+      ['installment_min_amount', 'Installment minimum (₱)', 10000, 10000000], ['installment_max_months', 'Installment maximum months', 2, 60],
     ] as [$k, $label, $min, $max])
       <div class="col-md-6 col-lg-4"><label class="form-label">{{ $label }}</label><input type="number" class="form-control settings-rule-input" name="{{ $k }}" min="{{ $min }}" max="{{ $max }}" value="{{ old($k, $rules[$k]) }}" required></div>
     @endforeach
+    <div class="col-md-6 col-lg-4"><label class="form-label" for="installment_late_fee_type">Installment late fee type</label><select class="form-select" name="installment_late_fee_type" id="installment_late_fee_type"><option value="fixed" @selected(old('installment_late_fee_type', $rules['installment_late_fee_type']) === 'fixed')>Fixed pesos</option><option value="percent" @selected(old('installment_late_fee_type', $rules['installment_late_fee_type']) === 'percent')>Percentage of installment</option></select></div>
+    <div class="col-md-6 col-lg-4"><label class="form-label" for="installment_late_fee_amount">Installment late fee</label><input type="number" class="form-control" name="installment_late_fee_amount" id="installment_late_fee_amount" min="0" max="100000" step="0.01" value="{{ old('installment_late_fee_amount', $rules['installment_late_fee_amount']) }}" required><div class="form-text">Set to 0 to disable. Applied once when 7 days overdue.</div></div>
     <div class="col-12"><hr></div>
     @foreach (['auto_confirm_bookings' => 'Auto-confirm patient bookings (otherwise staff must confirm each request)',
                'reminders_enabled' => 'Send reminder, thank-you and recall e-mails',

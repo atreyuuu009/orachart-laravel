@@ -25,7 +25,9 @@ class InstallmentReviewController extends Controller
     public function createForPatient(InstallmentService $service)
     {
         return view('installments.create-for-patient', [
-            'patients' => Patient::whereNotNull('user_id')->orderBy('last_name')->orderBy('first_name')->get(),
+            'patients' => Patient::whereNotNull('user_id')->whereHas('user', fn ($query) => $query->where('is_email_verified', 1))
+                ->whereNotIn('patient_id', InstallmentPlan::whereIn('status', ['requested', 'approved', 'active'])->select('patient_id'))
+                ->orderBy('last_name')->orderBy('first_name')->get(),
             'services' => $service->eligibleServices()->get(),
             'maxMonths' => Settings::int('installment_max_months'),
             'minimumAmount' => max(10000, Settings::int('installment_min_amount')),
@@ -49,6 +51,37 @@ class InstallmentReviewController extends Controller
         return redirect()->route('installments.index')->with('status', 'Installment plan created. The in-clinic down payment was recorded and the patient can now pay the remaining balance online.');
     }
 
+    public function schedule(InstallmentPlan $plan)
+    {
+        abort_unless(in_array($plan->status, ['active', 'approved'], true), 404);
+        $plan->load('patient', 'service', 'payments');
+        return view('installments.schedule', compact('plan'));
+    }
+
+    public function movePayment(Request $request, InstallmentPayment $row, InstallmentService $service)
+    {
+        $data = $request->validate(['due_date' => 'required|date|after_or_equal:today']);
+        abort_unless(in_array($row->plan->status, ['active', 'approved'], true), 404);
+        $service->moveDueDate($row, $data['due_date'], (int) $request->user()->user_id);
+        return back()->with('status', 'Installment due date updated.');
+    }
+
+    public function splitPayment(Request $request, InstallmentPayment $row, InstallmentService $service)
+    {
+        $minimumDate = max(today()->toDateString(), $row->due_date->toDateString());
+        $data = $request->validate(['second_due_date' => 'required|date|after_or_equal:'.$minimumDate]);
+        abort_unless(in_array($row->plan->status, ['active', 'approved'], true), 404);
+        $service->splitPayment($row, $data['second_due_date'], (int) $request->user()->user_id);
+        return back()->with('status', 'Installment split into two scheduled payments.');
+    }
+
+    public function extendPlan(Request $request, InstallmentPlan $plan, InstallmentService $service)
+    {
+        abort_unless($plan->status === 'active', 404);
+        $service->extendPlan($plan, (int) $request->user()->user_id);
+        return back()->with('status', 'Plan extended by one month and its last unpaid amount was split.');
+    }
+
     public function verify(InstallmentPayment $row, InstallmentService $service)
     {
         $service->verify($row, request()->user()->user_id);
@@ -68,7 +101,7 @@ class InstallmentReviewController extends Controller
         $path = Storage::disk('local')->path($row->proof_file_path);
         abort_unless(is_file($path), 404);
         $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($path);
-        abort_unless(in_array($mime, ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'], true), 404);
+        abort_unless(in_array($mime, ['image/jpeg', 'image/png'], true), 404);
 
         return response()->file($path, ['Content-Type' => $mime, 'Content-Disposition' => 'inline; filename="'.basename($path).'"', 'X-Content-Type-Options' => 'nosniff']);
     }

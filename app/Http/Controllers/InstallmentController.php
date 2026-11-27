@@ -25,7 +25,7 @@ class InstallmentController extends Controller
         abort_unless($belongsToUser, 403);
     }
     public function mine(Request $r){$plans=InstallmentPlan::with('service','payments')->where('patient_id',$this->patient($r)->patient_id)->latest('created_at')->get();return view('installments.mine',compact('plans'));}
-    public function pay(Request $r,InstallmentPayment $row,InstallmentService $s){$p=$row->plan;$this->owned($r,$p);abort_unless($p->status==='active'&&in_array($row->status,['unpaid','overdue','rejected']),404);$v=$r->validate(['proof'=>'required|file|mimes:jpg,jpeg,png,webp,pdf|max:5120','reference_number'=>'nullable|string|max:100']);$f=$v['proof'];$mime=(new \finfo(FILEINFO_MIME_TYPE))->file($f->getRealPath());abort_unless(in_array($mime,['image/jpeg','image/png','image/webp','application/pdf'],true),422,'Unsupported proof file.');$s->submitProof($row,$f,$v['reference_number']??null);return back()->with('status','Payment proof uploaded.');}
+    public function pay(Request $r,InstallmentPayment $row,InstallmentService $s){$p=$row->plan;$this->owned($r,$p);abort_unless($p->status==='active'&&in_array($row->status,['unpaid','overdue','rejected']),404);$v=$r->validate(['proof'=>'required|file|mimes:jpg,jpeg,png|max:5120','reference_number'=>'nullable|string|max:100']);$f=$v['proof'];$mime=(new \finfo(FILEINFO_MIME_TYPE))->file($f->getRealPath());abort_unless(in_array($mime,['image/jpeg','image/png'],true),422,'Only JPG and PNG proof images are accepted.');$s->submitProof($row,$f,$v['reference_number']??null);return back()->with('status','Payment proof uploaded.');}
     public function proof(Request $r,InstallmentPayment $row)
     {
         $this->owned($r,$row->plan);
@@ -33,7 +33,7 @@ class InstallmentController extends Controller
         $path=Storage::disk('local')->path($row->proof_file_path);
         abort_unless(is_file($path),404);
         $mime=(new \finfo(FILEINFO_MIME_TYPE))->file($path);
-        abort_unless(in_array($mime,['image/jpeg','image/png','image/webp','application/pdf'],true),404);
+        abort_unless(in_array($mime,['image/jpeg','image/png'],true),404);
         return response()->file($path,['Content-Type'=>$mime,'Content-Disposition'=>'inline; filename="'.basename($path).'"','X-Content-Type-Options'=>'nosniff']);
     }
 }

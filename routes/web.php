@@ -67,6 +67,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/new-for-patient', [InstallmentReviewController::class, 'createForPatient'])->name('create-for-patient');
         Route::post('/new-for-patient', [InstallmentReviewController::class, 'storeForPatient'])->name('store-for-patient');
     });
+    Route::middleware('role:admin')->prefix('installments')->name('installments.')->group(function () {
+        Route::get('/{plan}/schedule', [InstallmentReviewController::class, 'schedule'])->name('schedule');
+        Route::post('/payments/{row}/move', [InstallmentReviewController::class, 'movePayment'])->name('schedule.move');
+        Route::post('/payments/{row}/split', [InstallmentReviewController::class, 'splitPayment'])->name('schedule.split');
+        Route::post('/{plan}/extend', [InstallmentReviewController::class, 'extendPlan'])->name('schedule.extend');
+    });
     Route::middleware('role:admin,clinic_staff')->get('/installment-proofs/{row}/file', [InstallmentReviewController::class, 'proof'])->name('installments.proof.view');
     Route::middleware('role:admin,clinic_staff')->group(function () {
         Route::post('/installment-proofs/{row}/verify', [InstallmentReviewController::class, 'verify'])->name('installments.verify');

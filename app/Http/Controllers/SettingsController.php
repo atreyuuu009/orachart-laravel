@@ -22,7 +22,7 @@ class SettingsController extends Controller
     {
         $keys = ['slot_interval_minutes', 'buffer_before_minutes', 'buffer_after_minutes', 'min_booking_notice_hours',
             'slot_lock_minutes', 'max_patients_per_day', 'emergency_release_minutes', 'arrival_notice_minutes',
-            'reminder_hours_before', 'session_timeout_minutes', 'installment_min_amount', 'installment_max_months', 'installment_reminder_days'];
+            'reminder_hours_before', 'session_timeout_minutes', 'installment_min_amount', 'installment_max_months', 'installment_reminder_days', 'installment_late_fee_type', 'installment_late_fee_amount'];
         $rules = collect($keys)->mapWithKeys(fn ($k) => [$k => Settings::get($k)])->all();
 
         return view('admin.settings', [
@@ -250,8 +250,12 @@ class SettingsController extends Controller
             'session_timeout_minutes' => 'required|integer|min:5|max:120',
             'installment_min_amount' => 'required|numeric|min:10000|max:10000000',
             'installment_max_months' => 'required|integer|min:2|max:60',
-            'installment_reminder_days' => 'required|integer|min:1|max:30',
+            'installment_late_fee_type' => 'required|in:fixed,percent',
+            'installment_late_fee_amount' => 'required|numeric|min:0|max:100000',
         ]);
+        if ($v['installment_late_fee_type'] === 'percent' && $v['installment_late_fee_amount'] > 100) {
+            return back()->withErrors(['installment_late_fee_amount' => 'Percentage late fees cannot exceed 100%.'])->withInput()->with('tab', 'rules');
+        }
         foreach ($v as $k => $val) Settings::set($k, $val);
         foreach (['auto_confirm_bookings', 'enforce_service_specialty', 'reminders_enabled'] as $flag) {
             Settings::set($flag, $request->boolean($flag));

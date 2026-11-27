@@ -85,6 +85,12 @@ HTML],
             'installment_due' => ['Installment payment reminder', <<<'HTML'
 <p>Hi {first_name},</p><p>Installment {installment_number} of {months} for {service} is due {due_date}. Amount due: ₱{amount}.</p><p><a href="{action_url}">View your installment plan and payment instructions</a></p>
 HTML],
+            'installment_overdue' => ['Installment payment overdue', <<<'HTML'
+<p>Hi {first_name},</p><p>Installment {installment_number} of {months} for {service}, due {due_date}, is now 7 days overdue. Current amount due: ₱{amount}. This includes a late fee of ₱{late_fee}.</p><p>Please sign in to view your schedule or contact the clinic if you need an adjustment.</p><p><a href="{action_url}">View your installment plan</a></p>
+HTML],
+            'installment_schedule_changed' => ['Your installment schedule was adjusted', <<<'HTML'
+<p>Hi {first_name},</p><p>Your installment schedule for {service} was adjusted by the clinic.</p><p>{change_message}</p><p><a href="{action_url}">View your current schedule</a></p>
+HTML],
             'installment_approved' => ['Your installment plan is ready', <<<'HTML'
 <p>Hi {first_name},</p><p>Your installment plan for {service} is ready. Your clinic down payment has been recorded, and the remaining balance is ₱{net_amount} over {months} monthly payments.</p><p><a href="{action_url}">View your payment schedule</a></p>
 HTML],
