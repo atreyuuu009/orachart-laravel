@@ -18,7 +18,10 @@
         @auth
           <a class="btn btn-primary nav-cta" href="{{ route('dashboard') }}">My Account <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i></a>
         @else
-          <a class="btn btn-primary nav-cta" href="{{ route('register') }}">Register <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i></a>
+          <div class="landing-auth-actions">
+            <a class="landing-login-link" href="{{ route('login') }}"><i class="bi bi-person" aria-hidden="true"></i><span>Login</span></a>
+            <a class="btn nav-cta landing-register-link" href="{{ route('register') }}"><span>Register</span><span class="landing-register-arrow"><i class="bi bi-arrow-right" aria-hidden="true"></i></span></a>
+          </div>
         @endauth
       </div>
     </div>

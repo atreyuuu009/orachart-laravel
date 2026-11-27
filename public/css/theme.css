@@ -318,6 +318,21 @@ body:has(.landing-nav) { background: #062d29; color: #f5fffc; }
   .treatment-list { gap: .75rem 1.25rem; }
 }
 .topbar { background: #fff; border-bottom: 1px solid var(--bs-border-color); }
+
+/* Landing page account links */
+.landing-auth-actions { display: flex; align-items: center; gap: .75rem; }
+.landing-nav .landing-login-link { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; gap: .55rem; padding: .55rem 1.25rem; border: 1px solid rgba(191, 219, 235, .38); border-radius: 999px; background: rgba(18, 71, 102, .58); color: #fff; font-size: .9rem; font-weight: 600; text-decoration: none; }
+.landing-nav .landing-login-link i { font-size: .95rem; }
+.landing-nav .landing-login-link:hover, .landing-nav .landing-login-link:focus-visible { background: rgba(35, 91, 122, .78); color: #fff; }
+.landing-nav .btn.landing-register-link { display: inline-flex; min-height: 50px; align-items: center; gap: .75rem; padding: .35rem .4rem .35rem 1.35rem; border: 0; border-radius: 999px; background: #fff; box-shadow: 0 3px 0 #73bde5; color: #102b37; font-size: .9rem; font-weight: 600; text-decoration: none; }
+.landing-register-arrow { display: grid; width: 30px; height: 30px; flex: none; place-items: center; border-radius: 50%; background: #07395d; color: #fff; font-size: 1rem; }
+.landing-nav .btn.landing-register-link:hover, .landing-nav .btn.landing-register-link:focus-visible { background: #edf7fc; color: #102b37; box-shadow: 0 3px 0 #73bde5; }
+@media (max-width: 575.98px) {
+  .landing-auth-actions { gap: .5rem; }
+  .landing-nav .btn.landing-register-link { min-height: 42px; gap: .5rem; padding: .3rem .35rem .3rem .9rem; font-size: .8rem; }
+  .landing-register-arrow { width: 26px; height: 26px; }
+  .landing-nav .landing-login-link { min-height: 38px; gap: .35rem; padding: .4rem .75rem; font-size: .8rem; }
+}
 .stat-card .stat-value { font-size: 2rem; font-weight: 800; color: var(--gs-primary); line-height: 1; }
 .table > :not(caption) > * > * { padding: .75rem .85rem; vertical-align: middle; }
 .table thead th { font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: #6b7280; background: #f8fafc; }
