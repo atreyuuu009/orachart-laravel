@@ -92,12 +92,12 @@
   <div class="why-panel">
     <div class="text-center mb-4"><div class="eyebrow">WHY PATIENTS CHOOSE US</div><h2>Dental care that feels clear and comfortable</h2></div>
     <div class="row g-4 why-grid">
-      @foreach ([['bi-tooth','', 'Experienced dentists','Thorough exams, restorative care, and treatment plans you can understand.'],
+      @foreach ([['','', 'Experienced dentists','Thorough exams, restorative care, and treatment plans you can understand.'],
                  ['bi-coin','₱','Transparent pricing','See indicative service prices up front so you can plan with fewer surprises.'],
                  ['bi-calendar-event','', 'Easy online booking','Register, choose your procedure and preferred time, then manage appointments in one place.'],
                  ['bi-heart','', 'Gentle clinic experience','A calm, respectful environment for first-time and anxious patients.']] as [$i, $symbol, $t, $d])
         <div class="col-6 col-lg-3"><article class="why-item h-100">
-          <div class="why-icon" aria-hidden="true">@if($symbol)<span class="why-icon-symbol">{{ $symbol }}</span>@else<i class="bi {{ $i }}"></i>@endif</div>
+          <div class="why-icon" aria-hidden="true">@if($symbol)<span class="why-icon-symbol">{{ $symbol }}</span>@elseif($t === 'Experienced dentists')<svg class="why-tooth-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7.2 3.5c-2.3 0-3.7 1.8-3.7 4.2 0 2.1.8 4.1 1.5 5.8.6 1.5 1.1 3 1.4 4.4.3 1.4.8 2.6 1.8 2.6 1.2 0 1.4-1.8 1.8-3.6.3-1.3.7-2.4 2-2.4s1.7 1.1 2 2.4c.4 1.8.6 3.6 1.8 3.6 1 0 1.5-1.2 1.8-2.6.3-1.4.8-2.9 1.4-4.4.7-1.7 1.5-3.7 1.5-5.8 0-2.4-1.4-4.2-3.7-4.2-1.8 0-2.8 1-4.8 1s-3-1-4.8-1Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>@else<i class="bi {{ $i }}"></i>@endif</div>
           <h3>{{ $t }}</h3><p>{{ $d }}</p>
         </article></div>
       @endforeach

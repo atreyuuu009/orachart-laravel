@@ -364,6 +364,7 @@ body:has(.landing-nav) .why-panel h2 { color: #f4f9ff; font-size: clamp(1.35rem,
   text-shadow: 0 0 10px rgba(84, 177, 255, .38);
 }
 .why-icon-symbol { color: #70bcff; font-size: 1.3rem; font-weight: 700; }
+.why-tooth-icon { display: block; width: 23px; height: 23px; color: #70bcff; filter: drop-shadow(0 1px 2px rgba(71, 166, 255, .45)); }
 body:has(.landing-nav) .why-item h3 { margin: 0 0 .4rem; color: #f4f9ff; font-size: .98rem; font-weight: 650; }
 body:has(.landing-nav) .why-item p { margin: 0; color: #b8ccdc; font-size: .88rem; line-height: 1.55; }
 @media (max-width: 575.98px) {
