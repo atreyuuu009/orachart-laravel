@@ -88,15 +88,20 @@
   @include('partials.landing-services', ['categories' => $categories])
 </div></section>
 
-<section id="why" class="section-pad bg-white"><div class="container">
-  <div class="text-center mb-4"><div class="eyebrow">WHY PATIENTS CHOOSE US</div><h2>Dental care that feels clear and comfortable</h2></div>
-  <div class="row g-4">
-    @foreach ([['🦷','Experienced dentists','Thorough exams, restorative care, and treatment plans you can understand.'],
-               ['₱','Transparent pricing','See indicative service prices up front so you can plan with fewer surprises.'],
-               ['📅','Easy online booking','Register, choose your procedure and preferred time, then manage appointments in one place.'],
-               ['💙','Gentle clinic experience','A calm, respectful environment for first-time and anxious patients.']] as [$i, $t, $d])
-      <div class="col-md-6 col-lg-3"><div class="why-icon">{{ $i }}</div><h5>{{ $t }}</h5><p class="text-secondary">{{ $d }}</p></div>
-    @endforeach
+<section id="why" class="section-pad why-section"><div class="container">
+  <div class="why-panel">
+    <div class="text-center mb-4"><div class="eyebrow">WHY PATIENTS CHOOSE US</div><h2>Dental care that feels clear and comfortable</h2></div>
+    <div class="row g-4 why-grid">
+      @foreach ([['bi-tooth','', 'Experienced dentists','Thorough exams, restorative care, and treatment plans you can understand.'],
+                 ['bi-coin','₱','Transparent pricing','See indicative service prices up front so you can plan with fewer surprises.'],
+                 ['bi-calendar-event','', 'Easy online booking','Register, choose your procedure and preferred time, then manage appointments in one place.'],
+                 ['bi-heart','', 'Gentle clinic experience','A calm, respectful environment for first-time and anxious patients.']] as [$i, $symbol, $t, $d])
+        <div class="col-6 col-lg-3"><article class="why-item h-100">
+          <div class="why-icon" aria-hidden="true">@if($symbol)<span class="why-icon-symbol">{{ $symbol }}</span>@else<i class="bi {{ $i }}"></i>@endif</div>
+          <h3>{{ $t }}</h3><p>{{ $d }}</p>
+        </article></div>
+      @endforeach
+    </div>
   </div>
 </div></section>
 
