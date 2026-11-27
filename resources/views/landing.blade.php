@@ -37,7 +37,7 @@
     <p class="lead">From cleanings and fillings to braces, extractions, and crowns — clear<br class="d-none d-md-block"> prices, careful treatment, and a calm clinic experience for every<br class="d-none d-md-block"> patient.</p>
     <div class="d-flex flex-wrap justify-content-center gap-2 hero-actions">
       <a class="btn btn-primary btn-lg" href="{{ auth()->check() ? route('booking.create') : route('register') }}">Book Appointment <i class="bi bi-arrow-right ms-2"></i></a>
-      <a class="btn btn-outline-primary btn-lg" href="#services">See Services &amp; Prices</a>
+      <a class="btn btn-outline-primary btn-lg see-services-btn" href="#services"><span>See Services &amp; Prices</span><i class="bi bi-arrow-right see-services-arrow" aria-hidden="true"></i></a>
     </div>
     <div class="popular-treatments">
       <p>Browse our most popular <a href="#services">dental treatments</a></p>
