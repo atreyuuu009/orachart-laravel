@@ -68,7 +68,95 @@ class PatientController extends Controller
                     ->orWhere('contact_number', 'like', "%$term%"));
             }
         }
-        return view('patients.index', ['patients' => $query->orderByDesc('created_at')->orderByDesc('patient_id')->paginate(20)->withQueryString()]);
+
+        // Sex filter.
+        $sex = (string) $request->query('sex');
+        if (in_array($sex, ['male', 'female', 'other'], true)) {
+            $query->where('sex', $sex);
+        }
+
+        // Age group filter, derived from the birth date.
+        $today = now()->startOfDay();
+        $ageGroup = (string) $request->query('age');
+        if ($ageGroup === 'child') {
+            $query->where('birth_date', '>', $today->copy()->subYears(13)->toDateString());
+        } elseif ($ageGroup === 'teen') {
+            $query->where('birth_date', '<=', $today->copy()->subYears(13)->toDateString())
+                ->where('birth_date', '>', $today->copy()->subYears(20)->toDateString());
+        } elseif ($ageGroup === 'adult') {
+            $query->where('birth_date', '<=', $today->copy()->subYears(20)->toDateString())
+                ->where('birth_date', '>', $today->copy()->subYears(60)->toDateString());
+        } elseif ($ageGroup === 'senior') {
+            $query->where('birth_date', '<=', $today->copy()->subYears(60)->toDateString());
+        }
+
+        // Visit recency filter, useful for recall and re-engaging lapsed patients.
+        $activeSince = $today->copy()->subMonths(12)->toDateString();
+        $visit = (string) $request->query('visit');
+        if ($visit === 'never') {
+            $query->whereDoesntHave('visitRecords');
+        } elseif ($visit === 'active') {
+            $query->whereHas('visitRecords', fn ($v) => $v->where('visit_date', '>=', $activeSince));
+        } elseif ($visit === 'lapsed') {
+            $query->whereHas('visitRecords')
+                ->whereDoesntHave('visitRecords', fn ($v) => $v->where('visit_date', '>=', $activeSince));
+        }
+
+        // Clinical alert filter: allergies, medical conditions or flagged checklist items.
+        $hasAlerts = function ($profile) {
+            $profile->where(function ($w) {
+                $w->where(fn ($x) => $x->whereNotNull('allergies')->where('allergies', '!=', ''))
+                    ->orWhere(fn ($x) => $x->whereNotNull('medical_conditions')->where('medical_conditions', '!=', ''))
+                    ->orWhereJsonLength('structured_checklist->items', '>', 0);
+            });
+        };
+
+        $totalBeforeAlerts = (clone $query)->count();
+        $withAlertsCount = (clone $query)->whereHas('healthProfile', $hasAlerts)->count();
+        $alertCounts = [
+            'all' => $totalBeforeAlerts,
+            'with' => $withAlertsCount,
+            'without' => max(0, $totalBeforeAlerts - $withAlertsCount),
+        ];
+
+        $alerts = (string) $request->query('alerts');
+        if (in_array($alerts, ['with', 'without'], true)) {
+            $alerts === 'with'
+                ? $query->whereHas('healthProfile', $hasAlerts)
+                : $query->whereDoesntHave('healthProfile', $hasAlerts);
+        }
+
+        // Sorting.
+        $sort = (string) $request->query('sort', 'newest');
+        switch ($sort) {
+            case 'name_asc':
+                $query->orderBy('last_name')->orderBy('first_name');
+                break;
+            case 'name_desc':
+                $query->orderByDesc('last_name')->orderByDesc('first_name');
+                break;
+            case 'oldest':
+                $query->orderBy('created_at')->orderBy('patient_id');
+                break;
+            case 'last_visit':
+                $query->orderByDesc('visit_records_max_visit_date');
+                break;
+            case 'last_visit_oldest':
+                $query->orderBy('visit_records_max_visit_date');
+                break;
+            case 'newest':
+            default:
+                $query->orderByDesc('created_at')->orderByDesc('patient_id');
+                break;
+        }
+
+        return view('patients.index', [
+            'patients' => $query->paginate(20)->withQueryString(),
+            'alertCounts' => $alertCounts,
+            'activeVisit' => $visit,
+            'activeAlerts' => $alerts,
+            'activeSort' => $sort,
+        ]);
     }
 
     public function create(Request $request)

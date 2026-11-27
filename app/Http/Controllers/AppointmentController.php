@@ -26,7 +26,36 @@ class AppointmentController extends Controller
         ]);
 
         $isNeedsReschedule = $request->query('status') === 'needs_reschedule';
-        $q = Appointment::visibleTo($request->user())->with(['patient', 'service', 'dentist.user', 'emailLogs']);
+        $sort = $request->query('sort', 'desc');
+        $date = Carbon::parse($request->query('date', today()->toDateString()));
+        $period = $request->query('period', 'week');
+        $start = $date->copy()->{'startOf'.ucfirst($period)}();
+        $end = $date->copy()->{'endOf'.ucfirst($period)}();
+
+        $base = Appointment::visibleTo($request->user())->whereBetween('start_at', [$start, $end]);
+        if ($dentist = $request->query('dentist')) $base->where('assigned_dentist_id', $dentist);
+        if ($procedure = $request->query('procedure')) $base->where('service_id', $procedure);
+        if ($f = $request->query('from')) $base->where('start_at', '>=', Carbon::parse($f)->startOfDay());
+        if ($t = $request->query('to')) $base->where('start_at', '<=', Carbon::parse($t)->endOfDay());
+        if ($term = trim((string) $request->query('q'))) {
+            $base->whereHas('patient', fn ($p) => $p->where(fn ($w) => $w
+                ->where('first_name', 'like', "%$term%")->orWhere('last_name', 'like', "%$term%")
+                ->orWhere('patient_code', 'like', "%$term%")->orWhere('contact_number', 'like', "%$term%")));
+        }
+
+        $groupedStatusCounts = (clone $base)->selectRaw('status, COUNT(*) as cnt')->groupBy('status')->pluck('cnt', 'status');
+        $statusCounts = [
+            'all' => (int) $groupedStatusCounts->sum(),
+            'needs_reschedule' => (clone $base)->open()->where('needs_reschedule', 1)->count(),
+            'pending' => (int) ($groupedStatusCounts['pending'] ?? 0),
+            'confirmed' => (int) ($groupedStatusCounts['confirmed'] ?? 0),
+            'rescheduled' => (int) ($groupedStatusCounts['rescheduled'] ?? 0),
+            'completed' => (int) ($groupedStatusCounts['completed'] ?? 0),
+            'cancelled' => (int) ($groupedStatusCounts['cancelled'] ?? 0),
+            'no_show' => (int) ($groupedStatusCounts['no_show'] ?? 0),
+        ];
+
+        $q = (clone $base)->with(['patient', 'service', 'dentist.user', 'emailLogs']);
 
         if ($isNeedsReschedule) {
             $todayStr = today()->toDateString();
@@ -46,24 +75,7 @@ class AppointmentController extends Controller
             if ($s = $request->query('status')) {
                 $q->where('status', $s);
             }
-            $q->orderBy('start_at', $request->query('sort', 'desc'));
-        }
-
-        if ($dentist = $request->query('dentist')) $q->where('assigned_dentist_id', $dentist);
-        if ($procedure = $request->query('procedure')) $q->where('service_id', $procedure);
-
-        $date = Carbon::parse($request->query('date', today()->toDateString()));
-        $period = $request->query('period', 'day');
-        $start = $date->copy()->{'startOf'.ucfirst($period)}();
-        $end = $date->copy()->{'endOf'.ucfirst($period)}();
-        $q->whereBetween('start_at', [$start, $end]);
-
-        if ($f = $request->query('from')) $q->where('start_at', '>=', Carbon::parse($f)->startOfDay());
-        if ($t = $request->query('to')) $q->where('start_at', '<=', Carbon::parse($t)->endOfDay());
-        if ($term = trim((string) $request->query('q'))) {
-            $q->whereHas('patient', fn ($p) => $p->where(fn ($w) => $w
-                ->where('first_name', 'like', "%$term%")->orWhere('last_name', 'like', "%$term%")
-                ->orWhere('patient_code', 'like', "%$term%")->orWhere('contact_number', 'like', "%$term%")));
+            $q->orderBy('start_at', $sort);
         }
 
         // Call list for same-day and emergency appointments
@@ -87,6 +99,10 @@ class AppointmentController extends Controller
             'isNeedsReschedule' => $isNeedsReschedule,
             'emergencyCallList' => $emergencyCallList,
             'needsRescheduleCount' => $needsRescheduleCount,
+            'statusCounts' => $statusCounts,
+            'filterPeriod' => $period,
+            'filterDate' => $date,
+            'sort' => $sort,
         ]);
     }
 

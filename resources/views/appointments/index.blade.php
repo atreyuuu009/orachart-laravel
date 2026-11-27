@@ -1,40 +1,49 @@
 @extends('layouts.app')
 @section('title', 'Appointments')
-@php $dentistView = auth()->user()->hasRole('dentist'); @endphp
-@section('page_title', $dentistView ? 'My Appointments' : 'Manage Appointments')
+@php
+  $dentistView = auth()->user()->hasRole('dentist');
+  $activeStatus = (string) request('status', '');
+  $activeFilterCount = collect([
+    request('dentist'),
+    request('procedure'),
+    request('from'),
+    request('to'),
+    (request()->filled('date') && request('date') !== today()->toDateString()) ? request('date') : null,
+    $filterPeriod === 'year' ? 'year' : null,
+  ])->filter()->count();
+@endphp
+@section('page_title', $dentistView ? 'My Appointments' : 'Appointments')
 @section('page_subtitle', 'Review and manage patient appointments.')
+@section('page_actions')
+  <div class="d-flex align-items-center gap-2">
+    <a class="btn btn-outline-secondary bg-white" href="{{ route('calendar') }}">Calendar view</a>
+    @if (auth()->user()->hasRole('admin', 'clinic_staff'))
+      <a class="btn btn-primary" href="{{ route('booking.staff') }}">New appointment</a>
+    @endif
+  </div>
+@endsection
+
 @section('content')
-<div class="d-flex justify-content-end gap-2 mb-3">
-  <a class="btn btn-outline-primary" href="{{ route('calendar') }}"><i class="bi bi-calendar3 me-1"></i>Appointment Calendar</a>
-  @if (auth()->user()->hasRole('admin', 'clinic_staff'))<a class="btn btn-primary" href="{{ route('booking.staff') }}">Create Appointment</a>@endif
-</div>
 @if ($isNeedsReschedule)
   <div class="alert alert-warning shadow-sm border-warning mb-3">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
       <div>
-        <h5 class="alert-heading mb-1 text-dark fw-bold">⚠️ Needs Reschedule Queue ({{ $needsRescheduleCount }})</h5>
+        <h6 class="alert-heading mb-1 text-dark fw-bold">Needs Reschedule Queue ({{ $needsRescheduleCount }})</h6>
         <div class="small text-secondary">
-          Appointments affected by clinic closures or schedule adjustments. Priority order:
-          <strong>1)</strong> Patients already on the way (same-day), 
-          <strong>2)</strong> Emergencies, 
-          <strong>3)</strong> Multi-visit treatments (e.g. braces), 
-          <strong>4)</strong> Everyone else by date.
+          Priority order: <strong>1)</strong> Same-day, <strong>2)</strong> Emergencies, <strong>3)</strong> Multi-visit treatments, <strong>4)</strong> Everyone else by date.
         </div>
       </div>
-      <span class="badge text-bg-warning fs-6">{{ $needsRescheduleCount }} Pending</span>
+      <span class="badge text-bg-warning">{{ $needsRescheduleCount }} Pending</span>
     </div>
   </div>
 
   @if (! empty($emergencyCallList) && $emergencyCallList->isNotEmpty())
-    <div class="card border-danger shadow-sm mb-4">
-      <div class="card-header bg-danger text-white fw-bold d-flex justify-content-between align-items-center">
-        <span>📞 Priority Call List (Same-Day &amp; Emergencies)</span>
+    <div class="card border-danger shadow-sm mb-3">
+      <div class="card-header bg-danger text-white fw-bold d-flex justify-content-between align-items-center py-2">
+        <span>Priority Call List (Same-Day &amp; Emergencies)</span>
         <span class="badge bg-white text-danger">{{ $emergencyCallList->count() }} Patient(s)</span>
       </div>
       <div class="card-body p-0">
-        <div class="p-2 bg-light small text-secondary border-bottom">
-          Because SMS is not supported, patients with same-day visits or emergencies must be telephoned immediately while notification e-mails go out.
-        </div>
         <div class="table-responsive">
           <table class="table table-sm table-hover align-middle mb-0">
             <thead class="table-light">
@@ -54,7 +63,7 @@
                   <td class="fw-semibold">{{ $ec->patient->full_name }}</td>
                   <td>
                     <a href="tel:{{ $ec->patient->contact_number }}" class="btn btn-sm btn-outline-success fw-bold py-0">
-                      📞 {{ $ec->patient->contact_number }}
+                      {{ $ec->patient->contact_number }}
                     </a>
                   </td>
                   <td class="text-nowrap">{{ $ec->start_at->format('M j, g:i A') }}</td>
@@ -71,9 +80,8 @@
                       data-patient="{{ $ec->patient->full_name }}"
                       data-service="{{ $ec->service->service_name }}"
                       data-dentist="{{ $ec->dentist->name }}">
-                      Quick Reschedule…
+                      Reschedule
                     </button>
-                    <label class="ms-2 small"><input type="checkbox" class="form-check-input me-1"> Called</label>
                   </td>
                 </tr>
               @endforeach
@@ -85,56 +93,167 @@
   @endif
 @endif
 
-<form id="appointment-filter-form" class="card card-body mb-3" method="GET"><div class="row g-2 align-items-end">
-  @php
-    $filterPeriod = request('period', 'day');
-    $filterDate = \Carbon\Carbon::parse(request('date', today()->toDateString()));
-  @endphp
-  <div class="col-md-3"><label class="form-label small">Search patient</label><input name="q" value="{{ request('q') }}" class="form-control" placeholder="Name, code or phone"></div>
-  <div class="col-md-2"><label class="form-label small">Dentist</label><select name="dentist" class="form-select auto-submit"><option value="">All dentists</option>@foreach ($dentists as $dentist)<option value="{{ $dentist->dentist_id }}" @selected(request('dentist') == $dentist->dentist_id)>{{ $dentist->name }}</option>@endforeach</select></div>
-  <div class="col-md-2"><label class="form-label small">Procedure</label><select name="procedure" class="form-select auto-submit"><option value="">All procedures</option>@foreach ($services as $service)<option value="{{ $service->service_id }}" @selected(request('procedure') == $service->service_id)>{{ $service->service_name }}</option>@endforeach</select></div>
-  <div class="col-md-2"><label class="form-label small">Status</label><select name="status" class="form-select auto-submit"><option value="">All</option>
-    @foreach (['pending' => 'Pending', 'confirmed' => 'Confirmed', 'completed' => 'Completed', 'cancelled' => 'Cancelled', 'no_show' => 'No-show', 'rescheduled' => 'Rescheduled', 'needs_reschedule' => 'Needs reschedule'] as $v => $l)
-      <option value="{{ $v }}" @selected(request('status') === $v)>{{ $l }}</option>@endforeach</select></div>
-  <div class="col-md-2"><label class="form-label small">View period</label><select name="period" class="form-select auto-submit">@foreach (['day'=>'Day','week'=>'Week','month'=>'Month','year'=>'Year'] as $key=>$label)<option value="{{ $key }}" @selected($filterPeriod === $key)>{{ $label }}</option>@endforeach</select></div>
-  <div class="col-md-2"><label class="form-label small">{{ ucfirst($filterPeriod) }}</label>
-    <input type="hidden" name="date" value="{{ $filterDate->toDateString() }}" id="appointmentFilterDate">
-    @if ($filterPeriod === 'day')
-      <input type="date" value="{{ $filterDate->toDateString() }}" class="form-control period-value">
-    @elseif ($filterPeriod === 'week')
-      <input type="week" value="{{ $filterDate->format('o-\\WW') }}" class="form-control period-value">
-    @elseif ($filterPeriod === 'month')
-      <input type="month" value="{{ $filterDate->format('Y-m') }}" class="form-control period-value">
-    @else
-      <input type="number" min="2000" max="2100" value="{{ $filterDate->format('Y') }}" class="form-control period-value" aria-label="Year">
-    @endif
+<form id="appointment-filter-form" method="GET" action="{{ route('appointments.index') }}">
+  @if ($activeStatus !== '')
+    <input type="hidden" name="status" value="{{ $activeStatus }}">
+  @endif
+  <input type="hidden" name="period" id="appointmentFilterPeriod" value="{{ $filterPeriod }}">
+  <input type="hidden" name="date" id="appointmentFilterDate" value="{{ $filterDate->toDateString() }}">
+  <input type="hidden" name="sort" id="appointmentFilterSort" value="{{ $sort }}">
+
+  <div class="apt-toolbar">
+    <div class="apt-search-wrap">
+      <i class="bi bi-search"></i>
+      <input type="search" name="q" value="{{ request('q') }}" class="form-control apt-search-input" placeholder="Search name, code or phone" aria-label="Search appointments">
+    </div>
+
+    <div class="apt-period-seg" role="group" aria-label="View period">
+      @foreach (['day' => 'Day', 'week' => 'Week', 'month' => 'Month'] as $pKey => $pLabel)
+        <button type="button" class="apt-period-btn {{ $filterPeriod === $pKey ? 'active' : '' }}" data-period="{{ $pKey }}">{{ $pLabel }}</button>
+      @endforeach
+    </div>
+
+    <button class="btn apt-filter-btn" type="button" data-bs-toggle="collapse" data-bs-target="#aptFiltersPanel" aria-expanded="false" aria-controls="aptFiltersPanel">
+      <i class="bi bi-sliders"></i>
+      <span>Filters</span>
+      <span class="apt-filter-count">{{ $activeFilterCount }}</span>
+    </button>
   </div>
-  <div class="col-md-2"><label class="form-label small">Sort by date</label><select name="sort" class="form-select auto-submit"><option value="desc" @selected(request('sort', 'desc') === 'desc')>Descending</option><option value="asc" @selected(request('sort') === 'asc')>Ascending</option></select></div>
-  <div class="col-md-2 d-flex gap-2"><button class="btn btn-primary flex-fill">Apply</button><a class="btn btn-light" href="{{ route('appointments.index') }}">Reset</a></div>
-</div></form>
+
+  <div class="collapse mb-3" id="aptFiltersPanel">
+    <div class="card card-body border shadow-sm">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label small">Dentist</label>
+          <select name="dentist" class="form-select auto-submit">
+            <option value="">All dentists</option>
+            @foreach ($dentists as $dentist)
+              <option value="{{ $dentist->dentist_id }}" @selected(request('dentist') == $dentist->dentist_id)>{{ $dentist->name }}</option>
+            @endforeach
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small">Procedure</label>
+          <select name="procedure" class="form-select auto-submit">
+            <option value="">All procedures</option>
+            @foreach ($services as $service)
+              <option value="{{ $service->service_id }}" @selected(request('procedure') == $service->service_id)>{{ $service->service_name }}</option>
+            @endforeach
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small">{{ ucfirst($filterPeriod) }}</label>
+          @if ($filterPeriod === 'day')
+            <input type="date" value="{{ $filterDate->toDateString() }}" class="form-control period-value">
+          @elseif ($filterPeriod === 'week')
+            <input type="week" value="{{ $filterDate->format('o-\\WW') }}" class="form-control period-value">
+          @elseif ($filterPeriod === 'month')
+            <input type="month" value="{{ $filterDate->format('Y-m') }}" class="form-control period-value">
+          @else
+            <input type="number" min="2000" max="2100" value="{{ $filterDate->format('Y') }}" class="form-control period-value" aria-label="Year">
+          @endif
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small">Sort by date</label>
+          <select class="form-select" id="aptSortSelect">
+            <option value="desc" @selected($sort === 'desc')>Descending</option>
+            <option value="asc" @selected($sort === 'asc')>Ascending</option>
+          </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+          <button type="submit" class="btn btn-primary flex-fill">Apply</button>
+          <a class="btn btn-light" href="{{ route('appointments.index') }}">Reset</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+@php
+  $tabs = [
+    '' => ['label' => 'All', 'count' => $statusCounts['all'], 'warning' => false],
+    'needs_reschedule' => ['label' => 'Needs reschedule', 'count' => $statusCounts['needs_reschedule'], 'warning' => true],
+    'pending' => ['label' => 'Pending', 'count' => $statusCounts['pending'], 'warning' => false],
+    'confirmed' => ['label' => 'Confirmed', 'count' => $statusCounts['confirmed'], 'warning' => false],
+    'rescheduled' => ['label' => 'Rescheduled', 'count' => $statusCounts['rescheduled'], 'warning' => false],
+    'completed' => ['label' => 'Completed', 'count' => $statusCounts['completed'], 'warning' => false],
+    'cancelled' => ['label' => 'Cancelled', 'count' => $statusCounts['cancelled'], 'warning' => false],
+    'no_show' => ['label' => 'No-show', 'count' => $statusCounts['no_show'], 'warning' => false],
+  ];
+@endphp
+
+<div class="apt-status-bar">
+  <div class="apt-status-tabs">
+    @foreach ($tabs as $tabKey => $tab)
+      @php
+        $tabUrl = $tabKey === ''
+          ? route('appointments.index', request()->except('status', 'page'))
+          : route('appointments.index', array_merge(request()->except('page'), ['status' => $tabKey]));
+      @endphp
+      <a href="{{ $tabUrl }}" class="apt-status-tab {{ $activeStatus === $tabKey ? 'active' : '' }}">
+        <span>{{ $tab['label'] }}</span>
+        <span class="apt-tab-count {{ $tab['warning'] && $tab['count'] > 0 ? 'apt-tab-count-warning' : '' }}">{{ $tab['count'] }}</span>
+      </a>
+    @endforeach
+  </div>
+  <a href="{{ route('appointments.index', array_merge(request()->except('page'), ['sort' => $sort === 'asc' ? 'desc' : 'asc'])) }}"
+     class="apt-sort-btn"
+     title="Sort by date ({{ $sort === 'asc' ? 'Oldest first' : 'Newest first' }})"
+     aria-label="Toggle date sort order">
+    <i class="bi bi-arrow-down-up"></i>
+  </a>
+</div>
+
 <script>
 (() => {
   const form = document.querySelector('#appointment-filter-form');
   if (!form) return;
-  form.querySelectorAll('.auto-submit').forEach(control => control.addEventListener('change', () => form.requestSubmit()));
+
+  form.querySelectorAll('.auto-submit').forEach(control => {
+    control.addEventListener('change', () => form.requestSubmit());
+  });
+
+  form.querySelectorAll('[data-period]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('appointmentFilterPeriod').value = btn.dataset.period;
+      form.requestSubmit();
+    });
+  });
+
+  const sortSelect = document.getElementById('aptSortSelect');
+  const sortHidden = document.getElementById('appointmentFilterSort');
+  if (sortSelect && sortHidden) {
+    sortSelect.addEventListener('change', () => {
+      sortHidden.value = sortSelect.value;
+      form.requestSubmit();
+    });
+  }
+
   const value = form.querySelector('.period-value');
   const date = form.querySelector('#appointmentFilterDate');
-  if (value && date) value.addEventListener('change', () => {
-    if (value.type === 'week') {
-      const match = value.value.match(/^(\d{4})-W(\d{2})$/);
-      if (!match) return;
-      const jan4 = new Date(Number(match[1]), 0, 4);
-      const monday = new Date(jan4);
-      monday.setDate(jan4.getDate() - ((jan4.getDay() + 6) % 7) + (Number(match[2]) - 1) * 7);
-      date.value = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
-    } else if (value.type === 'month') date.value = `${value.value}-01`;
-    else if (value.type === 'number') date.value = `${value.value}-01-01`;
-    else date.value = value.value;
-    form.requestSubmit();
-  });
+  if (value && date) {
+    value.addEventListener('change', () => {
+      if (value.type === 'week') {
+        const match = value.value.match(/^(\d{4})-W(\d{2})$/);
+        if (!match) return;
+        const jan4 = new Date(Number(match[1]), 0, 4);
+        const monday = new Date(jan4);
+        monday.setDate(jan4.getDate() - ((jan4.getDay() + 6) % 7) + (Number(match[2]) - 1) * 7);
+        date.value = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
+      } else if (value.type === 'month') {
+        date.value = `${value.value}-01`;
+      } else if (value.type === 'number') {
+        date.value = `${value.value}-01-01`;
+      } else {
+        date.value = value.value;
+      }
+      form.requestSubmit();
+    });
+  }
 })();
 </script>
-<div class="card">@include('appointments._table', ['rows' => $appointments, 'actions' => true, 'empty' => 'No appointments match your filters.'])</div>
+
+@include('appointments._table', ['rows' => $appointments, 'actions' => true, 'empty' => 'No appointments match your filters.'])
 <div class="mt-3">{{ $appointments->links('pagination::bootstrap-5') }}</div>
 @include('appointments._modals')
 @endsection
