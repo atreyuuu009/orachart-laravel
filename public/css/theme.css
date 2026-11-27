@@ -482,6 +482,54 @@ body:has(.landing-nav) .landing-hero .hero-actions .see-services-btn:active {
   box-shadow: inset 0 2px 5px rgba(2,24,81,.48), 0 1px 0 #03346f, 0 4px 8px rgba(3,38,106,.3);
 }
 body:has(.landing-nav) .landing-hero .hero-actions .see-services-btn:focus-visible { outline: 2px solid #bfe3ff; outline-offset: 3px; }
+body:has(.landing-nav) .landing-hero .hero-actions .book-appointment-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  overflow: hidden;
+  isolation: isolate;
+  padding: 15px 28px;
+  border: 1px solid rgba(255, 255, 255, .88);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #cfeaff 45%, #8fcfff 100%);
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.95), inset 0 -4px 8px rgba(30,110,200,.35), 0 4px 0 #4a9be0, 0 14px 22px rgba(5,40,120,.45);
+  color: #06265a;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-shadow: none;
+  transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
+}
+body:has(.landing-nav) .landing-hero .hero-actions .book-appointment-btn::before {
+  position: absolute;
+  z-index: 0;
+  top: -40%;
+  bottom: -40%;
+  left: 0;
+  width: 38%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.78), transparent);
+  content: "";
+  opacity: 0;
+  transform: skewX(-22deg) translateX(-180%);
+}
+body:has(.landing-nav) .landing-hero .hero-actions .book-appointment-btn > * { position: relative; z-index: 1; }
+body:has(.landing-nav) .landing-hero .hero-actions .book-appointment-arrow { transition: transform .18s ease; }
+body:has(.landing-nav) .landing-hero .hero-actions .book-appointment-btn:hover {
+  transform: translateY(-3px);
+  border-color: #fff;
+  background: linear-gradient(180deg, #ffffff 0%, #dbf0ff 45%, #a3daff 100%);
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.98), inset 0 -4px 8px rgba(30,110,200,.32), 0 7px 0 #4a9be0, 0 20px 28px rgba(5,40,120,.5);
+  color: #06265a;
+}
+body:has(.landing-nav) .landing-hero .hero-actions .book-appointment-btn:hover::before { animation: services-button-shimmer .7s ease-out; }
+body:has(.landing-nav) .landing-hero .hero-actions .book-appointment-btn:hover .book-appointment-arrow { transform: translateX(4px); }
+body:has(.landing-nav) .landing-hero .hero-actions .book-appointment-btn:active {
+  transform: translateY(3px);
+  box-shadow: inset 0 2px 5px rgba(30,110,200,.35), 0 1px 0 #4a9be0, 0 4px 8px rgba(5,40,120,.3);
+}
+body:has(.landing-nav) .landing-hero .hero-actions .book-appointment-btn:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 @keyframes services-button-shimmer {
   0% { opacity: 0; transform: skewX(-22deg) translateX(-180%); }
   15% { opacity: 1; }
@@ -489,8 +537,11 @@ body:has(.landing-nav) .landing-hero .hero-actions .see-services-btn:focus-visib
 }
 @media (prefers-reduced-motion: reduce) {
   body:has(.landing-nav) .landing-hero .hero-actions .see-services-btn,
-  body:has(.landing-nav) .landing-hero .hero-actions .see-services-btn .see-services-arrow { transition: none; }
+  body:has(.landing-nav) .landing-hero .hero-actions .see-services-btn .see-services-arrow,
+  body:has(.landing-nav) .landing-hero .hero-actions .book-appointment-btn,
+  body:has(.landing-nav) .landing-hero .hero-actions .book-appointment-arrow { transition: none; }
   body:has(.landing-nav) .landing-hero .hero-actions .see-services-btn:hover::before { animation: none; }
+  body:has(.landing-nav) .landing-hero .hero-actions .book-appointment-btn:hover::before { animation: none; }
 }
 .stat-card .stat-value { font-size: 2rem; font-weight: 800; color: var(--gs-primary); line-height: 1; }
 .table > :not(caption) > * > * { padding: .75rem .85rem; vertical-align: middle; }

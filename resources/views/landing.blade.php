@@ -36,7 +36,7 @@
     <h1>Healthy Smiles Start With <span>Trusted<br class="d-none d-md-block"> Dental Care.</span></h1>
     <p class="lead">From cleanings and fillings to braces, extractions, and crowns — clear<br class="d-none d-md-block"> prices, careful treatment, and a calm clinic experience for every<br class="d-none d-md-block"> patient.</p>
     <div class="d-flex flex-wrap justify-content-center gap-2 hero-actions">
-      <a class="btn btn-primary btn-lg" href="{{ auth()->check() ? route('booking.create') : route('register') }}">Book Appointment <i class="bi bi-arrow-right ms-2"></i></a>
+      <a class="btn btn-primary btn-lg book-appointment-btn" href="{{ auth()->check() ? route('booking.create') : route('register') }}"><span>Book Appointment</span><i class="bi bi-arrow-right book-appointment-arrow" aria-hidden="true"></i></a>
       <a class="btn btn-outline-primary btn-lg see-services-btn" href="#services"><span>See Services &amp; Prices</span><i class="bi bi-arrow-right see-services-arrow" aria-hidden="true"></i></a>
     </div>
     <div class="popular-treatments">
