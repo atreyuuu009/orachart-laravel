@@ -23,8 +23,15 @@ document.addEventListener('click', (e) => {
   const cat = e.target.closest('[data-service-cat]');
   if (cat) {
     const tpl = document.getElementById('svc-tpl-' + cat.dataset.serviceCat);
-    document.getElementById('serviceModalBody').replaceChildren(tpl.content.cloneNode(true));
-    bootstrap.Modal.getOrCreateInstance(document.getElementById('serviceModal')).show();
+    const modalEl = document.getElementById('serviceModal');
+    const modalBody = document.getElementById('serviceModalBody');
+    if (!tpl || !modalEl || !modalBody) return;
+
+    // Keep the fixed modal outside positioned/stacked sections (such as the
+    // landing services container), otherwise its backdrop can cover the modal.
+    if (modalEl.parentElement !== document.body) document.body.appendChild(modalEl);
+    modalBody.replaceChildren(tpl.content.cloneNode(true));
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
     return;
   }
   // Cancel / reject modal
